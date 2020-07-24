@@ -23,7 +23,7 @@ public class DateUtils {
 	 * @param datestr 时间字符
 	 * @return
 	 * 
-	 * 
+	 *
 	 */
 	public static Date stringByDate(String datestr){
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");// 设置日期格式
