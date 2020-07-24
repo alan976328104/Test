@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>temp.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+<script type="text/javascript" src="assets/js/jquery-2.0.3.min.js"></script>
+
+<script type="text/javascript">
+function parseUrl() {
+	var url = location.href;
+	var i = url.indexOf('?');
+	if(i == -1) return;
+	var querystr = url.substr(i + 1);
+	var arr1 = querystr.split('&');
+	var str = new Array();
+	var num = 0;
+	for(i in arr1) {
+		var ta = arr1[i].split('=');
+		str[num] = decodeURI(ta[1]);
+		num++;
+	}
+	return str;
+}
+var card =  parseUrl();
+window.location.replace("http://139.10.133.32:8080/keyLogin.html?card="+card);
+</script>
+  </head>
+  
+  <body>
+    This is my HTML page. <br>
+  </body>
+</html>

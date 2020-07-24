@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<link rel="stylesheet" type="text/css" href="../themes/bootstrap/easyui.css">
+	<link rel="stylesheet" type="text/css" href="../css/Task.css">
+	<link rel="stylesheet" type="text/css" href="../themes/icon.css">
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.easyui.min.js"></script>
+<script>
+	function AddTabs(title) {
+			if($('#tt').tabs('exists', title)) {
+				$('#tt').tabs('select', title);
+			} else {
+//				var content = '<iframe scrolling="no" frameborder="0" src=" ' + url + '" style="width:100%;height:100%;"></ifrmae>';
+				$('#tt').tabs('add', {
+					title: title
+//					content: content
+				});
+			}
+		}
+</script>
+	<body style="margin: 0px;">
+		<div id="tt" class="easyui-tabs" style="width:100%;height:500px;">
+			<div title="基本信息" style="padding:20px;display:none;">
+				tab1
+			</div>
+			<div title="试验装置" data-options="closable:true" style="padding:20px;display:none;">
+				tab1
+			</div>
+			<div title="试验工况I1.1" data-options="closable:true" style="padding:0px;display:none;">
+				<div id="tt" class="easyui-tabs" style="width:99%;height:300px;padding: 0px;">
+					<div title="测试清单" data-options="closable:true" style="overflow:auto;padding:20px;display:none;">
+						tab2
+					</div>
+					<div title="试验报告" data-options="closable:true" style="overflow:auto;padding:20px;display:none;">
+						tab2
+					</div>
+					<div title="实验数据" data-options="closable:true" style="overflow:auto;padding:20px;display:none;">
+						tab2
+					</div>
+				</div>
+			</div>
+			<div title="试验工况I1.2" data-options="closable:true" style="padding:20px;display:none;">
+				tab3
+			</div>
+			<div title="试验工况I1.3" data-options="closable:true" style="padding:20px;display:none;">
+				tab3
+			</div>
+		</div>
+	</body>
+
+</html>

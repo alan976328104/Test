@@ -1,0 +1,38 @@
+spring.datasource.driver-class-name: oracle.jdbc.driver.OracleDriver
+spring.datasource.url: jdbc\:oracle\:thin\:@127.0.0.1\:1521\:orcl
+spring.datasource.username:	scott
+spring.datasource.password: 123456
+server.port=80
+server.session.timeout=10
+server.tomcat.uri-encoding=UTF-8
+
+
+posyspath=d:/lic/
+popassword=111111
+
+spring.thymeleaf.prefix=classpath:/static/
+spring.thymeleaf.suffix=.html
+spring.thymeleaf.content-type=text/html 
+spring.thymeleaf.cache=false 
+spring.thymeleaf.mode =LEGACYHTML5
+
+# 分页配置
+pagehelper:
+  helper-dialect: oracle
+  reasonable: true
+  support-methods-arguments: true
+  pageSizeZero:true
+  params: count=countSql
+  
+server.tomcat.max-http-post-size=-1
+multipart.maxFileSize=921600Mb
+multipart.maxRequestSize=921600Mb
+
+spring.messages.basename=messages
+
+# 打印sql
+#logging.level.ac.drsi.nestor.dao=debug
+
+filepath=F\:\\files\\
+photopath=F\:\\images
+indexDirpath=F\:\\lucene\\indexDir

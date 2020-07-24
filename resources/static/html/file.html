@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>预览</title>
+
+<meta name="keywords" content="keyword1,keyword2,keyword3">
+<meta name="description" content="this is my page">
+<meta name="content-type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="../assets/js/jquery-1.9.1.min.js"></script>
+
+<script src="../assets/js/pdf.js"></script>
+<script src="../assets/js/pdf.worker.js"></script>
+
+<link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+
+
+<!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+
+</head>
+
+<body>
+	<!--PDF全屏展示开始-->
+	<div style="width:100%;padding: 0px;">
+		<div class="topBtn" style="text-align: center;">
+			<button id="prev" type="button" class="btn btn-white btn-default btn-round">上一页</button>
+			<button id="next" type="button" class="btn btn-white btn-default btn-round">下一页</button>
+			<span><span id="page_num"></span> / <span id="page_count"></span></span>
+		</div>
+		<canvas id="the-canvas""></canvas>
+	</div>
+	<!--PDF全屏展示结束-->
+</body>
+<script>
+	$(function() {
+		showPdf();
+	})
+	//var url = '../assets/file/【非密】1测量清单I1.1Plan.pdf';
+	var url = '../assets/file/【非密】1测量清单PKLIIIi1.1RUN2 List.pdf';
+
+	var pdfDoc = null;
+	var pageNum = 1;
+	var pageRendering = false;
+	var pageNumPending = null;
+	var scale = 1;
+	var canvas = document.getElementById('the-canvas');
+	var ctx = canvas.getContext('2d');
+	var page_cont = document.getElementById('page_count');
+	/**
+	 * 加载PDF
+	 */
+	function showPdf() {
+		PDFJS.getDocument(url).then(function(pdfDoc_) {
+			pdfDoc = pdfDoc_;
+			page_cont.textContent = pdfDoc.numPages;
+			console.log(pdfDoc.numPages)
+			renderPage(pageNum);
+		});
+	}
+
+	//页面跳转函数
+	function renderPage(num) {
+		pageRendering = true;
+		pdfDoc.getPage(num).then(function(page) {
+			var viewport = page.getViewport(scale);
+			canvas.height = viewport.height;
+			canvas.width = viewport.width;
+
+			var renderContext = {
+				canvasContext : ctx,
+				viewport : viewport
+			};
+			var renderTask = page.render(renderContext);
+
+			renderTask.promise.then(function() {
+				pageRendering = false;
+				if (pageNumPending !== null) {
+					renderPage(pageNumPending);
+					pageNumPending = null;
+				}
+			});
+		});
+
+		document.getElementById('page_num').textContent = num;
+	}
+
+	/**
+	 * 改变pageNumRending并实现页面跳转
+	 */
+	function queueRenderPage(num) {
+		if (pageRendering) {
+			pageNumPending = num;
+		} else {
+			renderPage(num);
+		}
+	}
+
+	/**
+	 * 上一页函数
+	 */
+	function onPrevPage() {
+		if (pageNum <= 1) {
+			return;
+		}
+		pageNum--;
+		queueRenderPage(pageNum);
+	}
+	document.getElementById('prev').addEventListener('click', onPrevPage);
+
+	/**
+	 * 下一页函数
+	 */
+	function onNextPage() {
+		if (pageNum >= pdfDoc.numPages) {
+			return;
+		}
+		pageNum++;
+		queueRenderPage(pageNum);
+	}
+	document.getElementById('next').addEventListener('click', onNextPage);
+
+	function closePDF() {
+		pop.style.display = "none"
+		lightbox.style.display = "none"
+	}
+</script>
+</html>

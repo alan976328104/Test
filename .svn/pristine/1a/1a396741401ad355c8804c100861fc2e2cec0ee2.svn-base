@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html style="height:99%">
+  <head>
+   <meta charset="utf-8" />
+    <title>RelationSearch.html</title>
+	
+   
+    <link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+		
+		<script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+		<style type="text/css">
+		
+		.tree-icon{
+			background:none;
+		}
+		/*折叠时图片*/
+		.tree-folder{
+			background:none;
+		} 
+		/*展开时图片*/
+		.tree-folder-open
+		{
+			background:none;
+		}
+
+		</style>
+ <script charset = "UTF-8">
+
+$(function(){
+	$.ajaxSetup({cache:false});
+	var choosefileid;
+	//获得屏幕高度
+	var bodyheight = document.documentElement.clientHeight
+	var tbheight=bodyheight-30;
+	var thisinput; //选择当前的输入框
+	var chooseindex;//选择的文件列坐标
+	var choosename;//选择的文件或者选项卡名
+	var relationname;
+	//alert(document.documentElement.clientHeight);
+	$.ajax({
+		url:'/findallrelation',
+		//type:'post',
+		success:function(obj){
+			$('#dg').datagrid({    
+				columns:[[    
+				          {field:'id',title:'序号',width:10},    
+				          {field:'name',title:'规则名称',width:50},    
+				          {field:'menuname',title:'所属项目',width:100}    
+				      ]], 
+				      
+				      data:obj,
+				fitColumns:true,
+				singleSelect:true,
+				width:'99%',
+				height:'99%',
+				striped:true,
+				toolbar:'#tb',
+				onDblClickRow:function(rowIndex, rowData){
+					console.log(rowData);
+					$.ajax({
+						url:'/findrulebyrelationid',
+						data:{'id':rowData.id,'project':rowData.project},
+						success:function(data){
+							var str=""
+							for(var i = 0 ;i<data.length;i++){
+								
+								if(i==data.length-1){
+									str+=" <tr><td><input value="+data[i].name+" readonly='readonly'/></td></tr>"	
+								}else{
+									str+=" <tr><td><input value="+data[i].name+" readonly='readonly'/></td></tr><tr><td style='text-align: center;'>↓</td></tr>"	
+								}
+								
+								
+							}
+							
+							$("#showruledivtable").html(str);
+							$("#showruleWindows").window('open');
+							
+						}
+						
+					})
+				}
+				});  
+		}
+		
+	})
+
+	$("#choosprojecbtn").click(function(){
+		
+		var nodes = $('#projecttreet').tree('getChecked');
+		console.log(nodes)
+		if(nodes.length<=0){
+			alert('请选择')
+			return;
+		}
+		console.log($('#projecttreet').tree('getChecked'));
+		//console.log(JSON.stringify($('#projecttreet').tree('getChecked')));
+		var checkeddata=$('#projecttreet').tree('getChecked');
+		var treedata = []
+		treedata.push({"id":checkeddata[0].id,"text":checkeddata[0].text});
+		$.ajax({
+			url:"../addRelationByProject",
+			data:{"obj":JSON.stringify(treedata),"relationid":$('#dg').datagrid('getSelected').id},
+			success:function(data){
+				if(data>0){
+					alert("添加成功")
+					relaod();
+				}else{
+					alert("添加失败")
+				}
+			}
+			
+		})
+		
+		$('#choosprojectWindows').window('close');
+	})
+	
+	
+	$("#add").click(function(){
+		
+		$("#addWindows").window('open');
+		
+	})
+	
+	$("#addbtn").click(function(){
+		if($("#rname").textbox('getText')==''){
+			alert('请输入规则名称')
+		}else{
+		//	alert($("#rname").textbox('getText'))
+		//	relationname = $("#rname").textbox('getText');
+			$.ajax({
+				url:'',
+				data:{'name':$("#rname").textbox('getText')},
+				success:function(data){
+					if(data>0){
+						alert('该名称已存在')
+					}else{
+						$("#relationname").val($("#rname").textbox('getText'));
+						$("#addWindows").window('close');
+						$("#addContentWindows").window('open');
+					}
+				}
+				
+			})
+			
+		}
+	})
+	
+	
+		
+	
+	
+	$("#addproject").click(function(){
+		
+		if($('#dg').datagrid('getSelected')==null){
+			alert('请选择规则');
+			return;
+		}
+			
+		$("#projecttreet").tree({
+			url:'../findAllrelationProject',
+			method:'get',
+			checkbox:true
+		})
+		$('#choosprojectWindows').window('open');
+	})
+	
+	$('#addContentbtn').bind('click', function(){    
+		$("#rtable").append("<tr><td></td><td style='text-align: center;'>↓</td><td></td></tr><tr><td>请选择: </td><td  class='td2'> <input name='rcontent' style='margin-left: 5px'  /> </td><td><button class='delbtn' style='font-size: 18px;padding: 0px 6px'>-</button> <button class='choose'>选择</button></td></tr>  ");
+		
+		return false;
+    }); 
+	
+	$("body").on("click", ".delbtn", function() {
+		 $(this).parent().parent().prev().remove();
+       $(this).parent().parent().remove();
+       return false;
+    })
+	
+    
+    $("body").on("click", ".choose", function() {
+    	//alert(1);
+       //$(this).parent().parent().children(".td2").children("input").val("213")
+    	$(".tree-icon").remove()
+    	$("#addRelationwindows").window('open');
+      	 thisinput = $(this).parent().parent().children(".td2").children("input");
+      	 return false;
+    })
+    
+    
+    
+    $("#projecttree").tree({
+		url : '/findallmenuforManager',
+		lines:true,
+		onClick : function(node) {
+			$("#menuid").val(node.id);
+			$.ajax({
+				url:"/getTabsData",
+				type:'post',
+				data:{'id':node.id},
+				success:function(obj){
+					//console.log(obj);
+					
+					$("#datachoosetree").tree({
+						data:formt(obj),
+						lines:true,
+						checkbox:true,
+						onClick:function(node){
+							
+							//alert(JSON.stringify(node));
+							
+								$.ajax({
+									url:'/getfileBytabsIdforRelation',
+									data:{'id':node.id},
+									success:function(obj){
+										//	alert(obj)
+										
+										$('#dgforwindow').datagrid({    
+											   	data:obj,
+											    columns:[[    
+											        {field:'id',title:'id',width:50},    
+											        {field:'name',title:'名称',width:200,formatter:forma}    
+											    ]],
+											    fitColumns:true,
+											 //   onBeforeSelect:befor(),
+											    onClickCell:function(index, field, value){
+											    	if(field=="name"&&value.indexOf('xls')>0){
+											    			//alert(obj[index].url)
+											    				choosefileid = obj[index].id;
+											    			choosename = value;
+											    				//readExecl
+											    				$.ajax({
+											    				url:'/isHavaRelation',
+											    				type:'GET',
+											    				data:{'fileid':choosefileid},
+											    				async:false, 
+											    				success:function(data){
+											    					if(data==0){
+											    						$.ajax({
+														    				url:'/readExecl',
+														    				type:'post',
+														    				data:{"fileUrl":obj[index].url},
+														    				dataType:'json',
+														    				success:function(data){
+														    					console.log(data)
+														    					console.log(getcolums(data));
+														    					console.log(getdata(data));
+														    					//alert(getcolums(data))
+														    					$('#choosexlsWindows').window('open')
+														    					$("#choosexlstb").datagrid({
+														    						columns:getcolums(data),
+														    						data:getdata(data),
+														    						 fitColumns:true
+														    						// onBeforeSelect:befor()
+														    					})
+														    					
+														    				}
+														    				
+														    			})	
+											    					}else{
+											    						alert('该文件已存在规则');
+											    						
+											    					}
+											    				}
+											    				
+											    			})
+											    			
+											    				
+											    		
+											    		
+											    	}
+											    	
+											    }
+
+											});  
+									}
+									
+								})
+							
+						}
+					})
+				}
+				
+			})
+			
+		}
+	});
+				
+	
+		$("#choosexlsgtn").click(function(){
+			
+			   
+			  // alert($("input:checkbox:checked").val())
+			   
+			   
+			   var vals = [];
+			        $('input:checkbox:checked').each(function (index, item) {
+			            vals.push($(this).val());
+			        });
+			        
+			        
+			   if(vals.length>1){
+				   alert('只能选择一条');
+				   return false;
+			   }else{
+				   //alert();
+				   chooseindex=vals[0];
+				   thisinput.val(chooseindex+"$"+choosename+"$"+choosefileid);
+				   $("#choosexlsWindows").window("close");
+				   $("#addRelationwindows").window("close");
+			   }
+			   
+			  
+			   
+			
+		})
+	
+		
+		$("#Relatbtn").click(function(){
+			var nodes = $('#datachoosetree').tree('getChecked');
+			
+				var val="";
+				for(var i =0;i<nodes.length;i++){
+					val += nodes[i].id+"$"+nodes[i].name+",";
+				}
+				
+				 thisinput.val(val);
+					$("#addRelationwindows").window("close");
+			
+		})
+		
+		
+		
+		$("#addcontentbtn").click(function(){
+			
+			//alert(relationname);
+			$.ajax({
+				url:'/addRelation',
+				type:'post',
+				data:$('#myfrom').serialize(),
+				success:function(data){
+					if(data>0){
+						alert('添加成功');
+						relaod();
+						$("#addContentWindows").window('close');
+						
+					}else{
+						alert('添加失败');
+						$("#addContentWindows").window('close');
+					}
+				}
+				
+			})
+			
+			
+		})
+		
+		$("#del").click(function(){
+		if($('#dg').datagrid('getSelected')==null){
+			alert('请选择');
+			return;
+		}
+			var parm = $('#dg').datagrid('getSelected')
+			
+			$.ajax({
+				url:'/delrelation',
+				data:{'id':parm.id},
+				success:function(data){
+					if(data>0){
+						alert('删除成功');
+						
+						relaod();
+					}else{
+						alert('删除失败');
+					}
+					
+				}
+				
+			})
+			
+		})
+	
+})
+
+
+
+
+
+
+
+
+function relaod(){
+	$.ajax({
+		url:'/findallrelation',
+		//type:'post',
+		success:function(obj){
+			console.log(obj)
+			$('#dg').datagrid({    
+				columns:[[    
+				          {field:'id',title:'序号',width:10},    
+				          {field:'name',title:'规则名称',width:50},    
+				          {field:'menuname',title:'所属项目',width:100}    
+				      ]], 
+				      
+				      data:obj,
+				fitColumns:true,
+				singleSelect:true,
+				width:'99%',
+				height:'99%',
+				striped:true,
+				toolbar:'#tb'
+				});  
+		}
+		
+	})
+	
+}
+
+
+function formt(obj){
+	
+	for(var i=0; i<obj.length;i++){
+		obj[i].text = obj[i].name;
+		for(var j=0; j<obj[i].children.length;j++){
+			obj[i].children[j].text = obj[i].children[j].name;
+			for(var k=0; k<obj[i].children[j].children.length;k++){
+				obj[i].children[j].children[k].text= obj[i].children[j].children[k].name;
+				
+				}
+			}
+		}
+	return obj;
+}
+
+function forma(value,row,index){
+	
+	if (row.name.indexOf("xls")>0){
+		
+		return "<a href='#'>"+value+"</a>"; 
+	} else {
+		return value;
+	}
+
+}
+function getdata(data){
+	var newdata =[];
+	//var temp={};
+	var temp1={};
+	//for(var i=0;i<data[0].columns.length;i++){
+		//temp={};
+	//	temp["f"+i]=data[0].columns[i];
+		
+	//}
+	//newdata.push(temp);	
+	for(var i=0;i<data[0].formdata.length;i++){
+		temp1={};
+		for(var j=0;j<data[0].formdata[i].length;j++){
+			temp1["f"+j]=data[0].formdata[i][j];
+			
+		}
+		newdata.push(temp1);	
+	}
+	
+
+	
+	
+	
+	
+	
+	return newdata;
+}
+function getcolums(data){
+	$("#checkparent").empty();
+	var newdata =[[]];
+	
+	for(var i=0;i<data[0].formdata[0].length;i++){
+		newdata[0].push({field:"f"+i,title:''+(i+1),align:'center',width:100} );
+	}
+	
+	
+	for(var i=0;i<data[0].formdata[0].length;i++){
+		if(i==0){
+			$("#checkparent").append("<div style='display: inline-block;margin-left:"+((786- 20 *data[0].formdata[0].length)/data[0].formdata[0].length )/2+"px'><input type='checkbox' style='' name='ck' value="+i+"></div>");	
+		}else{
+			$("#checkparent").append("<div style='display: inline-block;margin-left:"+((786- 23 *data[0].formdata[0].length)/data[0].formdata[0].length )+"px'><input type='checkbox' style='' name='ck' value="+i+"></div>");
+		}
+		
+	}
+	
+	return newdata;
+	
+	
+}
+
+
+
+function befor(){
+	
+	return false;
+}
+</script>
+  </head>
+  
+  <body style="height:99%">
+  <table id="dg" style="height:99%"></table>  
+  
+
+ 		 <div id="tb">
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-tianjia',plain:true" id="add">添加</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-shanchu',plain:true" id="del">删除</a>
+				<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-tianjia',plain:true" id="addproject">添加应用项目</a>
+		</div>
+  
+  		<!--添加规则begin  -->
+  		<div id="addWindows" class="easyui-dialog" title="添加规则" width="300" height="110"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+       	<table  style="margin: 10px;margin-top: 10px">
+       	<tr>
+       	<td>规则名称 : </td>
+       	<td> <input id="rname" style="margin-left: 5px"  class="easyui-textbox" /> </td>
+       	</tr> 
+       	</table>
+       
+        <button id="addbtn" style="position:absolute;bottom:10px;right:10px">确认</button>
+		</div>
+  		<!-- 添加规则end -->
+  		
+  		<!--选择规则内容 begin  -->
+  		<div id="addContentWindows" class="easyui-dialog" title="添加规则" width="350" height="310"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+        <form id="myfrom">
+        <input id="relationname" name="relationname" style="display: none;" />
+         <input id="menuid" name="menuid" style="display: none;" />
+       	<table id="rtable" style="margin: 10px;margin-top: 10px">
+       	<tr>
+       	<td>请选择: </td>
+       	<td class="td2"> <input name="rcontent" style="margin-left: 5px"  /> </td>
+       	<td>  
+       		<button id="addContentbtn" style="font-size: 18px;padding: 0px 6px">+</button> 
+       		<button class="choose">选择</button>
+       	  </td>
+       	</tr> 
+       	</table>
+       	</form>
+        <button id="addcontentbtn" style="position:absolute;bottom:10px;right:10px">确认</button>
+		</div>
+  		<!-- 选择规则内容 begin-->
+  		
+  		<!--添加规则选择窗口begin  -->
+  		<div id="addRelationwindows" class="easyui-dialog" title="添加规则" width="900" height="500"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+	<div  class="easyui-layout" style="width:885px;height:460px;">   
+	
+	 <div data-options="region:'west',title:'项目列表'" style="width:190px;">
+	 <ul id="projecttree"></ul>  
+	 </div>   
+   
+   
+    <div data-options="region:'center',title:'数据列表'" style="">
+    <ul id="datachoosetree"></ul> 
+    </div>   
+    
+     <div data-options="region:'east',title:'数据选择'" style="width:500px;">
+     	
+     	<table id="dgforwindow"></table>  
+     	   
+    </div>   
+    <button id="Relatbtn" style="position:absolute;bottom:10px;right:10px;z-index: 3">确认</button>
+</div>  
+       
+       
+       
+		</div>
+  		<!-- 添加规则选择窗口end -->
+  		
+  		
+  		<!-- 点击xls文件打开窗口begin -->
+  		
+  		<div id="choosexlsWindows" class="easyui-dialog" title="选择列" width="800" height="500"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+       		<div id="checkparent">
+     	
+     	
+     	</div>
+       <table id="choosexlstb"></table>  
+        <button id="choosexlsgtn" style="position:absolute;bottom:10px;right:10px">确认</button>
+		</div>
+  		
+  		<!-- 点击xls文件打开窗口end -->
+  		
+  		<!-- 点击选择项目列表begin -->
+  		
+  		<div id="choosprojectWindows" class="easyui-dialog" title="选择项目" width="800" height="500"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+       		
+       		
+ 			    
+       		<ul id="projecttreet" class="easyui-tree">
+   
+			</ul>
+       		
+        <button id="choosprojecbtn" style="position:absolute;bottom:10px;right:10px">确认</button>
+		</div>
+  		
+  		<!-- 点击选择项目列表end -->
+  		<!-- 点击选择项目列表begin -->
+  		
+  		<div id="showruleWindows" class="easyui-dialog" title="选择项目" width="500" height="400"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+       		
+       		
+ 			    <div style="text-align: center;padding: 20px;">
+ 			    <table  id="showruledivtable" style="margin: 0px auto;">
+ 			   
+ 			    </table>
+ 			    </div>
+       		
+      
+		</div>
+  		
+  		<!-- 点击选择项目列表end -->
+    </body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"
+	content="ie=edge" />
+<meta charset="UTF-8">
+<title>图表</title>
+<link rel="stylesheet" type="text/css"
+	href="../themes/bootstrap/easyui.css">
+<link rel="stylesheet" type="text/css" href="../css/Task.css">
+<link rel="stylesheet" type="text/css" href="../themes/icon.css">
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script src="../js/echarts.min.js"></script>
+
+</head>
+
+<body style="width: 100%;">
+	<div id="main" style="width: 80%;height:550px;"></div>
+	<script type="text/javascript">
+		// 基于准备好的dom，初始化echarts实例
+		var myChart = echarts.init(document.getElementById('main'));
+		var datas = parseUrl();
+		// 指定图表的配置项和数据
+		var option = {
+			title : {
+				text : '对比结果'
+			},
+			tooltip : {
+				trigger : 'axis'
+			},
+			legend : {
+				data : [ '基准列题', '试验例题' ]
+			},
+			grid : {
+				left : '3%',
+				right : '4%',
+				bottom : '3%',
+				containLabel : true
+			},
+			toolbox : {
+				show : false,
+				feature : {
+					mark : {
+						show : true
+					},
+					dataView : {
+						show : true,
+						readOnly : false
+					},
+					magicType : {
+						show : true,
+						type : [ 'line', 'bar' ]
+					},
+					restore : {
+						show : true
+					},
+					saveAsImage : {
+						show : true
+					}
+				}
+			},
+			xAxis : {
+				type : 'category',
+				boundaryGap : false,
+				data : [ 1, 2, 3, 4 ]
+			},
+			yAxis : {
+				type : 'value'
+			},
+			series : [ {
+				name : '基准列题',
+				type : 'line',
+				stack : '总量',
+				data : datas[0].split(",")
+			}, {
+				name : '试验例题',
+				type : 'line',
+				stack : '总量',
+				data : datas[1].split(",")
+			} ]
+		};
+
+		// 使用刚指定的配置项和数据显示图表。
+		myChart.setOption(option);
+
+		function parseUrl() {
+			var url = location.href;
+			var i = url.indexOf('?');
+			if (i == -1)
+				return;
+			var querystr = url.substr(i + 1);
+			var arr1 = querystr.split('&');
+			var str = new Array();
+			var num = 0;
+			for (i in arr1) {
+				var ta = arr1[i].split('=');
+				str[num] = decodeURI(ta[1]);
+				num++;
+			}
+			return str;
+		}
+	</script>
+</body>
+
+</html>

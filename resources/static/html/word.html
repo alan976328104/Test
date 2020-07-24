@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>test</title>
+<script src="../assets/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript">
+	window.onload = function() {
+		document.title = document.getElementById("titleValue").value;
+	}
+	
+</script>
+
+</head>
+<body>
+	<input type="hidden" id="titleValue" th:value="${title}" />
+	<div style="width:100%;" id="pageofficeHeight"  th:utext="${pageoffice}"></div>
+</body>
+<script type="text/javascript">
+var pageofficeHeight= window.screen.height-80
+var pageofficeWidth= window.screen.width-80
+
+document.getElementById("PageOfficeCtrl1").style.width=pageofficeWidth+"px"
+document.getElementById("PageOfficeCtrl1").style.height=pageofficeHeight+"px"
+
+//$("#pageofficeHeight").css("{width:500px,height:300px}")
+</script>
+<script type="text/javascript">
+
+	function Save() {
+		document.getElementById("PageOfficeCtrl1").WebSave();
+	}
+	
+	
+</script>
+<script type="text/javascript">
+	function AddSeal() {
+		try {
+			document.getElementById("PageOfficeCtrl1").ZoomSeal.AddSeal();
+		} catch (e) {
+		}
+	}
+	function AfterDocumentOpened(){
+		document.getElementById("PageOfficeCtrl1").FullScreen = true;
+	}
+	function SwitchFullScreen() {//全屏
+		document.getElementById("PageOfficeCtrl1").FullScreen = !document
+				.getElementById("PageOfficeCtrl1").FullScreen;
+	}
+	function SetBookmarks() {
+        document.getElementById("PageOfficeCtrl1").BookmarksVisible = !document.getElementById("PageOfficeCtrl1").BookmarksVisible;
+    }
+
+    function PrintFile() {
+        document.getElementById("PageOfficeCtrl1").ShowDialog(4);
+    }
+    function SwitchFullScreen() {
+        document.getElementById("PageOfficeCtrl1").FullScreen = !document.getElementById("PageOfficeCtrl1").FullScreen;
+    }
+    function SetPageReal() {
+        document.getElementById("PageOfficeCtrl1").SetPageFit(1);
+    }
+    function SetPageFit() {
+        document.getElementById("PageOfficeCtrl1").SetPageFit(2);
+    }
+    function SetPageWidth() {
+        document.getElementById("PageOfficeCtrl1").SetPageFit(3);
+    }
+    function ZoomIn() {
+        document.getElementById("PageOfficeCtrl1").ZoomIn();
+    }
+    function ZoomOut() {
+        document.getElementById("PageOfficeCtrl1").ZoomOut();
+    }
+    function FirstPage() {
+        document.getElementById("PageOfficeCtrl1").GoToFirstPage();
+    }
+    function PreviousPage() {
+        document.getElementById("PageOfficeCtrl1").GoToPreviousPage();
+    }
+    function NextPage() {
+        document.getElementById("PageOfficeCtrl1").GoToNextPage();
+    }
+    function LastPage() {
+        document.getElementById("PageOfficeCtrl1").GoToLastPage();
+    }
+    function SetRotateRight() {
+        document.getElementById("PageOfficeCtrl1").RotateRight();
+    }
+    function SetRotateLeft() {
+        document.getElementById("PageOfficeCtrl1").RotateLeft();
+    }
+</script>
+</html>

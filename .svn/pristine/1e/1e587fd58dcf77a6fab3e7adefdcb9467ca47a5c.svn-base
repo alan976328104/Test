@@ -1,0 +1,27 @@
+.nav-tabs{
+    border: 0px;
+    /*border-bottom: 3px #3498db solid;*/
+}
+.nav-tabs li a{
+    line-height:2;
+    border:1px #ddd solid;
+    margin-right: -1px;
+    color: #999;
+    /*border-radius: 2;*/
+}
+.nav-tabs li a .icon-remove-sign:hover{
+    color:  red;
+    cursor: pointer;
+}
+.nav-tabs li a i:first-child{
+    margin-right: 3px;
+}
+.nav-tabs .active a{
+    border-top: solid 2px #3498db !important;
+    /*background: #3498db !important;*/
+    color:#3498db !important;
+}
+.nav-tabs li a{
+    line-height:2
+}
+

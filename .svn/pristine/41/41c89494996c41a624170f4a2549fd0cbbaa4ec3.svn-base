@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<!-- <link rel="stylesheet" type="text/css" href="../assets/css/default.css"> -->
+<link rel="stylesheet" href="../assets/css/font-awesome.min.css"
+	rel="stylesheet" />
+<!--if IE 7-->
+<link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css" />
+<!--endif-->
+<script type="text/javascript" src="../assets/js/jquery-2.0.3.min.js"></script>
+
+<script type="text/javascript" src="../assets/js/alldata.js"></script>
+<!--bootstrap-table-->
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrap-table.js"></script>
+<link rel="stylesheet"
+	href="../assets/css/bootstrap/bootstrap-table.css">
+<script src="../assets/js/bootstrap/bootstrap-table-pagejump.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-table-pagejump.css"
+	rel="stylesheet">
+<!-- <script type="text/javascript" src="../assets/js/bootstrap/bootstrap-table-zh-CN.js"></script> -->
+<link rel="stylesheet" href="../assets/css/bootstrap/bootstrap.min.css">
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrap.min.js"></script>
+
+<link rel="stylesheet"
+	href="../assets/css/bootstrap/bootstrap-dialog.css">
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+
+<!-- 按钮样式 -->
+<link rel="stylesheet"
+	href="../assets/css/awesome-bootstrap-checkbox.css">
+<!-- 表单验证 -->
+<link rel="stylesheet"
+	href="../assets/css/bootstrap/bootstrapValidator.min.css">
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrapValidator.min.js"></script>
+
+<!-- <script type="text/javascript" src="../assets/js/vue/vue.js"></script> -->
+<link rel="stylesheet" href="../assets/css/zTreeStyle.css"
+	type="text/css">
+<script type="text/javascript" src="../assets/js/jquery.ztree.core.js"></script>
+<script type="text/javascript"
+	src="../assets/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.ztree.exedit.js"></script>
+<link rel="stylesheet" href="../assets/css/newstyle.css">
+<style>
+i {
+	margin-right: 5px;
+}
+
+.selbordor {
+	border-color: #b94a48;
+}
+
+p {
+	margin-top: 5px;
+	margin-bottom: -2px;
+	color: #b94a48;
+	font-size: 12px;
+	display: none;
+}
+
+img {
+	margin: 8px 0px;
+}
+.ztree li .curSelectedNode span:last-child {
+    background-color: #4fc1e9;
+    color: #fff;
+}
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-left>.page-list{
+display: none !important;
+}
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination-jump{
+display: none !important;
+}
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-item{
+display: none !important;
+}
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-pre,.page-next{
+display: inline !important;
+}
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-next{
+display: inline !important;
+}
+
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-left>.page-list{
+display: none !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination-jump{
+display: none !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-item{
+display: none !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-pre,.page-next{
+display: inline !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-next{
+display: inline !important;
+}
+</style>
+<script>
+//获取登录者信息
+var sessionUser;
+$.ajax({
+	type : "post",
+	url : "/getSessionByIp",
+	async : false,
+	success : function(data) {
+		sessionUser=data
+	}
+})
+	var lang = getUrlParam("lang");
+	var columns, usercolumns;
+	var tabledata = [];
+	var userdata, deptdata
+	if (lang != "en_US") {
+		usercolumns = [ [ {
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		}, {
+			field : 'username',
+			title : '姓名',
+			width : '20%'
+		}, {
+			field : 'dname',
+			title : '部门',
+			width : '20%'
+		} ,{
+			field : 'deptname',
+			title : '部门'
+		}] ]
+		columns = [ [ {
+			field : 'userId',
+			title : '#',
+			width : '0.5%',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		},{
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		},  {
+			title : '#',
+			field : '#',
+			width : '0.5%',
+			formatter : function(value, row, index) {
+				return index + 1;
+			}
+		},{
+			field : 'username',
+			title : '姓名',
+			formatter : forma
+		},  {
+			field : 'secretlevel',
+			title : '密级',
+			formatter : formaS
+		}, {
+			field : 'role.roleName',
+			title : '角色'
+		}, {
+			field : 'deptname',
+			title : '部门'
+		} ] ]
+		document
+				.write("<script src='../assets/js/bootstrap/bootstrap-table-zh-CN.js' >"
+						+ "<" + "/script>");
+	} else {
+		usercolumns = [ [ {
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		}, {
+			field : 'username',
+			title : 'userName',
+			width : '20%'
+		}, {
+			field : 'dname',
+			title : 'deptName',
+			width : '20%'
+		} , {
+			field : 'deptname',
+			title : 'deptName',
+			width : '20%'
+		}] ]
+		columns = [ [ {
+			field : 'userId',
+			title : '#',
+			width : '0.5%',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		},{
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		},  {
+			title : '#',
+			field : '#',
+			width : '0.5%',
+			formatter : function(value, row, index) {
+				return index + 1;
+			}
+		},{
+			field : 'username',
+			title : 'Name',
+			formatter : forma
+		},  {
+			field : 'secretlevel',
+			title : 'Security',
+			formatter : formaS
+		}, {
+			field : 'role.roleName',
+			title : 'Role'
+		}, {
+			field : 'deptname',
+			title : 'Dept'
+		} ] ]
+	}
+	var setting = { //此处根据自己需要进行配置
+		view : {
+			selectedMulti : false, //设置是否能够同时选中多个节点
+			showIcon : true, //设置是否显示节点图标
+			ShowPlusMinus : false,
+			showLine : false, //设置是否显示节点与节点之间的连线
+			showTitle : false, //设置是否显示节点的title提示信息
+		},
+		data : {
+			simpleData : {
+				enable : true
+			},
+			key : {
+				url : "xUrl",
+				icon : "menuIcon"
+			}
+		},
+		callback : {
+			onClick : zTreeOnClickRight,
+			beforeClick : zTreeBeforeClick
+		}
+	};
+	function zTreeBeforeClick(treeId, treeNode, clickFlag) {
+		var str = treeNode.tId
+		var treeName = str.substring(0, str.indexOf("_"))
+		if (treeName == "deptTree") {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	// 树的单击事件
+	function zTreeOnClickRight(event, treeId, treeNode, clickFlag) {
+		console.log(treeNode)
+		$.ajax({
+			type : 'POST',
+			url : "/listUserAllByDeptName",
+			data:{deptname:treeNode.deptName},
+			async : false,
+			datatype : "json",
+			success : function(data) {
+				for(var i=0;i<data.length;i++){
+					data[i].dname=treeNode.deptName
+				}
+				$('#tb_deptUser').bootstrapTable('load', data);
+			}
+		})
+		
+		//	$.fn.zTree.init($("#userTree"), setting, users);
+		//var zTreeObj = $.fn.zTree.getZTreeObj("deptTree");
+		//console.log(zTreeObj.getCheckedNodes()[0].deptcode);
+	}
+	
+	$(function() {
+		if(sessionUser.userId==2){//1.admin 2.系统管理员3.安全审计员4.安全管理员
+			$("#role_div").css("display","none");//选择角色
+			$("#btn_delete").css("display","none");//删除用户
+			$("#btn_edit").css("display","none");//修改用户
+		} else {
+			$("#role_div").css("display","inline");
+			$("#btn_delete").css("display","inline");
+			$("#btn_edit").css("display","inline");
+		}
+		if (sessionUser.userId==2||sessionUser.userId==1){//安全管理员
+			$("#btn_addDB").css("display","inline");//同步数据库
+		}else{
+			$("#btn_addDB").css("display","none");
+		}
+		if (sessionUser.userId==4||sessionUser.userId==1){//安全管理员
+			$("#btn_addsec").css("display","inline");//同步密级
+		}else{
+			$("#btn_addsec").css("display","none");
+		}
+		if (sessionUser.userId==4){//安全管理员
+			$("#btn_add").css("display","none");//添加用户
+		}else{
+			$("#btn_add").css("display","inline");
+		}
+		console.log(sessionUser)
+		console.log(sessionUser.username)
+		dataAll();
+		DataAll();
+		//deptData()
+		$("#tb_user").bootstrapTable({
+			data : tabledata,
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			paginationShowPageGo : true,
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 10, //每页的记录行数（*）
+			pageList : [ 10, 15, 20, 30, 50 ], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : false, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			sidePagination : "client", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			columns : usercolumns
+		})
+		$("#tb_deptUser").bootstrapTable({
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			paginationShowPageGo : true,
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 10, //每页的记录行数（*）
+			pageList : [ 10, 15, 20, 30, 50 ], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : false, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			sidePagination : "client", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			search : false,
+			columns : usercolumns
+		})
+			$('#tb_user').bootstrapTable('hideColumn','deptname')
+			$('#tb_deptUser').bootstrapTable('hideColumn','deptname')
+		$('#userModal').on('hide.bs.modal', function() {
+			$.fn.zTree.init($("#userTree"), setting, null);
+			$("#tb_user").bootstrapTable('removeAll');
+			$("#tb_deptUser").bootstrapTable('removeAll');
+		});
+		/* $.ajax({
+			type : 'POST',
+			url : "/getUserButton",
+			data : {
+				userId : sessionUser.userId
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				if (data != null) {
+					for (var i = 0; i < data.length; i++) {
+						if (data[i].btnName == '修改') {
+							$("#btn_edit").css("display", "");
+						}
+						if (data[i].btnName == '删除') {
+							$("#btn_delete").css("display", "");
+						}
+						if (data[i].btnName == '上传') {
+							$("#btn_add").css("display", "");
+						}
+					}
+				}
+			}
+		}) */
+		$('#nameInput').bind('keypress',function(event){
+   			 if(event.keyCode == "13") {
+   				$("#tb_order").bootstrapTable('destroy');
+   				dataAll();
+    		}
+		})
+	});
+	//部门数据
+	function getDeptData(array) {
+		for (var i = 0; i < array.length; i++) {
+			array[i].name = array[i].deptName
+			if (array[i].children != undefined && array[i].children.length > 0) {
+				getDeptData(array[i].children)
+			} else {
+				delete array[i].children
+			}
+		}
+		return array;
+	}
+	//用户表格加载
+	function dataAll() {
+		$("#tb_order").bootstrapTable({
+			url : "/pageUser",
+			method : "post", //请求方式（*）
+			contentType : "application/x-www-form-urlencoded",//post请求的话就加上这个句话
+			toolbar : "#toolbar", //工具按钮用哪个容器
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			paginationShowPageGo : true,
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 15, //每页的记录行数（*）
+			pageList : [ 10, 15, 20, 30, 50 ], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : false, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			sidePagination : "server", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			queryParams : function(params) {//自定义参数，这里的参数是传给后台的，我这是是分页用的
+				return {//这里的params是table提供的
+					username : $("#nameInput").val(),
+					pageNumber : params.pageNumber,
+					pageSize : params.pageSize
+				};
+			},
+			columns : columns
+		});
+		$('#tb_order').children().children().children('th').eq(0).css(
+				"display", "none")
+	}
+	
+	function forma(value, row, index) {
+		if (row.username) {
+			var namestr=row.username;
+				if($("#nameInput").val()!=""){
+					var array = namestr.split($("#nameInput").val());
+					namestr="";
+					for(var j = 0;j<array.length;j++){
+						if(j==array.length-1){
+							namestr+=array[j]
+						}else{
+							namestr+=array[j]+"<span style='color:red;'>"+$("#nameInput").val()+"</span>"
+						}
+					}
+				}
+			return namestr;
+		}
+	}
+	//密级一栏字段修饰
+	function formaS(value, row, index) {
+		if (value == "A" || value == "B") {
+			return "重要涉密人员";
+		} else if (value == "C") {
+			return "一般涉密人员";
+		} else if (value == "D") {
+			return "非密";
+		}
+	}
+	//添加分享用户
+	function allleft() {
+		var getSelectRows = $("#tb_user").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		var rows = $('#tb_user').bootstrapTable('getData');
+		for (var i = 0; i < rows.length; i++) {
+			for (j = 0; j < getSelectRows.length; j++) {
+				if (rows[i].id == getSelectRows[j].id) {
+					rows.splice(i, 1);
+				}
+			}
+		}
+		$("#tb_user").bootstrapTable('load', rows);
+	}
+	//移除分享用户
+	function allright() {
+		var getSelectRows = $("#tb_deptUser").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		console.log(getSelectRows.length)
+		if(getSelectRows.length>0){
+			for (var i = 0; i < getSelectRows.length; i++) {
+				delete getSelectRows[i].ck
+				console.log(getSelectRows[i])
+				tabledata.push(getSelectRows[i])
+				console.log(tabledata)
+			}
+		//	distinct(tabledata)
+			$("#tb_user").bootstrapTable('load', unique(tabledata));
+		}else{
+			console.log('请选择')
+		}
+	}
+	//数组去重
+	function unique(arr){
+	    arr.sort();
+	    var newArr = [arr[0]];
+	     for(var i = 1; i < arr.length; i++){
+	          if(arr[i].userAllId != newArr[newArr.length - 1].userAllId){
+	               newArr.push(arr[i]);
+	          }
+	     }
+	     return newArr;
+	}
+	//修改用户名名称验证
+	function ValidatorUpdateUserInfo() {
+		$('#updateUserForm').bootstrapValidator({
+			message : '这个值没有被验证',
+			fields : {
+				editUserName : {
+					validators : {
+						notEmpty : {
+							message : '用户名是必填项'
+						}
+					}
+				}
+			}
+		})
+	}
+</script>
+</head>
+
+<body style="height:100%">
+	<div id="box" style="height:100%">
+		<table id="tb_order" style="width:100%;height:100% ;">
+		</table>
+
+		<div id="toolbar" class="btn-group">
+			<button type="button" id="btn_addDB"  class="btn btn-white btn-default btn-round"
+				onclick="syncDatabase()">
+				<span th:text="#{sync}"></span>
+			</button>
+			<button type="button" id="btn_addsec"  class="btn btn-white btn-default btn-round"
+				onclick="syncDBSecurity()">
+				<span th:text="#{syncse}"></span>
+			</button>
+			<button type="button" id="btn_add"  class="btn btn-white btn-default btn-round"
+				onclick="openAddModel()">
+				<span th:text="#{add}"></span>
+			</button>
+			<button type="button" id="btn_edit"  class="btn btn-white btn-default btn-round"
+				onclick="editUser()">
+				<span th:text="#{modification}"></span>
+			</button>
+			<button id="btn_delete" type="button"
+				class="btn btn-white btn-default btn-round"  onclick="delUser()">
+				<span th:text="#{delete}"></span>
+			</button>
+			<div class="input-group sousuo">
+			<input type="text" class="form-control" id="nameInput"
+				th:placeholder='#{searchText}'> <span
+				class="input-group-btn">
+				<button class="btn btn-default" type="button" onclick="nameSearch()">
+					<i class="icon-search"></i>
+				</button>
+			</span>
+		</div>
+		</div>
+		
+		<!-- /input-group -->
+
+
+		<!-- 添加弹出窗口begin -->
+		<!-- 模态框（Modal） -->
+		<div class="modal fade" id="addUser" tabindex="-1" role="dialog"
+			aria-labelledby="addUserLabel" aria-hidden="true"
+			data-backdrop="static" data-keyboard="false">
+			<div class="modal-dialog" style="width: 330px !important;">
+				<div class="modal-content" style="width: 330px !important;">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="addUserLabel" th:text="#{useradd}">添加用户</h4>
+					</div>
+					<div class="modal-body">
+						<div class="row">
+							<div class="col-md-8 col-md-offset-2">
+								<form id="addUserForm">
+									<table style="width:100%;height: 100%;">
+										<tr>
+											<td align="left"><span style="color:red">*</span><label
+												th:text="#{name}">姓名</label></td>
+											<td>
+												<div class="form-group">
+													<i class="icon-user-md new-icon"></i> <!-- <input
+														class="new_input" type="text" name="username"
+														id="username" th:placeholder="#{caption}"
+														autocomplete="off" /> -->
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td align="left"><label th:text="#{sex}">性别</label></td>
+											<td><div class="form-group">
+													<div class="radio radio-info radio-inline">
+														<input type="radio" id="inlineRadio1" value="0"
+															name="sexadd" checked> <label for="inlineRadio1"
+															th:text="#{man}">男</label>
+													</div>
+													<div class="radio radio-info radio-inline">
+														<input type="radio" id="inlineRadio2" value="1"
+															name="sexadd"> <label for="inlineRadio2"
+															th:text="#{woman}">女</label>
+													</div>
+												</div></td>
+										</tr>
+										<tr>
+											<td align="left"><span style="color:red">*</span><label
+												th:text="#{major}">专业</label></td>
+											<td><div class="form-group">
+													<i class="icon-star new-icon"></i> <select
+														class="new_input" id="majorVal" name="majorId">
+													</select>
+												</div></td>
+										</tr>
+										<tr>
+											<td align="left"><span style="color:red">*</span><label
+												th:text="#{security}">密级</label></td>
+											<td><div class="form-group">
+													<i class="icon-lock new-icon"></i> <select
+														class="new_input" id="securityVal" name="securityId">
+													</select>
+												</div></td>
+										</tr>
+										<tr>
+											<td align="left"><span style="color:red">*</span><label
+												th:text="#{role}">角色</label></td>
+											<td><div class="form-group">
+													<i class="icon-user new-icon"></i> <select
+														class="new_input" name="roleId" id="roleVal">
+													</select>
+												</div></td>
+										</tr>
+										<tr>
+											<td align="left"><span style="color:red">*</span><label
+												th:text="#{dept}">部门</label></td>
+											<td><div class="form-group">
+													<select class="new_input" id="deptVal" name="deptId">
+													</select>
+												</div></td>
+										</tr>
+										<tr>
+											<td align="left"><label th:text="#{status}">状态</label></td>
+											<td><div class="form-group">
+													<div class="checkbox checkbox-success checkbox-inline">
+														<input id="checkboxOK" type="radio" name="stateadd"
+															value="0" checked> <label for="checkboxOK"
+															th:text="#{enabled}"> 启用 </label>
+													</div>
+													<div class="checkbox checkbox-danger checkbox-inline">
+														<input id="checkboxNO" type="radio" name="stateadd"
+															value="1"> <label for="checkboxNO"
+															th:text="#{disabled}"> 禁用 </label>
+													</div>
+												</div></td>
+										</tr>
+									</table>
+								</form>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="padding: 10px">
+						<button type="button" class="btn new-tijiao queding"
+							onclick="addUser()" th:text="#{submit}">保存</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!-- 添加弹出窗口end -->
+		<!-- 修改窗口begin -->
+		<div class="modal fade" id="editUser" tabindex="-1" role="dialog"
+			aria-labelledby="editUserLabel" aria-hidden="true">
+			<div class="modal-dialog" style="width: 330px !important;">
+				<div class="modal-content" style="width: 330px !important;">
+					<div class="modal-header" style="padding: 10px">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="editUserLabel" th:text="#{useredit}">修改用户</h4>
+					</div>
+					<div class="modal-body">
+						<div class="row">
+							<div class="col-md-8 col-md-offset-2">
+								<form id="updateUserForm">
+									<table style="width:100%;">
+										<tr>
+											<td><span style="color:red">*</span> <label
+												th:text="#{name}">姓名</label><input type="text" name="editUserId"
+												id="editUserId" style="display: none" /></td>
+											<td><div class="form-group">
+													<i class="icon-user-md new-icon"></i> <input
+														class="new_input" type="text" name="editUserName"
+														id="editUserName" autocomplete="off" disabled="disabled" onkeyup="WidthCheck(this,8);"/>
+												</div></td>
+										</tr>
+										<!--<tr>
+											<td><label th:text="#{sex}">性别</label></td>
+											<td><div class="form-group">
+													<div class="radio radio-info radio-inline">
+														<input type="radio" id="Radio1" value="0" name="sex"
+															 /> <label for="Radio1" th:text="#{man}">男</label>
+													</div>
+													<div class="radio radio-info radio-inline">
+														<input type="radio" id="Radio2" value="1" name="sex"
+															 /> <label for="Radio2"
+															th:text="#{woman}">女</label>
+													</div>
+												</div></td>
+										</tr>
+										 <tr>
+											<td><span style="color:red">*</span><label
+												th:text="#{security}">密级</label></td>
+											<td><div class="form-group">
+													<i class="icon-lock new-icon"></i> <select
+														class="new_input" name="securityId" id="editSecurityId">
+
+													</select>
+													<p name="errorText">请选择密级</p>
+												</div></td>
+										</tr> -->
+										<tr>
+											<td><span style="color:red">*</span><label
+												th:text="#{role}">角色</label></td>
+											<td><div class="form-group">
+													<i class="icon-user new-icon"></i> <select
+														class="new_input" name="roleId" id="editRoleId">
+													</select>
+													<p name="errorText">请选择角色</p>
+												</div></td>
+										</tr>
+									</table>
+								</form>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="padding: 10px">
+						<button type="button" class="btn new-tijiao queding"
+							onclick="updateUser()" th:text="#{submit}">提交</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!-- 修改窗口end -->
+		<!-- 选择用户star -->
+		<div class="modal fade" id="userModal" tabindex="-1" role="dialog"
+			aria-labelledby="addRoleLabel" aria-hidden="true">
+			<div class="modal-dialog" style="width: 800px;">
+				<div class="modal-content">
+					<div class="modal-header" style="padding:8px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="addRoleLabel">选择用户</h4>
+					</div>
+					<div class="modal-body" style="height: 500px;">
+						<div style="width:100%;height:100%;">
+							<div
+								style="width:20%;height:100%;float: left;border-right: 1px solid rgb(204, 204, 204);overflow: auto;">
+
+								<ul class="ztree" id="deptTree"></ul>
+							</div>
+							<div
+								style="width:35%;height:100%;float: left;border-right: 1px solid rgb(204, 204, 204);overflow: auto;" id="div_deptUser">
+								<input class="new_input" type="text" name="username"id="username" th:placeholder="#{caption}"autocomplete="off" style="float: right; border-radius: 3px; border: 1px solid #CCC;padding-left: 5px;"/>
+								<table id="tb_deptUser" style="height:100%;width:100%"></table>
+							</div>
+							<div
+								style="float: left;width:5%;height:100%;float: left;border-right: 1px solid rgb(204, 204, 204); overflow: auto;">
+								<div style="position: relative;top:30%">
+									<img onclick="allleft()" src="../assets/images/allleft.png"
+										style="cursor: pointer;" />
+									<!-- <img onclick="" src="../assets/images/left.png"/>
+								<img onclick="" src="../assets/images/right.png"/> -->
+									<img onclick="allright()" src="../assets/images/allright.png"
+										style="cursor: pointer;" />
+								</div>
+							</div>
+							<div  id="div_user" style="float: left;height:100%;width:35%;overflow: auto;">
+								<table id="tb_user" style="height:100%;width:100%"></table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="padding:5px;">
+						<div id="role_div" style="display:none;float:left">
+							<span style="color:red">*</span><label th:text="#{role}">角色</label>
+							<div class="form-group" style="display:inline;">
+								<i class="icon-user new-icon" style="top: 1px;"></i> <select
+									class="new_input"
+									style="width: 180px; height: 35px;border-radius: 5px;border: 1px solid #c7c2c2;padding-left: 25px"
+									name="roleId" id="roleSelect">
+								</select>
+							</div>
+						</div>
+
+						<button type="button" class="btn new-tijiao queding"
+							onclick="addUser()" th:text="#{submit}"></button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!-- 选择用户end -->
+	</div>
+</body>
+<!-- <script language='javascript' th:inline="javascript">
+	var userdel = [ [ #{userdel} ] ];
+	var cancel = [ [ #{cancel} ] ];
+	var confirm = [ [ #{confirm} ] ];
+</script> -->
+<script>
+	$.showConfirm = function(str, funcok, userdel, confirm) {
+		BootstrapDialog.confirm({
+			title : userdel,
+			message : str,
+			type : BootstrapDialog.TYPE_WARNING,
+			closable : true, // 点击对话框以外的页面内容可关闭
+			//draggable : true, // 可拖拽
+			btnOKLabel : confirm,
+			btnOKClass : 'btn-warning',
+			size : BootstrapDialog.SIZE_SMALL,
+			// 对话框关闭的时候执行方法
+			onhide : userdel,
+			callback : function(result) {
+				if (result) {
+					$.post("/deleteUser", {
+						userIds : funcok
+					}, function(data) {
+						if (data != null) {
+							deleteSuccess();
+							$('#tb_order').bootstrapTable('refresh');
+						}
+					});
+				}
+			}
+		});
+	};
+	
+	function DataAll() {
+		if(sessionUser.userId==4){
+			$.ajax({
+			type : 'POST',
+			url : "/listRoleByUserId",
+			data:{userId:sessionUser.userId},
+			datatype : "json",
+			success : function(data) {
+				data=JSON.parse(data); 
+				var option="";
+				option = "<option value='0'>请选择</option>";
+				for (var i = 0; i < data.length; i++) {
+					option += "<option value='"+data[i].roleId+"'>"
+							+ data[i].roleName + "</option>"
+				}
+				console.log(option)
+				var nodes = document.getElementsByName("roleId");
+				for (var i = 0; i < nodes.length; i++) {
+					nodes[i].innerHTML="";
+					nodes[i].innerHTML += option;//将循环拼接的字符串插入第二个下拉列表
+				}
+			}
+		})
+		}else{
+			$.ajax({
+			type : 'POST',
+			url : "/getRoleAll",
+			datatype : "json",
+			success : function(data) {
+				if(data!=null){
+					var option="";
+					option = "<option value='0'>请选择</option>";
+					for (var i = 0; i < data.length; i++) {
+						option += "<option value='"+data[i].roleId+"'>"
+								+ data[i].roleName + "</option>"
+					}
+					console.log(option)
+					var nodes = document.getElementsByName("roleId");
+					for (var i = 0; i < nodes.length; i++) {
+						nodes[i].innerHTML="";
+						nodes[i].innerHTML += option;//将循环拼接的字符串插入第二个下拉列表
+					}
+				}
+			}
+		})
+		}
+		
+		$.ajax({
+			type : 'POST',
+			url : "/getDeptAll",
+			datatype : "json",
+			success : function(data) {
+				console.log(data)
+				$.fn.zTree.init($("#deptTree"), setting, getDeptData(data));
+			}
+		})
+		/* $.ajax({
+			type : 'POST',
+			url : "/getMajorAll",
+			datatype : "json",
+			success : function(data) {
+				var option = "<option value='0'>请选择</option>";
+				for (var i = 0; i < data.length; i++) {
+					option += "<option value='"+data[i].majorId+"'>"
+							+ data[i].majorName + "</option>"
+				}
+				var nodes = document.getElementsByName("majorId");
+				for (var i = 0; i < nodes.length; i++) {
+					nodes[i].innerHTML += option;//将循环拼接的字符串插入第二个下拉列表
+				}
+			}
+		}) */
+		/*$.ajax({
+			type : 'POST',
+			url : "/getSecurityAll",
+			datatype : "json",
+			success : function(data) {
+				var option = "<option value='0'>请选择</option>";
+				for (var i = 0; i < data.length; i++) {
+					option += "<option value='"+data[i].securityId+"'>"
+							+ data[i].securityName + "</option>"
+				}
+				var nodes = document.getElementsByName("securityId");
+				for (var i = 0; i < nodes.length; i++) {
+					nodes[i].innerHTML += option;//将循环拼接的字符串插入第二个下拉列表
+				}
+			}
+		})*/
+		var errorText = document.getElementsByName("errorText");
+
+	}
+	function openAddModel() {//添加用户按钮点击事件
+		$('#userModal').modal('show');
+	}
+
+	function addUser() {//添加用户
+		if(sessionUser.userId!=2||sessionUser.username!='system'){
+			if ($("#roleSelect").val() > 0) {
+				$.post("/insertUser", {
+					"jsonstr" : JSON.stringify($('#tb_user').bootstrapTable(
+							'getData')),
+					roleId : $("#roleSelect").val()
+				}, function(data) {
+					if (data>0) {
+						$('#userModal').modal('hide');
+						addSuccess();
+						tabledata=[];
+						$('#tb_order').bootstrapTable('refresh');
+						//$('#tb_user').bootstrapTable('destroy');
+						//document.getElementById("addUserForm").reset();
+					} else {
+						aliasErr();
+					}
+				});
+			} else {
+				selectedRoleErr();
+			}
+		}else{
+			$.post("/insertUser", {
+				"jsonstr" : JSON.stringify($('#tb_user').bootstrapTable(
+						'getData')),
+				roleId : $("#roleSelect").val()
+			}, function(data) {
+				if (data>0) {
+					$('#userModal').modal('hide');
+					addSuccess();
+					tabledata=[];
+					$('#tb_order').bootstrapTable('refresh');
+					//$('#tb_user').bootstrapTable('destroy');
+					//document.getElementById("addUserForm").reset();
+				} else {
+					aliasErr();
+				}
+			});
+		}
+	}
+	function delUser() {//删除用户
+		var userIdAll = [];
+	var notUser=true;
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if (getSelectRows.length == 0) {
+			nullErr();
+		} else {
+			for (i = 0; i < getSelectRows.length; i++) {
+				if(getSelectRows[i].username=="admin"){
+					notUser=false
+				}else{
+					userIdAll.push(getSelectRows[i].userId)
+				}
+				
+			}
+			if(notUser){
+				if (lang != "en_US") {
+					$
+							.showConfirm(
+									"<i style='color: red;position: relative;top: 2px;font-size: 20px;left: -6px;' class='icon-remove new-icon'></i>确认要删除吗？",
+									userIdAll, "删除用户", "确认");
+				} else {
+					$
+							.showConfirm(
+									"<i style='color: red;position: relative;top: 2px;font-size: 20px;left: -6px;' class='icon-remove new-icon'></i>Are you sure you want to delete it?",
+									userIdAll, "DeleteUser", "confirm");
+				}
+			}else{
+				deleteUserErr()
+			}
+		}
+	}
+	function editUser() {//根据点击表格，查询当前用户，表单赋值
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if (getSelectRows.length == 0) {
+			nullErr();
+		} else if (getSelectRows.length > 1) {
+			oneErr();
+		} else {
+			var userId = getSelectRows[0].userId;
+			$.ajax({
+				type : 'POST',
+				url : "/getUserById",
+				data : {userId : userId},
+				//datatype : "json",
+				//async : false,
+				success : function(data) {
+					if (data != null) {
+						document.getElementById("editUserId").value = data.userId;
+						document.getElementById("editUserName").value = data.username;
+						if(data.role!=null){
+							set_select_checked('editRoleId',data.role.roleId);
+						}
+						
+						$("input[name=sex][value=" + data.sex + "]").prop("checked", "true")
+					}
+				}
+			});
+			$('#editUser').modal('show');
+		}
+	}
+	function updateUser() {//更新用户信息
+		ValidatorUpdateUserInfo()
+		$("#updateUserForm").bootstrapValidator('validate');//提交验证
+		var sel = $("#updateUserForm select");
+		var errorText = document.getElementsByName("errorText");
+		var selstate = true;
+		$("#updateUserForm option:selected").each(function(index, item) {
+			if ($(this).val() == 0) {
+				errorText[index].style.display = "block";
+				$(sel[index]).css({
+					"border-color" : "#b94a48"
+				});
+				selstate = false;
+			} else {
+				errorText[index].style.display = "none";
+				$(sel[index]).css({
+					"border-color" : "rgb(70, 136, 71)"
+				});
+			}
+		});
+
+		if ($("#updateUserForm").data('bootstrapValidator').isValid()) {
+			if (selstate) {
+				$.ajax({
+					type : 'POST',
+					url : "/updateUser",
+					data : $("#updateUserForm").serializeArray(),
+					datatype : "json",
+					//async : false,
+					success : function(data) {
+						if (data != null) {
+							$('#editUser').modal('hide');
+							updateSuccess();
+							$('#tb_order').bootstrapTable('refresh');
+						} else {
+							updateErr();
+						}
+					}
+				});
+			}
+		}
+	}
+	function nameSearch() {//根据用户姓名模糊查询
+		$("#tb_order").bootstrapTable('destroy');
+		dataAll();
+	}
+	var flag = true;
+    $('#username').on('compositionstart',function(){
+        flag = false;
+    })
+    $('#username').on('compositionend',function(){
+        flag = true;
+    })
+	$('#username').bind('input', function() {
+	 var _this = this;
+        setTimeout(function(){
+            if(flag){
+            	//$("#tb_deptUser").bootstrapTable('destroy');
+            	console.log($('#username').val())
+            	$.ajax({
+					type : 'POST',
+					url : "/userAllByName",
+					data : {"username":$('#username').val()},
+					async : false,
+					success : function(data) {
+						console.log(data)
+						if (data != null&&data.length>0) {
+							for(var i=0;i<data.length;i++){
+								data[i].dname=data[i].deptname
+							}
+							$("#tb_deptUser").bootstrapTable('removeAll');
+							$('#tb_deptUser').bootstrapTable('load', data);
+						} else {
+							$("#tb_deptUser").bootstrapTable('removeAll');
+						}
+					}
+				});
+    			//getSecurity();
+    			//window.onload = function(){
+    				var oInput = document.getElementById("username");
+    				oInput.focus();
+    			//}
+            }
+        },0)
+})
+	//同步用户数据库
+	function syncDatabase(){
+    	//var userString ="{\"success\":\"true\",\"message\":\"\",\"data\" : [{\"code\" : \"A124\",\"sex\" :  \"男\",\"mobile\" : null,\"isdeleted\" : \"F\",\"officephone\" : \"85908841\",\"secretlevel\" : \"D\",\"depts\" : [{\"dept\":\"501\", \"deptType\":\"1\"},{\"dept\":\"512\",\"deptType\":\"2\"} ],\"status \":  \"在册在岗\",email : \"zhangsan@drsi.ac\",\"emailb \": \"zhangsan@npp.com\",\"name\" : \"张某\",\"cardno\" : \"1853415546\",\"keyno\" : \"npic123,npic123a\",\"id\":\" 078589ea22b9ee1a0122b9eeb06401e1\"}]}"
+    //	console.log(userString)
+		$.ajax({
+			type : 'GET',
+			url : "/userInsert",
+		//	data:{"userString":userString},
+			datatype : "json",
+			async : false,
+			success : function(data) {
+				if (data >0) {
+					syncSuccess();
+				} else {
+					syncErr();
+				}
+			}
+		});
+	}
+    
+  //同步用户密级
+	function syncDBSecurity(){
+		$.ajax({
+			type : 'GET',
+			url : "/userInsert",
+			datatype : "json",
+			async : false,
+			success : function(data) {
+				if (data >0) {
+					$.ajax({
+						type : 'POST',
+						url : "/updateUserSecurity",
+						async : false,
+						success : function(data) {
+							if (data >0) {
+								syncSuccess();
+								$('#tb_order').bootstrapTable('refresh');
+							} else {
+								syncErr();
+							}
+						}
+					});
+				} else {
+					syncErr();
+				}
+			}
+		});
+	}
+	function set_select_checked(selectId, checkValue) {
+		var select = document.getElementById(selectId);
+		for (var i = 0; i < select.options.length; i++) {
+			if (select.options[i].value == checkValue) {
+				select.options[i].selected = true;
+				break;
+			}
+		}
+	}
+	$("#toolbar").find('button').bind('click', function() {
+		$(this).css("background", "#cc7003");
+	});
+	$('.modal').on('hide.bs.modal', function() {
+		$(".btn").css("background", "#0085ff");
+		dataAll();
+		DataAll();
+	});
+</script>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+
+<title>系统配置</title>
+<link href="../assets/css/font-awesome.min.css" rel="stylesheet">
+<script src="../assets/js/jquery-1.9.1.min.js"></script>
+<!--bootstrap-table-->
+<script src="../assets/js/bootstrap/bootstrap-table.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-table.css"
+	rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap-table-zh-CN.js"></script>
+<link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="../assets/js/vue/vue.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-dialog.css"
+	rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+<link rel="stylesheet" href="../assets/css/newstyle.css">
+<link rel="stylesheet" href="../assets/css/zTreeStyle.css"
+	type="text/css">
+<script type="text/javascript" src="../assets/js/jquery.ztree.core.js"></script>
+<script type="text/javascript"
+	src="../assets/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.ztree.exedit.js"></script>
+<script src="../assets/js/alldata.js"></script>
+<script src="../assets/js/jquery-form.js"></script>
+<style>
+* {
+	font-size: 18px !important;
+}
+
+input,input:focus,input:hover {
+	font-size: 16px !important;
+	outline: none;
+	border: 0px;
+	background: #fbfbfb;
+	width: 350px;
+}
+
+i {
+	margin-right: 5px;
+}
+
+ul {
+	margin: 0px;
+	padding: 0px;
+	list-style: none;
+}
+
+li {
+	margin: 15px 0px;
+}
+
+table {
+	margin-top: 30px;
+}
+
+button {
+	display: block;
+}
+
+table tr td div {
+	width: 380px;
+	border-bottom: 1px solid #000;
+}
+
+#info::-webkit-scrollbar {
+	display: none;
+}
+</style>
+<script>
+	var lang = getUrlParam("lang");
+	var setting = { //此处根据自己需要进行配置
+		view : {
+			enable : true,
+			showLine : true,
+			showIcon : false, //设置是否显示节点图标
+			//addHoverDom: addHoverDom, //当鼠标移动到节点上时，显示用户自定义控件  
+			removeHoverDom : removeHoverDom, //离开节点时的操作 
+		},
+		edit : {
+			enable : true, //单独设置为true时，可加载修改、删除图标  
+			editNameSelectAll : true,
+			showRemoveBtn : showRemoveBtn,
+		//showRenameBtn: showRenameBtn  
+		},
+		data : {
+			simpleData : {
+				enable : true
+
+			}
+		},
+		callback : {
+			onClick : zTreeOnClick, //单击事件  
+			onMouseUp : treeUp,
+			//onRemove: onRemove, //移除事件  
+			onRename : onRename
+		//修改事件  
+		}
+	};
+	// 树的单击事件
+	function zTreeOnClick(event, treeId, treeNode) {
+
+	}
+	function treeUp(action, objId, data) {
+		var treeobj = $.fn.zTree.getZTreeObj("tree");
+		treeobj.cancelSelectedNode();
+	}
+	function showRemoveBtn(treeId, treeNode) {
+		return !treeNode.level == 0; //跟节点返回false,所以跟节点不显示删除按钮。
+	}
+	function removeHoverDom(treeId, treeNode) {
+		$("#addBtn_" + treeNode.tId).unbind().remove();
+	};
+	function onRename(e, treeId, treeNode, isCancel) {
+		//console.log(treeNode.id)
+		//console.log(treeNode.name)
+		$.ajax({
+			type : 'POST',
+			url : "/updateMenu",
+			async : false,
+			data : {
+				menuId : treeNode.id,
+				name : treeNode.name
+			},
+			success : function(data) {
+				window.parent.callback();
+			}
+		})
+	}
+	$(function() {
+		menuData();
+	});
+	function menuData() {
+		$.ajax({
+			type : 'POST',
+			url : "/pageMenu",
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				tableData = data.rows;
+				$.fn.zTree.init($("#tree"), setting, getChildren(data.rows));
+			}
+		})
+	}
+	function getChildren(array) {
+		for (var i = 0; i < array.length; i++) {
+			if (lang == "en_US") {
+				if (array[i].ename != "") {
+					array[i].name = array[i].ename
+				}
+			}
+			if (array[i].children != "undefined"
+					|| array[i].children != undefined) {
+				if (array[i].children != "null" && array[i].children != null
+						&& array[i].children.length != 0) {
+					delete array[i].icon
+					getChildren(array[i].children)
+					delete array[i].children
+				} else {
+					delete array[i].children
+					delete array[i].icon
+				}
+			}
+		}
+		return array;
+	}
+
+	function editImg() {
+
+	}
+	$(function() {
+		//获取系统标题
+		$.ajax({
+			type : 'POST',
+			url : "/getDataName",
+			dataType : "json",
+			async : false,
+			success : function(data) {
+				console.log(data)
+				document.getElementById("title").value = data.dataName;
+				document.getElementById("infoError").value = data.infoError;
+				document.getElementById("info").value = data.info;
+				//	document.getElementById("info").innerHTML+='<i style="margin-left:10px;" class="icon-pencil"></i>'
+				console.log(document.getElementById("info"))
+			}
+		});
+		/* document.getElementById("title").value = window.parent.document
+				.getElementById("titleDemo").innerText; */
+		dataAll();
+	})
+	function saveReport() {
+		/* // jquery 表单提交 
+		var AllImgExt = ".jpg|.jpeg|.gif|.bmp|.png|";
+		var extName = document.getElementById("logo");//（把路径中的所有字母全部转换为小写）       
+		if (extName.value != "") {
+			var fileType = extName.value.substring(extName.value
+					.lastIndexOf(".") + 1, extName.value.length)
+			if (AllImgExt.indexOf(fileType) == -1) {
+				ErrMsg = "该文件类型不允许上传。请上传 " + AllImgExt + " 类型的文件，当前文件类型为"
+						+ fileType;
+				alert(ErrMsg);
+				return false;
+			} else {
+				$("#showDataForm").ajaxSubmit(
+								function(message) {
+									// 对于表单提交成功后处理，message为提交页面saveReport.htm的返回内容 
+									//updateSuccess()
+									window.parent.document
+											.getElementById("logo").src = "../assets/images/logo.png";
+									//window.parent.$(".logo").load(window.parent.location.href + " .logo");
+								});
+				return true;
+			}
+		} else {
+			return true;
+		} */
+		if ( document.getElementById("logo").value != "") {
+		$("#showDataForm").ajaxSubmit(
+				function(message) {
+					// 对于表单提交成功后处理，message为提交页面saveReport.htm的返回内容 
+					//updateSuccess()
+					window.parent.document
+							.getElementById("logo").src = "../assets/images/logo.png";
+					//window.parent.$(".logo").load(window.parent.location.href + " .logo");
+				});
+		}
+		return false;
+	}
+</script>
+</head>
+
+<body style="height: 100%;width: 100%;margin: 0px;padding: 0px;">
+	<div id="box">
+		<!-- <table id="tb_order" ></table> -->
+		<form id="showDataForm" action="/updateLogo" method="post"
+			enctype="multipart/form-data">
+			<table
+				style="float:left;border-collapse:separate; border-spacing:0px 30px;width: 50%">
+				<tr>
+					<td><span th:text="#{icon}"></span></td>
+					<td><input type="file"  id="logo"
+						name="file" style="border:0px !important;" accept="image/gif, image/jpg, image/png, image/jpeg, image/.bmp"/></td>
+				</tr>
+				<tr>
+					<td><span th:text="#{title}"></span></td>
+					<td><div>
+							<input type="text" id="title" autocomplete="off" /><i
+								class="icon-pencil"></i>
+						</div></td>
+				</tr>
+				<tr>
+					<td><span th:text="#{infoError}">信息</span></td>
+					<td><div>
+							<input type="text" id="infoError" autocomplete="off" /><i
+								class="icon-pencil"></i>
+						</div></td>
+				</tr>
+				<tr>
+					<td><span th:text="#{infoError}">信息</span></td>
+					<td><div style="width: 380px;border: 1px solid #000;">
+							<textarea id="info" rows="6" style="width:100%;height:100%"></textarea>
+						</div></td>
+				</tr>
+			</table>
+			<table>
+
+				<tr>
+					<td><span th:text="#{pmenu}"></span></td>
+					<td colspan="2">
+						<!-- <ul id="tree" class="ztree"></ul> -->
+						<ul id="menuId"></ul>
+					</td>
+				</tr>
+			</table>
+			<button type="button" class="btn btn-default"
+				style="background: #0085ff ;color: rgb(255, 255, 255);margin-left:10px;position: absolute;;bottom: 10px;right: 10px;"
+				onclick="updateMenu()" th:text="#{amend}"></button>
+		</form>
+	</div>
+</body>
+<script>
+	function dataAll() {
+		$
+				.ajax({
+					type : 'POST',
+					url : "/pageMenu",
+					//async : false,
+					dataType : "json",
+					success : function(data) {
+						data = data.rows
+						console.log(data)
+						for (var i = 0; i < data.length; i++) {
+							if (lang != "en_US") {
+							$("#menuId")
+									.append(
+											'<li ><div><input type="hidden" value='+data[i].id+' /><input type="text" style="display:inline !important;" name="menu" autocomplete="off" value="'
+													+ data[i].name
+													+ '" onkeyup="WidthCheck(this,15);"/><i class="icon-pencil"></i></div></li>');
+							}else{
+								$("#menuId")
+								.append(
+										'<li ><div><input type="hidden" value='+data[i].id+' /><input type="text" style="display:inline !important;" name="menu" autocomplete="off" value="'
+												+ data[i].ename
+												+ '" onkeyup="WidthCheck(this,30);"/><i class="icon-pencil"></i></div></li>');
+							}
+						}
+					}
+				})
+	}
+
+	function updateMenu() {
+		var isEmty=true;
+		var inputArr = document.getElementsByName("menu");
+		for (var i = 0; i < inputArr.length; i++) {
+			if(inputArr[i].value==""){
+				isEmty=false;
+			}
+		}
+		if(document.getElementById("title").value==""||document.getElementById("infoError").value==""||document.getElementById("info").value==""){
+			isEmty=false;
+		}
+		if(isEmty){
+
+		 	$.ajax({
+				type : 'POST',
+				url : "/updateDataName",
+				data : {
+					dataName : document.getElementById("title").value,
+					infoError : document.getElementById("infoError").value,
+					info : document.getElementById("info").value
+				},
+				async : false,
+				success : function(data) {
+					if (data > 0) {
+						//updateSuccess()
+						window.parent.document
+								.getElementById("titleDemo").innerText = document
+								.getElementById("title").value;
+						window.parent.document
+								.getElementById("infoError").innerText = document
+								.getElementById("infoError").value;
+						window.parent.document.getElementById("info").innerText = document
+								.getElementById("info").value;
+					}
+				}
+			});
+		var inputArr = document.getElementsByName("menu");
+		for (var i = 0; i < inputArr.length; i++) {
+				$.ajax({
+					type : 'POST',
+					url : "/updateMenu",
+					async : false,
+					data : {
+						menuId : inputArr[i].previousSibling.value,
+						name : inputArr[i].value
+					},
+					success : function(data) {
+
+					}
+				})
+			}
+			saveReport()
+			updateSuccess()
+			window.parent.callback(); 
+		}else{
+			emtyErr();
+		}
+	}
+</script>
+
+</html>

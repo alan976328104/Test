@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ceshiceshil.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+  <script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+    <script type="text/javascript" src="../assets/js/html2canvas.js"></script>
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+<script type="text/javascript">
+
+$(function(){
+	$("#btn").click(function(){
+		 html2canvas(document.getElementById("test")).then(function (canvas) {
+	          var imgUri = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"); // 获取生成的图片的url
+	          window.location.href = imgUri; // 下载图片
+	      });
+		
+		
+	})
+	
+	 
+	
+})
+</script>
+  </head>
+  
+  <body>
+  <div id="test"> This is my HTML page.</div>
+   <button id="btn"></button>
+  </body>
+</html>

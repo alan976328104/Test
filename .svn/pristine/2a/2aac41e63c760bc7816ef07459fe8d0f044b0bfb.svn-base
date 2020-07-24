@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>temp.html</title>
+	  <link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+    <script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+  
+
+  </head>
+  <script>
+  $(function(){
+	  var id = parseUrl()[0];
+	  location.href = "OpenVideo.html?fileId="+id;
+  })
+ 
+  function parseUrl() {
+		var url = location.href;
+		var i = url.indexOf('?');
+		if(i == -1) return;
+		var querystr = url.substr(i + 1);
+		var arr1 = querystr.split('&');
+		var str = new Array();
+		var num = 0;
+		for(i in arr1) {
+			var ta = arr1[i].split('=');
+			str[num] = decodeURI(ta[1]);
+			num++;
+		}
+		return str;
+	}
+  </script>
+  <body>
+  
+  </body>
+</html>

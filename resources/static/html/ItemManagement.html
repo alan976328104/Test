@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<!-- <link rel="stylesheet" type="text/css" href="../assets/css/default.css"> -->
+<link rel="stylesheet" href="../assets/css/font-awesome.min.css"
+	rel="stylesheet" />
+<!--if IE 7-->
+<link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css" />
+<!--endif-->
+<script type="text/javascript" src="../assets/js/jquery-2.0.3.min.js"></script>
+
+
+<!--bootstrap-table-->
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrap-table.js"></script>
+<link rel="stylesheet"
+	href="../assets/css/bootstrap/bootstrap-table.css">
+<script src="../assets/js/bootstrap/bootstrap-table-pagejump.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-table-pagejump.css"
+	rel="stylesheet">
+<!-- <script type="text/javascript" src="../assets/js/bootstrap/bootstrap-table-zh-CN.js"></script> -->
+<link rel="stylesheet" href="../assets/css/bootstrap/bootstrap.min.css">
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrap.min.js"></script>
+
+<link rel="stylesheet"
+	href="../assets/css/bootstrap/bootstrap-dialog.css">
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+
+<!-- 按钮样式 -->
+<link rel="stylesheet"
+	href="../assets/css/awesome-bootstrap-checkbox.css">
+<!-- 表单验证 -->
+<link rel="stylesheet"
+	href="../assets/css/bootstrap/bootstrapValidator.min.css">
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrapValidator.min.js"></script>
+
+<!-- <script type="text/javascript" src="../assets/js/vue/vue.js"></script> -->
+<link rel="stylesheet" href="../assets/css/zTreeStyle.css"
+	type="text/css">
+<script type="text/javascript" src="../assets/js/jquery.ztree.core.js"></script>
+<script type="text/javascript"
+	src="../assets/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.ztree.exedit.js"></script>
+<link rel="stylesheet" href="../assets/css/newstyle.css">
+<script type="text/javascript" src="../assets/js/alldata.js"></script>
+<style>
+i {
+	margin-right: 5px;
+}
+
+.selbordor {
+	border-color: #b94a48;
+}
+
+p {
+	margin-top: 5px;
+	margin-bottom: -2px;
+	color: #b94a48;
+	font-size: 12px;
+	display: none;
+}
+
+img {
+	margin: 8px 0px;
+}
+
+.tobar .btn {
+	background: #0085ff !important;
+	color: #fff;
+}
+.ztree li .curSelectedNode span:last-child {
+	background-color: #4fc1e9;
+	color: #fff;
+}
+/* 
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-left>.page-list{
+display: none !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination-jump{
+display: none !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-item{
+display: none !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-pre,.page-next{
+display: inline !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-next{
+display: inline !important;
+} */
+</style>
+<script>
+	//获取登录者信息
+	var sessionUser;
+	$.ajax({
+		type : "post",
+		url : "/getSessionByIp",
+		async : false,
+		success : function(data) {
+			sessionUser = data
+		}
+	})
+	var lang = getUrlParam("lang");
+	var columns, usercolumns;
+	var userdata, deptdata;
+	if (lang != "en_US") {
+		usercolumns = [ [ {
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		}, {
+			field : 'username',
+			title : '姓名',
+			width : '20%'
+		} , {
+			field : 'keyno',
+			title : '工号',
+			width : '20%'
+		}, {
+			field : 'deptname',
+			title : '部门',
+			width : '20%'
+		}] ]
+		columns = [ [ {
+			field : 'userId',
+			title : '#',
+			width : '0.5%',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		}, {
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		}, {
+			title : '#',
+			field : '#',
+			width : '0.5%',
+			formatter : function(value, row, index) {
+				return index + 1;
+			}
+		}, {
+			field : 'username',
+			title : '姓名',
+			formatter : forma
+		}, {
+			field : 'secretlevel',
+			title : '密级',
+			formatter : formaS
+		}, {
+			field : 'role.roleName',
+			title : '角色'
+		}, {
+			field : 'deptname',
+			title : '部门'
+		} ] ]
+		document
+				.write("<script src='../assets/js/bootstrap/bootstrap-table-zh-CN.js' >"
+						+ "<" + "/script>");
+	} else {
+		usercolumns = [ [ {
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		}, {
+			field : 'username',
+			title : 'userName',
+			width : '20%'
+		} , {
+			field : 'keyno',
+			title : 'keyNo',
+			width : '20%'
+		}, {
+			field : 'deptname',
+			title : 'deptName',
+			width : '20%'
+		}] ]
+		columns = [ [ {
+			field : 'userId',
+			title : '#',
+			width : '0.5%',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		}, {
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		}, {
+			title : '#',
+			field : '#',
+			width : '0.5%',
+			formatter : function(value, row, index) {
+				return index + 1;
+			}
+		}, {
+			field : 'username',
+			title : 'Name',
+			formatter : forma
+		},  {
+			field : 'secretlevel',
+			title : 'Security',
+			formatter : formaS
+		}, {
+			field : 'role.roleName',
+			title : 'Role'
+		}, {
+			field : 'deptname',
+			title : 'Dept'
+		} ] ]
+	}
+	var setting = { //此处根据自己需要进行配置
+		view : {
+			selectedMulti : true, //设置是否能够同时选中多个节点
+			showIcon : false, //设置是否显示节点图标
+			ShowPlusMinus : false,
+			showLine : true, //设置是否显示节点与节点之间的连线
+			showTitle : false, //设置是否显示节点的title提示信息
+		},
+		data : {
+			simpleData : {
+				enable : true
+			},
+			key : {
+				url : "xUrl",
+				icon : "menuIcon"
+			}
+		},
+		check : {
+			enable : true
+		//设置是否显示checkbox复选框
+		},
+		callback : {
+			onClick : zTreeOnClickRight,
+			beforeClick : zTreeBeforeClick,
+			onCheck : onCheck
+		}
+	};
+	var settingRole = { //此处根据自己需要进行配置
+		view : {
+			selectedMulti : true, //设置是否能够同时选中多个节点
+			showIcon : false, //设置是否显示节点图标
+			ShowPlusMinus : false,
+			showLine : true, //设置是否显示节点与节点之间的连线
+			showTitle : false, //设置是否显示节点的title提示信息
+		},
+		simpleData : {
+			enable : true
+		},
+		callback : {
+			onClick : zTreeOnClickRole,
+			beforeClick : zTreeBeforeClick,
+			onCheck : onCheck
+		}
+	};
+	function zTreeBeforeClick(treeId, treeNode, clickFlag) {
+
+	}
+	var btnMenuRoles = [];
+	function onCheck(e, treeId, treeNode) {
+		if (treeId == "tree") {
+
+		}
+		if (treeId == "btntree") {
+			var treeBtnBer = $.fn.zTree.getZTreeObj("btntree");
+			var nodebtnBer = treeBtnBer.getCheckedNodes(true);
+			var btnIds = [];
+			var tIds = [];
+			if (nodebtnBer.length > 0) {
+				for (var i = 0; i < nodebtnBer.length; i++) {
+					btnIds.push(nodebtnBer[i].btnId)
+					tIds.push(nodebtnBer[i].tId)
+				}
+				if (btnMenuRoles.length > 0) {
+					for (var j = 0; j < btnMenuRoles.length; j++) {
+						if (btnMenuRoles[j].roleId == $('#roleId').val()
+								&& btnMenuRoles[j].menuId == $('#menuId').val()) {
+							//btnMenuRoles[j].btnIds=btnIds;
+							//btnMenuRoles[j].tIds=tIds;
+							delete btnMenuRoles[j]
+						}
+					}
+					btnMenuRoles = notEmpty(btnMenuRoles)
+				}
+				btnMenuRoles.push({
+					"roleId" : $('#roleId').val(),
+					"menuId" : $('#menuId').val(),
+					"btnIds" : btnIds,
+					"tIds" : tIds
+				})
+			}else{
+				btnMenuRoles.push({
+					"roleId" : $('#roleId').val(),
+					"menuId" : $('#menuId').val(),
+					"btnIds" : [],
+					"tIds" : []
+				})
+			}
+			console.log(btnMenuRoles)
+		}
+	}
+	function notEmpty(arr){
+		var newarray=[];
+		for(var i=0;i<arr.length;i++){
+			if (arr[i] !== "" && arr[i]  != undefined) {
+				newarray.push(arr[i]);
+	        }
+		}
+		return newarray;
+	}
+	var roleState;
+	function addMajorRole() {
+		$("#roleLeft").css("border","none");
+		$("#roleTable").css("display","");
+		$('#roleId').val(sessionUser.role.roleId);
+		roleState=1
+		$("#majorRoleName").val("");
+		$("#majorDescribe").val("");
+		initMenuData();
+		$("#update").css("display","none")
+		$("#add").css("display","")
+		$("#btn").css("display", "none")
+	}
+	function initMenuData(){
+		var treeObj = $.fn.zTree.getZTreeObj("menuTree");
+		expandNodes(treeObj, treeObj.getNodes());
+		var node = treeObj.getNodes();
+		var nodes = treeObj.transformToArray(node);
+		treeObj.checkAllNodes(false);
+		treeObj.cancelSelectedNode();
+		var treeObjBtn = $.fn.zTree.getZTreeObj("roleTree");
+		if(treeObjBtn!=null){
+			var nodeBtn = treeObjBtn.getNodes();
+			var nodesBtn = treeObjBtn.transformToArray(nodeBtn);
+			treeObjBtn.checkAllNodes(false);
+			treeObjBtn.cancelSelectedNode(); 
+		}
+		
+	}
+	function editMajorRole(){
+		var treeObj = $.fn.zTree.getZTreeObj("roleTree");
+		var nodes = treeObj.getSelectedNodes();
+		if (nodes.length != 0) {
+			$("#roleLeft").css("border","none");
+			$("#roleTable").css("display","");
+			$("#add").css("display","none")
+			$("#update").css("display","")
+		} else {
+			selectErr()
+		}
+	}
+	function deleteMajorRole(){
+		var treeObj = $.fn.zTree.getZTreeObj("roleTree");
+		var nodes = treeObj.getSelectedNodes();
+		var roleIdAll=[];
+		if (nodes.length != 0) {
+			for (var i = 0; i < nodes.length; i++) {
+				roleIdAll.push(nodes[i].roleId)
+			}
+			console.log(roleIdAll)
+			if (lang != "en_US") {
+				$.showConfirmRole("<i style='color: red;position: relative;top: 2px;font-size: 27px;left: -6px;' class='icon-remove new-icon'></i>确认要删除吗？", roleIdAll,"删除角色","确认");
+			}else{
+				$.showConfirmRole("<i style='color: red;position: relative;top: 2px;font-size: 20px;left: -6px;' class='icon-remove new-icon'></i>Are you sure you want to delete it?", roleIdAll,"DeleteRole","confirm");
+			}
+		} else {
+			selectErr()
+		}
+	}
+	function zTreeOnClickRole(event, treeId, treeNode, clickFlag) {
+		if (treeId == "roleTree") {
+			console.log(treeNode)
+			$("#majorRoleName").val(treeNode.name);
+			$("#majorDescribe").text(treeNode.describe);
+			$.ajax({
+				type : "post",
+				url : "/getRoleMenuById",
+				data : {
+					roleId : treeNode.roleId
+				},
+				async : true,
+				dataType : "json",
+				success : function(data) {
+					var treeObj = $.fn.zTree.getZTreeObj("menuTree");
+					var node = treeObj.getNodes();
+					var nodes = treeObj.transformToArray(node);
+					treeObj.checkAllNodes(false);
+					treeObj.refresh();
+					//treeObjBtn.cancelSelectedNode();
+					//treeObj.expandAll(false);    
+					for (var i = 0; i < nodes.length; i++) {
+						for (var j = 0; j < data.length; j++) {
+							if (nodes[i].id == data[j].menuId) {
+								var checkNode = treeObj.getNodeByTId(nodes[i].tId);
+								treeObj.checkNode(checkNode, true, false);
+								//treeObj.expandNode(nodes[0], true,false);
+							}
+						}
+					}
+				}
+			})
+			roleState=2
+			$("#roleLeft").css("border-right","1px solid rgb(204, 204, 204)");
+			$("#roleTable").css("display","none")
+			$("#btn").css("display","none");
+			$('#roleId').val(treeNode.roleId);
+		}
+	}
+	function zTreeOnClickRight(event, treeId, treeNode, clickFlag) {
+		if (treeId == "menuTree") {
+			var parentNodes = treeNode.getPath();
+			console.log(treeNode.url)
+			for ( var i in parentNodes) {
+				if (parentNodes[i].level == 0) {//根节点的level为0
+					if (parentNodes[i].id == 1 && !treeNode.isParent
+							&& treeNode.url != ""&&treeNode.url=='html/tab3.html') {
+						$("#btn").css("display", "inline-block")
+					} else {
+						$("#btn").css("display", "none")
+					}
+				}
+			}
+			var roleId = $('#roleId').val();
+			//var roleId=sessionUser.role.roleId
+			var menuId = treeNode.id;
+			console.log(roleId)
+			console.log(menuId)
+			getBtnZtree(roleId, menuId)
+			var treeBtnBer = $.fn.zTree.getZTreeObj("btntree");
+			if (btnMenuRoles.length > 0) {
+				for (var i = 0; i < btnMenuRoles.length; i++) {
+					console.log(btnMenuRoles[i].menuId == menuId)
+					if (btnMenuRoles[i].menuId == menuId) {
+						treeBtnBer.checkAllNodes(false)
+						for (j = 0; j < btnMenuRoles[i].tIds.length; j++) {
+							console.log(btnMenuRoles[i].tIds[j])
+							var checkNode = treeBtnBer
+									.getNodeByTId(btnMenuRoles[i].tIds[j]);
+							treeBtnBer.checkNode(checkNode, true, true);
+						}
+					} else {
+						//console.log(123)
+						//getBtnZtree(roleId,menuId)
+					}
+				}
+			}
+			$("#menuId").val(menuId)
+			$("#parentMenuId").val(treeNode.parentId)
+			$("#mName").text(treeNode.name)
+		}
+	}
+	//获取该角色拥有的权限
+	function getBtnZtree(roleId, menuId) {
+	//	$("#btn").css("display", "none")
+		/* $.ajax({
+			type : "post",
+			url : "/getRoleButtonByRoleId",
+			data : {
+				roleId : sessionUser.role.roleId,
+				menuId : menuId
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				console.log(data)
+				var btnData = [];
+				for (var i = 0; i < data.length; i++) {
+					btnData.push({
+						btnId : data[i].btnId,
+						name : data[i].btnName
+					})
+				}
+				$.fn.zTree.init($("#btntree"), setting, btnData); //加载按钮数据 
+				$("#btn").css("display", "inline-block")
+			}}) */
+		$.ajax({
+			type : "post",
+			url : "/getRoleButtonByMId",
+			data : {
+				roleId : roleId,
+				menuId : menuId
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				console.log(132)
+				console.log(data)
+				if (data != null) {
+				var treeBtn = $.fn.zTree.getZTreeObj("btntree");
+				var nodebtn = treeBtn.getNodes();
+				var nodebtns = treeBtn.transformToArray(nodebtn);
+				treeBtn.checkAllNodes(false)
+				if(roleState==2){
+					for (var i = 0; i < nodebtns.length; i++) {
+					for (var j = 0; j < data.length; j++) {
+						if (nodebtns[i].btnId == data[j].btnId) {
+							var checkNode = treeBtn
+									.getNodeByTId(nodebtns[i].tId);
+							treeBtn.checkNode(checkNode, true, true);
+						}
+					}
+				}
+					$("#btn").css("display", "inline-block")
+				}else {
+					//$("#btn").css("display", "none")
+				}
+				} 
+			}
+		})
+	}
+	$(function() {
+		$("#tb_user").bootstrapTable({
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			toolbar : "#tb_role",
+			pagination : true, //是否显示分页（*）
+			paginationShowPageGo : true,
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 10, //每页的记录行数（*）
+			pageList : [ 10, 15, 20, 30, 50 ], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : false, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			sidePagination : "client", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			search : true,
+			columns : usercolumns
+		})
+		dataAll();
+		DataAll();
+		deptUserData();
+		//与本条目一致点击事件
+		$('#accordance').click(function () {
+			 if(confirm("确认其余数据是否与本条目一致")){
+			var treeBtnBer = $.fn.zTree.getZTreeObj("btntree");
+			var nodebtnBer = treeBtnBer.getCheckedNodes(true);
+			var menuTree = $.fn.zTree.getZTreeObj("menuTree");
+			var menuNodes=menuTree.getNodes();
+			var menuNode = menuTree.getCheckedNodes(true);
+			var menuIds=[];
+			var mIds=[];
+			console.log(menuNode)
+			console.log(menuNodes[0].menus)
+			mIds=getMenuId(menuNodes[0].menus,mIds)
+			console.log(mIds)
+			 for(var i=0;i<menuNode.length;i++){
+				 for(var j=0;j<mIds.length;j++){
+					 if(menuNode[i].id==mIds[j]){
+						menuIds.push(menuNode[i].id)
+					 }
+				 }
+			} 
+			console.log(menuIds)
+			var btnIds=[];
+			var tIds=[];
+			if(nodebtnBer.length>0){
+				for(var i=0;i<nodebtnBer.length;i++){
+					btnIds.push(nodebtnBer[i].btnId)
+					tIds.push(nodebtnBer[i].tId)
+				}
+				for(var j=0;j<menuIds.length;j++){
+					if(btnMenuRoles.length>0){
+						for(var i=0;i<btnMenuRoles.length;i++){
+							if(btnMenuRoles[i].roleId==$('#roleId').val()&&btnMenuRoles[i].menuId==menuIds[j]){
+								delete btnMenuRoles[i]
+							}
+						}
+						btnMenuRoles=notEmpty(btnMenuRoles)
+					}
+					btnMenuRoles.push({"roleId":$('#roleId').val(),"menuId":menuIds[j],"btnIds":btnIds,"tIds":tIds})
+				}
+			} 
+			console.log(456)
+			console.log(btnMenuRoles)
+			console.log(123)
+			 }
+		})
+		/* var users = [];
+		var data = userdata.data;
+		getDeptName(data)
+		for (var i = 0; i < data.length; i++) {
+			if (sessionUser.deptname == data[i].deptname) {
+				users.push(data[i])
+			}
+		}
+		console.log(users)
+		$('#tb_user').bootstrapTable('load', users); */
+		/* $.ajax({
+			type : 'POST',
+			url : "/getUserButton",
+			data : {
+				userId : sessionUser.userId
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				console.log(data)
+				if (data != null) {
+					for (var i = 0; i < data.length; i++) {
+						if (data[i].btnName == '修改') {
+							$("#btn_edit").css("display", "");
+						}
+						if (data[i].btnName == '删除') {
+							$("#btn_delete").css("display", "");
+						}
+						if (data[i].btnName == '上传') {
+							$("#btn_add").css("display", "");
+							$("#btn_addRole").css("display", "");
+						}
+					}
+				}
+			}
+		}) */
+	});
+	//获取基本节点的Id
+	function getMenuId(array,menuIds){
+		for(var i=0;i<array.length;i++){
+			console.log(array[i].name)
+			if(array[i].menus.length>0){
+				 getMenuId(array[i].menus,menuIds)
+			}else{
+				if((array[i].url=="html/tab3.html"/* ||array[i].url=="html/yanzhengjuzhen.html" */)){
+					menuIds.push(array[i].id)
+				}
+			}
+		}
+		return menuIds
+	}
+	/* function getDeptName(array) {
+		var data = deptdata.dptfullNameData
+		for (var i = 0; i < array.length; i++) {
+			if (array[i] != undefined && array[i].depts.length > 0) {
+				array[i].deptname = "";
+				for (var k = 0; k < array[i].depts.length; k++) {
+					for (var j = 0; j < data.length; j++) {
+						if (array[i].depts[k].dept == data[j].deptcode) {
+							array[i].deptname += data[j].deptname + ","
+						}
+					}
+				}
+				array[i].deptname = array[i].deptname.substr(0,
+						array[i].deptname.length - 1)
+			}
+		}
+	} */
+	function deptUserData() {
+		$.ajax({
+			type : 'POST',
+			url : "/userByDeptName",
+			data : {
+				deptname : sessionUser.deptname
+			},
+			dataType : "json",
+			success : function(data) {
+				console.log(data)
+				$('#tb_user').bootstrapTable('load', data);
+			}
+		})
+	}
+	function getDeptData(array) {
+		for (var i = 0; i < array.length; i++) {
+			array[i].name = array[i].deptName
+			if (array[i].children != undefined && array[i].children.length > 0) {
+				getDeptData(array[i].children)
+			} else {
+				delete array[i].children
+			}
+		}
+		return array;
+	}
+	function dataAll() {
+		$("#tb_order").bootstrapTable({
+			url : "/pageUser",
+			method : "post", //请求方式（*）
+			contentType : "application/x-www-form-urlencoded",//post请求的话就加上这个句话
+			toolbar : "#toolbar", //工具按钮用哪个容器
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			paginationShowPageGo : true,
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 15, //每页的记录行数（*）
+			pageList : [ 10, 15, 20, 30, 50 ], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : false, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			sidePagination : "server", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			queryParams : function(params) {//自定义参数，这里的参数是传给后台的，我这是是分页用的
+				return {//这里的params是table提供的
+					username : $("#nameInput").val(),
+					deptname : sessionUser.deptname,
+					pageNumber : params.pageNumber,
+					pageSize : params.pageSize
+				};
+			},
+			columns : columns
+		});
+		$('#tb_order').children().children().children('th').eq(0).css(
+				"display", "none")
+	}
+	function formasex(value, row, index) {
+		if (row.sex == 0) {
+			return "男";
+		} else {
+			return "女";
+		}
+	}
+	function formaNull(value, row, index) {
+		if (value > 0) {
+			return row.phone;
+		} else {
+			return "";
+		}
+	}
+	function forma(value, row, index) {
+		if (row.username) {
+			var namestr = row.username;
+			if ($("#nameInput").val() != "") {
+				var array = namestr.split($("#nameInput").val());
+				namestr = "";
+				for (var j = 0; j < array.length; j++) {
+					if (j == array.length - 1) {
+						namestr += array[j]
+					} else {
+						namestr += array[j] + "<span style='color:red;'>"
+								+ $("#nameInput").val() + "</span>"
+					}
+				}
+			}
+			return namestr;
+		}
+	}
+	function formaS(value, row, index) {
+		if (value == "A" || value == "B") {
+			return "重要涉密人员";
+		} else if (value == "C") {
+			return "一般涉密人员";
+		} else if (value == "D") {
+			return "非密";
+		}
+	}
+</script>
+</head>
+
+<body style="height:100%">
+	<div id="box" style="height:100%">
+		<table id="tb_order" style="width:100%;height:100% ;">
+		</table>
+		<div id="toolbar" class="btn-group">
+			<!-- <button type="button" id="btn_add"
+				class="btn btn-white btn-default btn-round"
+				onclick="openAddUserModal()">
+				<span th:text="#{add}"></span>
+			</button> -->
+			<button type="button" id="btn_edit"
+				class="btn btn-white btn-default btn-round" onclick="editUser()">
+				<span th:text="#{modification}"></span>
+			</button>
+			<button id="btn_delete" type="button"
+				class="btn btn-white btn-default btn-round" onclick="delUser()">
+				<span th:text="#{delete}"></span>
+			</button>
+			<button id="btn_delete" type="button"
+				class="btn btn-white btn-default btn-round" style="width: 120px" id="btn_addRole"
+				onclick="openAddRoleModal()">
+				<span th:text="#{rolemajoradd}">添加角色</span>
+			</button>
+			<div class="input-group sousuo">
+				<input type="text" class="form-control" id="nameInput"
+					th:placeholder='#{searchText}'> <span
+					class="input-group-btn">
+					<button class="btn btn-default" type="button"
+						onclick="nameSearch()">
+						<i class="icon-search"></i>
+					</button>
+				</span>
+			</div>
+		</div>
+
+		<!-- /input-group -->
+
+		<!-- 修改窗口begin -->
+		<div class="modal fade" id="editUser" tabindex="-1" role="dialog"
+			aria-labelledby="editUserLabel" aria-hidden="true">
+			<div class="modal-dialog" style="width: 330px !important;">
+				<div class="modal-content" style="width: 330px !important;">
+					<div class="modal-header" style="padding: 10px">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="editUserLabel" th:text="#{useredit}">修改用户</h4>
+					</div>
+					<div class="modal-body">
+						<div class="row">
+							<div class="col-md-8 col-md-offset-2">
+								<form id="updateUserForm">
+									<table style="width:100%;">
+										<tr>
+											<td><span style="color:red">*</span> <label
+												th:text="#{name}">姓名</label><input type="text" name="editUserId"
+												id="editUserId" style="display: none" /></td>
+											<td><div class="form-group">
+													<i class="icon-user-md new-icon"></i> <input
+														class="new_input" type="text" name="editUserName"
+														id="editUserName" autocomplete="off" />
+												</div></td>
+										</tr>
+										<!-- <tr>
+											<td><label th:text="#{sex}">性别</label></td>
+											<td><div class="form-group">
+													<div class="radio radio-info radio-inline">
+														<input type="radio" value="0" name="sex" id="editSexMan" />
+														<label for="editSexMan" th:text="#{man}">男</label>
+													</div>
+													<div class="radio radio-info radio-inline">
+														<input type="radio" value="1" name="sex" id="editSexWoman" />
+														<label for="editSexWoman" th:text="#{woman}">女</label>
+													</div>
+												</div></td>
+										</tr> -->
+										<tr>
+											<td><span style="color:red">*</span><label
+												th:text="#{role}">角色</label></td>
+											<td><div class="form-group">
+													<i class="icon-user new-icon"></i> <select
+														class="new_input" name="roleId" id="editRoleId">
+													</select>
+													<p name="errorText">请选择角色</p>
+												</div></td>
+										</tr>
+									</table>
+								</form>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="padding: 10px">
+						<button type="button" class="btn new-tijiao queding"
+							onclick="updateUser()" th:text="#{submit}">提交</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!-- 修改窗口end -->
+		<!-- 选择用户star -->
+		<div class="modal fade" id="userModal" tabindex="-1" role="dialog"
+			aria-labelledby="addUserLabel" aria-hidden="true">
+			<div class="modal-dialog" style="width: 800px;">
+				<div class="modal-content">
+					<div class="modal-header" style="padding:8px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="addUserLabel" th:text="#{useradd}">添加用户</h4>
+					</div>
+					<div class="modal-body" style="height: 500px;">
+						<div style="width:100%;height:100%;">
+							<div
+								style="width:100%;height:100%;float: left;padding-right:5px;border-right: 1px solid rgb(204, 204, 204);"
+								id="div_user">
+								<table id="tb_user" style="height:100%;width:100%"></table>
+							</div>
+							<div id="tb_role">
+								<span style="color:red">*</span><label th:text="#{role}">角色</label>
+								<div class="form-group" style="display:inline;">
+									<i class="icon-user new-icon" style="top: 1px;"></i> <select
+										class="new_input"
+										style="width: 180px; height: 35px;border-radius: 5px;border: 1px solid #c7c2c2;padding-left: 25px"
+										name="roleId" id="roleSelect">
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="padding:5px;">
+						<button type="button" class="btn new-tijiao queding"
+							onclick="addUser()" th:text="#{submit}"></button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!-- 选择用户end -->
+		<!-- 添加角色star -->
+		<div class="modal fade" id="addRoleModal" tabindex="-1" role="dialog"
+			aria-hidden="true">
+			<div class="modal-dialog" style="width: 800px;">
+				<div class="modal-content">
+					<div class="modal-header" style="padding:8px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title" th:text="#{rolemajoradd}">添加角色</h4>
+					</div>
+					<div class="modal-body" style="height: 500px;">
+						<div style="width:100%;height:100%;">
+							<div
+								style="width:99%;height:100%;float: left;padding-left:10px;overflow: auto">
+								<div id="roleLeft" style="width:20%;float: left;height:100%;margin-right: 1%;border-right:1px solid rgb(204, 204, 204);">
+									<div class="tobar">
+										<button type="button" class="btn btn-default btn-sm"
+											onclick="addMajorRole()" style="width: 45px !important; ">
+											<span th:text="#{add}"></span>
+										</button>
+
+										<button type="button" class="btn btn-default btn-sm"
+											style="width: 45px !important;" onclick="editMajorRole()">
+											<span th:text="#{modification}"></span>
+										</button>
+										<button type="button" class="btn btn-default btn-sm"
+											style="width: 45px !important;" onclick="deleteMajorRole()">
+											<span th:text="#{delete}"></span>
+										</button>
+									</div>
+									<ul id="roleTree" class="ztree"></ul>
+								</div>
+								<input type="text" id="roleId" style="display:none" /> <input
+									type="text" id="menuId" style="display:none" /> <input
+									type="text" id="parentMenuId" style="display:none" />
+								<table id="roleTable"
+									style="width:78%;border-left:1.5px solid rgb(204, 204, 204);margin-left:10px;display:none">
+									<tr>
+										<td style="width: 2%;padding:0px;"></td>
+										<td><span th:text="#{roleName}">角色名称</span><input
+											type="text" id="majorRoleName" class='form-control'
+											autocomplete='off'
+											style="display: inline !important;width:220px !important;" />
+										</td>
+										<td></td>
+									</tr>
+									<tr><td></td><td><span th:text="#{description}" style="padding-left:35px;">描述</span><textarea class="new_input" id="majorDescribe" style="width:220px;"></textarea></td><td></td></tr>
+									<tr style="font-weight: bolder;">
+										<td style="width: 2%"></td>
+										<td th:text="#{menu}" style="width: 60%">数据权限</td>
+										<td style="width: 40%"></td>
+									</tr>
+									<tr>
+										<td style="width: 2%"></td>
+										<td valign="top" style="width: 60%"><ul class="ztree" id="menuTree"></ul></td>
+										<td valign="top" style="width: 40%">
+											<div id="btn" style="width: 45%;display:none;height: 100%;">
+												<span id="mName"
+													style="border:1px solid #333;padding:3px;background-color: #4fc1e9;
+    color: #fff;">
+												</span>
+												<ul id="btntree" class="ztree" style="margin-top:8px;"></ul>
+												<div style="margin-top:10px;">
+
+													<button class="btn  btn-primary"
+														style="background: #0085ff !important;color: #fff !important"
+														id="accordance">与本权限一致</button>
+												</div>
+											</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+				</div>
+				<div class="modal-footer" style="padding:5px;">
+					<button id ="add" type="button" class="btn new-tijiao queding"
+						onclick="addRole()" th:text="#{submit}" style="display:none"></button>
+					<button id="update" type="button" class="btn new-tijiao queding"
+						onclick="updateRole()" th:text="#{submit}" style="display:none"></button>
+				</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+	<!-- 添加角色end -->
+	</div>
+</body>
+<!-- <script language='javascript' th:inline="javascript">
+	var userdel = [ [ #{userdel} ] ];
+	var cancel = [ [ #{cancel} ] ];
+	var confirm = [ [ #{confirm} ] ];
+</script> -->
+<script>
+	$.showConfirm = function(str, funcok, userdel, confirm) {
+		BootstrapDialog.confirm({
+			title : userdel,
+			message : str,
+			type : BootstrapDialog.TYPE_WARNING,
+			closable : true, // 点击对话框以外的页面内容可关闭
+			//draggable : true, // 可拖拽
+			btnOKLabel : confirm,
+			btnOKClass : 'btn-warning',
+			size : BootstrapDialog.SIZE_SMALL,
+			// 对话框关闭的时候执行方法
+			onhide : userdel,
+			callback : function(result) {
+				if (result) {
+					$.post("/deleteUser", {
+						userIds : funcok
+					}, function(data) {
+						if (data != null) {
+							deleteSuccess();
+							$('#tb_order').bootstrapTable('refresh');
+						}
+					});
+				}
+			}
+		});
+	};
+	$.showConfirmRole = function(str, funcok, funcclose,confirm) {
+		BootstrapDialog.confirm({
+			title : funcclose,
+			message : str,
+			type : BootstrapDialog.TYPE_WARNING,
+			// BootstrapDialog.TYPE_PRIMARY
+			closable : true, // 点击对话框以外的页面内容可关闭
+			draggable : false, //可拖拽
+			btnOKLabel : confirm,
+			btnOKClass : 'btn-warning',
+			size : BootstrapDialog.SIZE_SMALL,
+			// 对话框关闭的时候执行方法
+			onhide : funcclose,
+			callback : function(result) {
+				if (result) {
+					console.log(funcok)
+					$.post("/deleteRole", {
+						roleIds : funcok
+					}, function(data) {
+						if (data>0) {
+							var treeObj = $.fn.zTree.getZTreeObj("roleTree");
+							   //选中节点
+							var nodes = treeObj.getSelectedNodes();
+							for (var i=0, l=nodes.length; i < l; i++) 
+							{
+								//删除选中的节点
+								treeObj.removeNode(nodes[i]);
+							}
+							DataAll();
+							$('#addRoleModal').modal('hide');
+							deleteSuccess();
+							$('#tb_order').bootstrapTable('refresh');
+							// location.reload()
+							 btnMenuRoles=[];
+						}else{
+							roleDeleteErr();
+						}
+					});
+				}
+			}
+		});
+	};
+	function openAddUserModal() {
+		$('#userModal').modal('show');
+		DataAll()
+	}
+	function openAddRoleModal() {
+		$('#addRoleModal').modal('show');
+		$("#roleLeft").css("border-right","1px solid rgb(204, 204, 204)");
+		$("#roleTable").css("display","none");
+		var treeObj = $.fn.zTree.getZTreeObj("roleTree");
+		if(treeObj!=null){
+			treeObj.cancelSelectedNode();
+		}
+	}
+	
+	function DataAll() {
+		$.ajax({
+					type : 'POST',
+					url : "/listRoleByUserId",
+					data : {
+						userId : sessionUser.userId
+					},
+					dataType : "json",
+					async : false,
+					success : function(data) {
+						var option="";
+						option = "<option value='0'>请选择</option>";
+						if (data != "") {
+							for (var i = 0; i < data.length; i++) {
+								data[i].name = data[i].roleName
+								option += "<option value='"+data[i].roleId+"'>"
+										+ data[i].roleName + "</option>"
+							}
+						}
+						var nodes = document.getElementsByName("roleId");
+						for (var i = 0; i < nodes.length; i++) {
+							nodes[i].innerHTML="";
+							nodes[i].innerHTML += option;//将循环拼接的字符串插入第二个下拉列表
+						}
+						console.log(data)
+						$.fn.zTree.init($("#roleTree"), settingRole,getChildren(data)); //加载权限数据
+
+						var treeObj = $.fn.zTree.getZTreeObj("roleTree");//根据 treeId 获取 zTree 对象 
+						 treeObj.refresh();
+					}
+				})
+		var errorText = document.getElementsByName("errorText");
+		$.ajax({
+			type : "post",
+			url : "/getUserMenu",
+			data : {
+				"userId" : sessionUser.userId
+			},
+			dataType : "json",
+			async : false,
+			success : function(data) {
+				$.fn.zTree.init($("#menuTree"), setting, getChildren(data)); //加载菜单数据
+			}
+		})
+		var treeObj = $.fn.zTree.getZTreeObj("menuTree");
+		expandNodes(treeObj, treeObj.getNodes());
+		 //加载按钮开始
+		  $.ajax({
+			type : "post",
+			url : "/getButtonAll",
+			/* data : {
+				roleId : sessionUser.role.roleId
+			}, */
+			//dataType : "json",
+			async : false,
+			success : function(data) {
+				data=JSON.parse(data);
+				console.log(data)
+				var btnData = [];
+				for (var i = 0; i < data.length; i++) {
+					btnData.push({
+						btnId : data[i].btnId,
+						name : data[i].btnName
+					})
+				}
+				$.fn.zTree.init($("#btntree"), setting, btnData); //加载按钮数据 
+				console.log(btnData)
+			}
+		}); 
+	}
+	function expandNodes(treeObj, nodes) {
+		//如果nodes为null 则return
+		if (!nodes)
+			return;
+		//将状态设置为expand
+		curStatus = 'expand';
+		//获取当前的树
+		//var treeObj = $.fn.zTree.getZTreeObj("ztree");
+		//循环展开节点
+		for (var i = 0; i < nodes.length; i++) {
+			treeObj.expandNode(nodes[i], true, false, false);
+			//递归 如果子节点的是父节点则进行递归操作
+			if (nodes[i].isParent && nodes[i].zAsync) {
+				expandNodes(nodes[i].children);
+			} else {
+				goAsync = true;
+			}
+		}
+	}
+
+	function addUser() {//添加用户
+		var getSelectRows = $("#tb_user").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		var userIdAll = [];
+		if (getSelectRows.length > 0) {
+			if ($("#roleSelect").val() > 0) {
+				$.post("/insertUser", {
+					"jsonstr" : JSON.stringify($('#tb_user').bootstrapTable(
+							'getSelections')),
+					roleId : $("#roleSelect").val()
+				}, function(data) {
+					if (data > 0) {
+						$('#userModal').modal('hide');
+						addSuccess();
+						tabledata = [];
+						$('#tb_order').bootstrapTable('refresh');
+						//$('#tb_user').bootstrapTable('destroy');
+						//document.getElementById("addUserForm").reset();
+					} else {
+						aliasErr();
+					}
+				});
+			} else {
+				selectedRoleErr();
+			}
+		} else {
+			selectedUserErr();
+		}
+	}
+	function delUser() {//删除用户
+		var userIdAll = [];
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if (getSelectRows.length == 0) {
+			nullErr();
+		} else {
+			for (i = 0; i < getSelectRows.length; i++) {
+				userIdAll.push(getSelectRows[i].userId)
+			}
+			if (lang != "en_US") {
+				$.showConfirm(
+								"<i style='color: red;position: relative;top: 2px;font-size: 20px;left: -6px;' class='icon-remove new-icon'></i>确认要删除吗？",
+								userIdAll, "删除用户", "确认");
+			} else {
+				$.showConfirm(
+								"<i style='color: red;position: relative;top: 2px;font-size: 20px;left: -6px;' class='icon-remove new-icon'></i>Are you sure you want to delete it?",
+								userIdAll, "DeleteUser", "confirm");
+			}
+		}
+	}
+	function editUser() {//根据点击表格，查询当前用户，表单赋值
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if (getSelectRows.length == 0) {
+			nullErr();
+		} else if (getSelectRows.length > 1) {
+			oneErr();
+		} else {
+			var userId = getSelectRows[0].userId;
+			$
+					.ajax({
+						type : 'POST',
+						url : "/getUserById",
+						data : {
+							userId : userId
+						},
+						//datatype : "json",
+						//async : false,
+						success : function(data) {
+							if (data != null) {
+								document.getElementById("editUserId").value = data.userId;
+								document.getElementById("editUserName").value = data.username;
+								console.log(data.role)
+								if(data.role!=null){
+									set_select_checked('editRoleId',
+											data.role.roleId);
+								}
+								
+								//$("input[name=sex][value=" + data.sex + "]").prop("checked", "true")
+								/*console.log(data.sex)
+								if (data.sex == 0) {
+									$('#editSexMan').attr("checked", "checked")
+								} else {
+									$('#editSexWoman').attr("checked",
+											"checked")
+								}*/
+							}
+						}
+					});
+			$('#editUser').modal('show');
+		}
+	}
+	function updateUser() {//更新用户信息
+		$.ajax({
+			type : 'POST',
+			url : "/updateUser",
+			data : $("#updateUserForm").serializeArray(),
+			datatype : "json",
+			//async : false,
+			success : function(data) {
+				if (data != null) {
+					$('#editUser').modal('hide');
+					updateSuccess();
+					$('#tb_order').bootstrapTable('refresh');
+				} else {
+					updateErr();
+				}
+			}
+		});
+
+	}
+	function addRole() {
+		if ($("#majorRoleName").val() != "") {
+			$.ajax({
+				type : 'POST',
+				url : "/inserMajortRole",
+				data : {
+					roleName : $("#majorRoleName").val(),
+					describe : $("#majorDescribe").val(),
+					userId : sessionUser.userId
+				},
+				//datatype : "json",
+				async : false,
+				success : function(data) {
+					console.log(data!=0)
+					if (data != 0) {
+						if (data != null) {
+							console.log('新增角色id:'+data)
+							perIdsave(data)
+						//	DataAll();
+						//	addSuccess()
+						} else {
+							addErr();
+						}
+					} else {
+						aliasErr();
+					}
+				}
+			});
+		} else {
+			emtyErr()
+		}
+
+	}
+	function updateRole() {
+		var menuIdAll = [];
+		var treeObj = $.fn.zTree.getZTreeObj("menuTree");
+		var trees = treeObj.getCheckedNodes(true)
+		for (i = 0; i < trees.length; i++) {
+			menuIdAll.push(trees[i].id)
+		}
+		$.ajax({
+			type : "post",
+			url : "/editRoleMenu",
+			data : {
+				menuIds : menuIdAll,
+				roleId : $('#roleId').val()
+			},
+			success : function(data) {
+				if (data != null) {
+					if(menuIdAll.length>0){
+						/* var btnIdAll = [];
+						var treeBtn = $.fn.zTree.getZTreeObj("btntree");
+						var treebtns = treeBtn.getCheckedNodes(true)
+						for (i = 0; i < treebtns.length; i++) {
+							btnIdAll.push(treebtns[i].btnId)
+						} */
+						for(var j=0;j<menuIdAll.length;j++){
+							for(var i=0;i<btnMenuRoles.length;i++){
+								if(btnMenuRoles[i].menuId==menuIdAll[j]){
+									
+								}else{
+									console.log(btnMenuRoles[i].menuId)
+									console.log(menuIdAll[j])
+									//delete btnMenuRoles[i]
+								}
+								//btnMenuRoles=notEmpty(btnMenuRoles)
+							}
+						}
+						console.log(btnMenuRoles)
+						$.ajax({
+							type : "post",
+							url : "/editRoleButtonById",
+							data : {params:JSON.stringify(btnMenuRoles),rId:$('#roleId').val()},
+							success : function(data) {
+								if (data != null) {
+									$('#addRoleModal').modal('hide');
+									updateSuccess()
+									 $('#tb_order').bootstrapTable('refresh');
+									// location.reload()
+									 btnMenuRoles=[];
+									 DataAll();
+								} else {
+									updateErr()
+								}
+							},
+							error : function() {
+								updateErr()
+							}
+						})
+					}else{
+						$('#addRoleModal').modal('hide');
+						updateSuccess()
+						 $('#tb_order').bootstrapTable('refresh');
+						// location.reload()
+						 btnMenuRoles=[];
+						 DataAll();
+					}
+					
+
+				} else {
+					updateErr()
+				}
+			},
+			error : function() {
+				updateErr()
+			}
+		})
+
+	}
+	function perIdsave(roleId) {
+		var menuIdAll = [];
+		var treeObj = $.fn.zTree.getZTreeObj("menuTree");
+		if(treeObj!=null){
+			var trees = treeObj.getCheckedNodes(true)
+			for (i = 0; i < trees.length; i++) {
+				menuIdAll.push(trees[i].id)
+			}
+		}
+		console.log(menuIdAll)
+		console.log(btnMenuRoles)
+		$.ajax({
+			type : "post",
+			url : "/editRoleMenu",
+			data : {
+				menuIds : menuIdAll,
+				roleId : roleId
+			},
+			success : function(data) {
+				if (data != null) {
+					var btnIdAll = [];
+					var treeBtn = $.fn.zTree.getZTreeObj("btntree");
+					if(treeBtn!=null){
+						var treebtns = treeBtn.getCheckedNodes(true)
+						for (i = 0; i < treebtns.length; i++) {
+							btnIdAll.push(treebtns[i].btnId)
+						}
+					}
+					if(menuIdAll.length>0){
+						for (var j = 0; j < menuIdAll.length; j++) {
+							for (var i = 0; i < btnMenuRoles.length; i++) {
+								if (btnMenuRoles[i].menuId == menuIdAll[j]) {
+
+								} else {
+									btnMenuRoles[i].roleId = roleId
+								//	console.log(btnMenuRoles[i].menuId)
+									console.log(menuIdAll[j])
+									//delete btnMenuRoles[i]
+								}
+								//btnMenuRoles=notEmpty(btnMenuRoles)
+							}
+						}
+						$.ajax({
+							type : "post",
+							url : "/editRoleButtonById",
+							data : {
+								params : JSON.stringify(btnMenuRoles),
+								rId:roleId
+							},
+							success : function(data) {
+								if (data != null) {
+									$('#addRoleModal').modal('hide');
+									addSuccess()
+									$('#tb_order').bootstrapTable('refresh');
+									// location.reload()
+									window.parent.callback();
+									btnMenuRoles = [];
+									DataAll();
+								} else {
+									addErr()
+								}
+							},
+							error : function() {
+								addErr()
+							}
+						})
+					}else{
+						$('#addRoleModal').modal('hide');
+						addSuccess()
+						$('#tb_order').bootstrapTable('refresh');
+						// location.reload()
+						window.parent.callback();
+						btnMenuRoles = [];
+						DataAll();
+					}
+					
+					//console.log(btnMenuRoles)
+					
+
+				} else {
+					addErr()
+				}
+			},
+			error : function() {
+				addErr()
+			}
+		})
+	}
+	function nameSearch() {//根据用户姓名模糊查询
+		$("#tb_order").bootstrapTable('destroy');
+		dataAll();
+	}
+	function set_select_checked(selectId, checkValue) {
+		var select = document.getElementById(selectId);
+		for (var i = 0; i < select.options.length; i++) {
+			if (select.options[i].value == checkValue) {
+				select.options[i].selected = true;
+				break;
+			}
+		}
+	}
+	$('#addRoleModal').on('hide.bs.modal', function() {
+		btnMenuRoles = [];
+		initMenuData();
+		DataAll();
+	});
+	$("#toolbar").find('button').bind('click', function() {
+		$(this).css("background", "#cc7003");
+	});
+	$('.modal').on('hide.bs.modal', function() {
+		$(".btn").css("background", "#0085ff")
+	});
+</script>
+</html>

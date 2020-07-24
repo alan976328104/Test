@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+   <meta charset="UTF-8">
+		<link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+		
+		<title></title>
+		<script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+		</head>
+ <script>
+    $.ajaxSetup({cache:false});
+    var str = window.parent.frameElement.id;
+	var index = str.lastIndexOf("_");
+	var menuId = str.substring(index + 1, str.length);
+    var data ={'total':4,'rows':[]};
+   
+  $(function(){
+	  $.ajaxSetup({cache:false});
+	  $.ajax({
+	    	url:'/getPhenomenonmenuid',
+	    	type:'get',
+	    	async:false, 
+	    	success:function(obj){
+	    		//alert(obj)
+	    		if(obj>0){
+	    			$("#reblack").show();
+	    		}else{
+	    			$("#reblack").hide();
+	    		}
+	    	}
+	  });
+	  
+	  
+	  $.ajax({
+	    	url:'/getinfoexcel',
+	    	type:'get',
+	    	data:{'menuid':menuId},
+	    	async:false, 
+	    	success:function(obj){
+	    		data.total=obj.length;
+	    		data.rows = obj;
+	    		$("#dg").datagrid({
+	    			data:data,
+	    			 columns:[[{field:'name',title:'属性名称',width:'45%'},    
+	    				        {field:'value',title:'属性值',width:'45%'}]],
+	    				singleSelect:true
+	    				,toolbar: '#tb'
+	    		})
+	    	}
+	    	
+	    }) 
+	      
+	    
+	    $("#reblack").click(function(){
+	    		//console.log( history)
+	    	// document.frames['admin'].history.back();
+	    	//	history.back()
+	    	console.log(window.parent)
+	    	window.parent.returnjuzhen();
+	    		
+	    })
+
+	  
+  })
+
+    </script>
+
+
+<body>
+
+<table id = "dg" style="width: 100%;height: 1080px"></table>
+
+ <div id="tb" style="text-align: right;margin-right: 20px">
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-fanhui',plain:true" id="reblack">返回验证矩阵</a>
+		</div>
+</body>
+</html>

@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title></title>
+<link rel="stylesheet" href="../assets/css/font-awesome.min.css" />
+<!--<link rel="stylesheet" href="css/bootstrap.min.css" />-->
+</head>
+<style>
+.li-div {
+	border: 1px solid #CCCCCC;
+	display: block;
+	background-color: #f2f2f2;
+	border-radius: 5px;
+	overflow: hidden;
+	height: 100%;
+}
+
+ul li {
+	list-style: none;
+	float: left;
+	height: 100%;
+	float: left;
+	text-align: center;
+	margin-right: 10px;
+	width: 15%;
+}
+
+ul {
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
+.div-img {
+	width: 40%;
+	height: 100%;
+	display: inline-block;
+	float: left;
+	padding-top: 5%;
+}
+
+.div-text {
+	width: 60%;
+	display: inline-block;
+	float: right;
+	margin-top: 5%;
+}
+
+.top {
+	width:100%;
+	height:10%;
+}
+.bottom{
+width:100%;
+	height:10%;
+}
+/*.col-lg-6,.col-xl-3{
+	    position: relative;
+    width: 100%;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+}*/
+/*@media (min-width: 1200px)*/
+.top-div {
+	width:24%;
+	display: inline-block;
+}
+
+.bg-white {
+	border-radius: 40px;
+	margin: 0px 10px;
+}
+
+.bg-white {
+	-webkit-box-bg-white: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1) !important;
+	box-bg-white: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.bg-white {
+	padding: 1.3rem !important;
+}
+
+.bg-white {
+	/* height: 100%!important;*/
+	
+}
+
+.bg-white {
+	box-bg-white: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+}
+
+.bg-white {
+	-ms-flex-pack: justify !important;
+	justify-content: space-between !important;
+}
+
+.bg-white {
+	
+}
+
+.bg-white {
+	background-color: white !important;
+}
+/*.bg-violet {
+    background-color: #DF99CA !important;
+}*/
+.icon {
+	min-width: 2.2rem;
+	max-width: 2.2rem;
+	min-height: 2.2rem;
+	max-height: 2.2rem;
+	border-radius: 50%;
+	display:inline-block;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	padding-top:5px;
+}
+
+.icon i{
+margin: 9px;
+}
+.text-white {
+	color: #fff !important;
+}
+
+.bg-violet {
+	background-color: #DF99CA !important;
+}
+
+.bg-green {
+	background-color: #7CF29C !important;
+}
+
+.bg-blue {
+	background-color: #4C84FF !important;
+}
+
+.bg-red {
+	background-color: #F0404C !important;
+}
+
+.dot {
+	max-width: 10px;
+	min-width: 10px;
+	max-height: 10px;
+	min-height: 10px;
+	border-radius: 50%;
+	margin-right: 1rem !important;
+	float:left;
+	margin-top: 12px;
+}
+
+.mb-0,.my-0 {
+	margin-bottom: 0 !important;
+}
+
+h6,.h6 {
+	margin-bottom: 0.5rem;
+	font-family: "Poppins", sans-serif;
+	font-weight: 800;
+	line-height: 1.2;
+	color: inherit;
+	margin-top: 0;
+	font-size: 1.0rem;
+}
+
+.text-gray {
+	color: #adb5bd;
+}
+
+.bg-white {
+	-ms-flex-align: center !important;
+	align-items: center !important;
+}
+
+.flex-grow-1 {
+	align-items: center !important;
+	-ms-flex-positive: 1 !important;
+	flex-grow: 1 !important;
+	align-items: center !important;
+}
+
+.echarts {
+	width: 35%;
+	margin: 10px 0px;
+	float: left;
+}
+
+.centre-div {
+	float: left;
+	width: 48%;
+	margin: 10px 8px 10px 10px;
+}
+
+.count {
+	background-color: #fff !important;
+	border-radius: 20px;
+	margin-bottom: 19px;
+	margin-top: 10px;
+	padding: 1.0rem !important;
+}
+.bottom-count{
+background-color: #fff !important;
+	border-radius: 20px;
+	margin-bottom: 19px;
+	margin-top: 10px;
+	padding: 1.0rem !important;
+	display: inline-block;
+	width: 40%;
+}
+.centre {
+	width: 100%;
+	height: 80%;
+	display: block;
+}
+
+.bottom {
+	display: block;
+}
+
+.yuan {
+	max-width: 10px;
+	min-width: 10px;
+	max-height: 10px;
+	min-height: 10px;
+	border-radius: 50%;
+	margin-right: 1rem !important;
+	display: inline-block;
+}
+
+.count-left {
+	display: inline-block;
+	width: 90%;
+	vertical-align: middle;
+}
+
+.text {
+	display:inline;
+	vertical-align: middle;
+	float:left;
+	width: 75%;
+}
+.count-text{
+	display: inline-block;
+	vertical-align: middle;
+	width: 80%;
+}
+
+.tubiao {
+	display: inline-block;
+	min-width: 2.2rem;
+	max-width: 2.2rem;
+	min-height: 2.2rem;
+	max-height: 2.2rem;
+	border-radius: 50%;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 35px;
+}
+/* 
+*,::after,::before {
+	box-sizing: border-box;
+} */
+
+.row {
+	/* display: flex; */
+	width: 100%;
+	margin-top: 1em;
+}
+
+.card {
+	background-color: #fff;
+	border: none;
+	box-shadow: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1);
+	border-radius: 1rem;
+	/* position: relative; */
+	/* display: -ms-flexbox; */
+	/* display: flex; */
+	-ms-flex-direction: column;
+	flex-direction: column;
+	min-width: 0;
+	word-wrap: break-word;
+	background-color: #fff;
+	background-clip: border-box;
+	border: 1px solid rgba(0, 0, 0, .125);
+	margin-bottom: 1.5rem !important;
+	width: 100%;
+}
+
+.card-header:first-child {
+	border-radius: calc(1rem - 1px) calc(1rem - 1px) 0 0;
+}
+
+.card-header {
+	padding: 1.5rem 2rem;
+	background-color: white;
+	border-bottom: none;
+	-webkit-box-shadow: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1);
+	box-shadow: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+	padding: 1rem;
+}
+
+
+.lg {
+	width: 60%;
+	display:inline-block;
+}
+	
+.sm {
+	width: 33%;
+	display:inline-block;
+}
+
+.equal {
+	width: 40%;
+	display: inline-block;
+	margin-right: 15px;
+}
+
+.visits {
+	padding: 2px;
+	margin-left: 5px;
+	border: 1px solid;
+	border-radius: 3px;
+}
+.visited{
+float:none;width: 100%;margin: 15px 0px;}
+.visited span{
+float:left;
+width:80%;
+text-align: left;
+}
+</style>
+<script>
+	
+</script>
+<body
+	style="width: 99%;height: 100%;background-color: #F8F9FB;padding: 1em">
+	<div style="width: 99%;height: 100%;">
+		<div class="top">
+			<div class="top-div">
+				<div class="bg-white">
+					<div class="flex-grow-1">
+						<div class="dot bg-violet"></div>
+						<div class="text">
+							<h6 class="mb-0">总例题（项目）个数</h6>
+							<span id="itemCount" class="text-gray"></span>
+						</div>
+					</div>
+					<div class="icon text-white bg-violet">
+						<i class="icon-signal"></i>
+					</div>
+				</div>
+			</div>
+			<div class="top-div">
+				<div class="bg-white">
+					<div class="flex-grow-1">
+						<div class="dot bg-blue"></div>
+						<div class="text">
+							<h6 class="mb-0">数据总装载量</h6>
+							<span id="dataCount" class="text-gray"></span>
+						</div>
+					</div>
+					<div class="icon text-white bg-blue">
+						<i class="icon-bar-chart"></i>
+					</div>
+				</div>
+			</div>
+			<div class="top-div">
+				<div class="bg-white">
+					<div class="flex-grow-1">
+						<div class="dot bg-red"></div>
+						<div class="text">
+							<h6 class="mb-0">验证矩阵个数</h6>
+							<span class="text-gray" id="yanzhengjuzhen">123</span>
+						</div>
+					</div>
+					<div class="icon text-white bg-red">
+						<i class="icon-table"></i>
+					</div>
+				</div>
+			</div>
+			<div class="top-div">
+				<div class="bg-white">
+					<div class="flex-grow-1">
+						<div class="dot bg-green"></div>
+						<div class="text">
+							<h6 class="mb-0">系统标签总数</h6>
+							<span id="sysAliasCount" class="text-gray"></span>
+						</div>
+					</div>
+					<div class="icon text-white bg-green">
+						<i class="icon-tags"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="centre">
+			<div class="row">
+				<div class="lg ">
+					<div class="card">
+						<div class="card-header">
+							<h2 class="h6 text-uppercase mb-0">一年数据上传量<select class="visits" id="yearData"
+									onchange="changeYearData()"></select></h2>
+						</div>
+						<div class="card-body">
+							<div class="chart-holder mt-5 mb-5">
+								<!-- <canvas id="lineChartExample"></canvas> -->
+								<div id="dataEcharts" style="height:620px;width:100%;margin:  0px auto;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="sm" style="margin-left: 15px;float: right;margin-right: 3%">
+					<div class="card">
+						<div class="card-header">
+							<h2 class="h6 text-uppercase mb-0">TOP5最常访问文件</h2>
+						</div>
+						<div class="card-body" style="padding:0.8em 1.5em">
+							
+								
+								<ul id="visited">
+								</ul>
+								
+							
+						</div>
+					</div>
+					<!-- <div class="card">
+						<div class="card-header">
+							<h2 class="h6 text-uppercase mb-0">系统标签数目各专业占比图</h2>
+						</div>
+						<div class="card-body" style="padding:15px 0px 0px 0px">
+							<div class="chart-holder">
+								<canvas id="pieChart2"></canvas>
+								<div id="aliasEcharts" style="height:250px;width:100%;margin:  0px auto;"></div>
+							</div>
+						</div>
+					</div> -->
+					<div class="card">
+						<div class="card-header">
+							<h2 class="h6 text-uppercase mb-0">年新装载数据量统计图</h2>
+						</div>
+						<div class="card-body" style="padding:0px">
+							<div class="chart-holder ">
+								<!--<canvas id="pieChart3"></canvas>-->
+								<div id="allFilesChart" style="height:280px;width: 100%;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="row" style="margin: 0px">
+				<div class="sm " style="float: left;">
+					<div class="card">
+						<div class="card-header">
+							<h2 class="h6 text-uppercase mb-0">各专业例题数目占比图</h2>
+						</div>
+						<div class="card-body">
+							<div class="chart-holder">
+								<!-- <canvas id="pieChart4"></canvas> -->
+								<div id="menuCountEcharts" style="height:250px;width: 100%;"></div>
+							</div>
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-header">
+							<h2 class="h6 text-uppercase mb-0">各专业的数据占比图</h2>
+						</div>
+						<div class="card-body">
+							<div class="chart-holder">
+								<div id="menuDataEcharts" style="height:250px;width: 100%;"></div>
+								<!--  <canvas id="doughnutChartExample"></canvas>  -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="lg" style="margin-left: 15px;">
+					<div class="card">
+						<div class="card-header">
+							<h2 class="h6 text-uppercase mb-0">各类文档占比图</h2>
+						</div>
+						<div class="card-body">
+							<div class="chart-holder  mt-5 mb-5">
+								<!-- <canvas id="barChartExample1"></canvas> -->
+								<div id="formatEcharts" style="height:620px;width: 100%;margin:  0px auto;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="equal ">
+					<div class="card">
+						<div class="card-header">
+							<h2 class="h6 text-uppercase mb-0">文件密级文档占比图</h2>
+						</div>
+						<div class="card-body">
+							<div class="chart-holder">
+								<div id="securityEcharts" style="height:280px;width: 100%;"></div>
+								<!--<canvas id="pieChartExample"></canvas>-->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div style="display: inline-block;width: 50%;vertical-align: top;">
+				<div class="count">
+					<div class="count-left">
+						<div class="yuan bg-red"></div>
+						<div class="count-text">
+							<h6 class="mb-0">总访问次数</h6>
+							<span class="text-gray" id="totalView"></span>
+						</div>
+					</div>
+					<div class="tubiao text-white bg-red">
+						<i class="icon-group"></i>
+					</div>
+				</div>
+				
+				<div class="count">
+					<div class="count-left">
+						<div class="yuan bg-red"></div>
+						<div class="count-text">
+							<h6 class="mb-0">年访问次数<select class="visits" id="yearSelect"
+									onchange="changeYear()"></select></h6>
+							<span class="text-gray" id="yearVisits"></span>
+						</div>
+					</div>
+					<div class="tubiao text-white bg-red">
+						<i class="icon-group"></i>
+					</div>
+				</div>
+				<div class="count">
+					<div class="count-left">
+						<div class="yuan bg-red"></div>
+						<div class="count-text">
+							<h6 class="mb-0">月访问次数<select class="visits" id="monthSelect"
+									onchange="changeMonth()"><option value="0">1</option>
+									<option value="0">2</option>
+									<option value="0">3</option>
+									<option value="0">4</option>
+									<option value="0">5</option>
+									<option value="0">6</option>
+									<option value="0">7</option>
+									<option value="0">8</option>
+									<option value="0">9</option>
+									<option value="0">10</option>
+									<option value="0">11</option>
+									<option value="0">12</option></select></h6>
+							<span class="text-gray" id="monthVisits" ></span>
+						</div>
+					</div>
+					<div class="tubiao text-white bg-red">
+						<i class="icon-group"></i>
+					</div>
+				</div>
+				<div class="count">
+					<div class="count-left">
+						<div class="yuan bg-red"></div>
+						<div class="count-text">
+							<h6 class="mb-0">日访问次数</h6>
+							<span class="text-gray" id="listToDay">32</span>
+						</div>
+					</div>
+					<div class="tubiao text-white bg-red">
+						<i class="icon-group"></i>
+					</div>
+				</div>
+			</div>
+			</div>
+
+		</div>
+<div class="bottom"> 
+			<div class="bottom-count">
+					<div class="count-left">
+						<div class="yuan bg-blue"></div>
+						<div class="count-text">
+							<h6 class="mb-0">标签数目最多的例题</h6>
+							<span class="text-gray" id="aliasManyByFile"></span>
+						</div>
+					</div>
+					<div class="tubiao text-white bg-blue">
+						<i class="icon-group"></i>
+					</div>
+				</div>
+				<div class="bottom-count">
+					<div class="count-left">
+						<div class="yuan bg-blue"></div>
+						<div class="count-text">
+							<h6 class="mb-0">关联规则配置总数</h6>
+							<span class="text-gray" id="relationcount">32</span>
+						</div>
+					</div>
+					<div class="tubiao text-white bg-blue">
+						<i class="icon-group"></i>
+					</div>
+				</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="../assets/js/jquery-2.0.3.min.js"></script>
+	<script type="text/javascript" src="../assets/js/chart/Chart.min.js"></script>
+	<!-- <script type="text/javascript" src="../assets/js/chart/charts-custom.js"></script> -->
+		<script src="../assets/js/echarts.min.js"></script>
+</body>
+
+<script type="text/javascript">
+	$(function() {
+		
+		$.ajax({
+			type : 'POST',
+			url : '/Getyanzhengjuzhen',
+			async : false,
+			success : function(data) {
+				document.getElementById("yanzhengjuzhen").innerHTML = data
+			}
+		})
+		
+		
+		$.ajax({
+			type : 'POST',
+			url : '/GetrelationNum',
+			async : false,
+			success : function(data) {
+				document.getElementById("relationcount").innerHTML = data
+			}
+		})
+		$.ajax({
+			type : 'POST',
+			url : '/getFilesAllCount',
+			async : false,
+			success : function(data) {
+				document.getElementById("dataCount").innerHTML = data
+			}
+		})
+		$.ajax({
+			type : 'POST',
+			url : '/sysAliasCount',
+			async : false,
+			success : function(data) {
+				document.getElementById("sysAliasCount").innerHTML = data
+			}
+		})
+		//年新装载数据量统计
+			$.ajax({
+				type : 'POST',
+				url : '/listFileCountAll',
+				async : false,
+				success : function(data) {
+					console.log(data)
+					  var nameData=[];
+					var valueData=[];
+					for(i=0;i<data.length;i++){
+						nameData.push(data[i].name)
+						valueData.push(data[i].value)
+					}
+					console.log(nameData)
+					var myChart = echarts.init(document.getElementById('allFilesChart'));
+					zhuzhuangtu(myChart,nameData,valueData) 
+				}
+			})
+		//个人 标签总数
+	/* 	$.ajax({
+			type : 'POST',
+			url : '/perAliasCount',
+			async : false,
+			success : function(data) {
+				document.getElementById("perAliasCount").innerHTML = data
+			}
+		}) */
+		//创建个人标签最多的用户的个人标签数
+		/* $.ajax({
+			type : 'POST',
+			url : '/perAliasBigCount',
+			async : false,
+			success : function(data) {
+				document.getElementById("perAliasBigCount").innerHTML = data
+			}
+		}) */
+		//总访问量
+		$.ajax({
+			type : 'POST',
+			url : '/totalView',
+			///async : false,
+			success : function(data) {
+				document.getElementById("totalView").innerHTML = data
+			}
+		})
+		//日访问量
+		$.ajax({
+			type : 'POST',
+			url : '/listToDay',
+			//async : false,
+			success : function(data) {
+				document.getElementById("listToDay").innerHTML = data
+			}
+		})
+		//年访问量
+		$.ajax({
+			type : 'POST',
+			url : '/yearVisits',
+			async : false,
+			success : function(data) {
+				console.log(data)
+				var optionstring = ""
+				$.each(data, function(key, value) { //循环遍历后台传过来的json数据
+					optionstring += "<option value=\"" + value.value + "\" >"
+							+ value.name + "</option>";
+				});
+				$("#yearSelect").html(optionstring); //获得要赋值的select的id，进行赋值
+				$("#yearData").html(optionstring); 
+				document.getElementById("yearVisits").innerHTML = $(
+						"#yearSelect").val()
+			}
+		})
+		//月访问量
+		monthVisits($("#yearSelect option:selected").text())
+		//系统标签数目最多的例题
+		$.ajax({
+			type : 'POST',
+			url : '/aliasManyByFile',
+			async : false,
+			success : function(data) {
+				console.log(data)
+				if(data!=""){
+					document.getElementById("aliasManyByFile").innerHTML =data.text
+				}else{
+					document.getElementById("aliasManyByFile").innerHTML="无"
+				}
+				
+			}
+		})
+		//TOP5最常访问文件的点击次数
+		$.ajax({
+			type : 'POST',
+			url : '/listVisited',
+			async : false,
+			success : function(data) {
+				console.log(data)
+				var optionstring = "<li class='visited' ><span style='font-weight: 600'>文件名称</span><strong>点击次数</strong></li>"
+				$.each(data, function(key, value) { //循环遍历后台传过来的json数据
+					optionstring += "<li class='visited'><span style='white-space:nowrap;text-overflow:ellipsis;overflow:hidden;' title='"+value.name +"'>"
+							+ value.name + "</span><strong>"+ value.value+"</strong></li>";
+				});
+				$("#visited").html(optionstring);
+			}
+		})
+		///系统标签数目各专业占比及数目
+/* 	$.ajax({
+	type : 'POST',
+	url : '/listBySysAlias',
+	async : false,
+	success : function(data) {
+		 var nameData=[];
+			for(i=0;i<data.length;i++){
+				nameData.push(data[i].name)
+			}
+		var myChart = echarts.init(document.getElementById('aliasEcharts'));
+		bingtu(myChart,nameData,data) 
+	}
+}) */
+//查询一年的数据上传量
+changeYearData()
+	//查询各类文档占比图
+	$.ajax({
+		type : 'POST',
+		url : '/listformat',
+		async : false,
+		success : function(data) {
+			var nameData=data.map(function (item) {
+			　　　　 return item['name']; 
+			});
+			var valueData=data.map(function (item) {
+			　　　　 return item['value']; 
+			});
+			var myChart = echarts.init(document.getElementById('formatEcharts'));
+			zhuzhuangtu(myChart,nameData,valueData) 
+		}
+	})
+	//查询各专业的数据占比图
+		$.ajax({
+		type : 'POST',
+		url : '/listMenu',
+		async : false,
+		success : function(data) {
+			var nameData=data.map(function (item) {
+			　　　　 return item['name']; 
+			});
+			var valueData=data.map(function (item) {
+			　　　　 return item['value']; 
+			});
+			var myChart = echarts.init(document.getElementById('menuDataEcharts'));
+			yuanxingtu(myChart,nameData,data)
+		}
+	})
+		//查询各专业例题数目占比图
+	$.ajax({
+		type : 'POST',
+		url : '/listMenuCount',
+		async : false,
+		success : function(data) {
+			nameData=data.map(function (item) {
+			　　　　 return item['name']; 
+			});
+			valueData=data.map(function (item) {
+			　　　　 return item['value']; 
+			});
+			var sum =0 
+			for(var i=0;i<valueData.length;i++){
+				if(valueData[i]!=0){
+					sum=sum+parseInt(valueData[i])
+				}else{
+					valueData.splice(i,1);
+				}
+			} 
+			document.getElementById("itemCount").innerHTML=sum
+			var myChart = echarts.init(document.getElementById('menuCountEcharts'));
+			console.log(nameData)
+			console.log(valueData)
+			yuanxingtu(myChart,nameData,data)
+		}
+	})
+	//查询文件密级进行文档占比图
+	 $.ajax({
+		type : 'POST',
+		url : '/listSecurity',
+		async : false,
+		success : function(data) {
+			 var nameData=[];
+				for(i=0;i<data.length;i++){
+					nameData.push(data[i].name)
+				}
+				console.log(nameData)
+				var myChart = echarts.init(document.getElementById('securityEcharts'));
+				shixinyuan(myChart,nameData,data) 
+		}
+	}) 
+		//echartsInit(formatChart, formatName, formatData, formatColor)
+		//echartsInit(securityEcharts, securityname, securityData, securityColor)
+		//echartsInit(majorEcharts, majorName, majorData, majorColor)
+		//echartsInit(itemEcharts, itemName, itemData, itemColor)
+		//echartsInit(aliasEcharts, itemName, itemData, itemColor)
+	})
+	//月访问量
+	function monthVisits(yearValue){
+		$.ajax({
+			type : 'POST',
+			url : '/monthVisits',
+			async : false,
+			data : {
+				"yearValue" : yearValue 
+			},
+			success : function(data) {
+				$('#monthSelect option:first').prop('selected', 'selected');
+				$("#monthSelect").children("option").each(function(){
+					for (var i = 0; i < data.length; i++) {
+						if($(this).text() == data[i].name){
+							$(this).val(data[i].value)
+						}
+					}
+				})
+				document.getElementById("monthVisits").innerHTML = $("#monthSelect").val()
+			}
+		})
+	}
+	function changeYearData(){
+		//查询一年的数据上传量
+
+		$.ajax({
+			type : 'POST',
+			url : '/listMonth',
+			async : false,
+			data:{
+				"yearValue":$("#yearData option:selected").text()
+			},
+			//dataType:"json",
+			success : function(data) {
+				var myChart = echarts.init(document.getElementById('dataEcharts'));
+				var nameData=[1, 2, 3, 4, 5, 6, 7, 8, 9,10, 11, 12]
+				zhuzhuangtu(myChart,nameData,data) 
+			}
+		})
+	}
+	function changeYear() {
+		document.getElementById("yearVisits").innerHTML = $("#yearSelect").val()
+		$("#monthSelect").children("option").each(function(){
+				$(this).val(0)
+		})
+		monthVisits($("#yearSelect option:selected").text())
+	}
+	function changeMonth() {
+		//monthVisits($("#yearSelect option:selected").text())
+		console.log($("#monthSelect").val())
+		document.getElementById("monthVisits").innerHTML = $("#monthSelect").val()
+	}
+	function zhexiantu(myChart,nameData,valueData){
+		var  option = {
+				    xAxis: {
+				        type: 'category',
+				        boundaryGap: false,
+				        data: nameData
+				    },
+				    yAxis: {
+				        type: 'value'
+				    },
+				    series: [{
+				        data: valueData,
+				        type: 'line',
+				        areaStyle: {}
+				    }]
+				};
+		myChart.setOption(option);
+	  }
+	
+function bingtu(myChart,nameData,valueData){
+		var option = {
+			    tooltip: {
+			        trigger: 'item',
+			        formatter: '{a} <br/>{b}: {c} '
+			    },
+			    legend: {
+			       // orient: 'vertical',
+			        left: 'center',
+			        data: nameData
+			    },
+			    series: [
+			        {
+			            name: '',
+			            type: 'pie',
+			            radius: ['65%', '70%'],
+			            avoidLabelOverlap: false,
+			            label: {
+			                show: false,
+			                position: 'center'
+			            },
+			            emphasis: {
+			                label: {
+			                    show: false,
+			                    fontSize: '30',
+			                    fontWeight: 'normal'
+			                }
+			            },
+			            labelLine: {
+			                show: false
+			            },
+			            data: valueData
+			        }
+			    ]
+			}
+		myChart.setOption(option);
+		
+	}
+function zhuzhuangtu(myChart, nameData, valueData){
+	var option = {
+		    xAxis: {
+		        type: 'category',
+		        data: nameData
+		    },
+		    yAxis: {
+		        type: 'value'
+		    },
+		    series: [{
+		        data: valueData,
+		        type: 'bar',
+		        showBackground: true,
+		        backgroundStyle: {
+		            color: 'rgba(220, 220, 220, 0.8)'
+		        }
+		    }]
+		};
+	myChart.setOption(option);
+	
+}
+function yuanxingtu(myChart,nameData,valueData){
+	var  option = {
+			 tooltip: {
+			        trigger: 'item',
+			        formatter: '{a} <br/>{b}: {c} '
+			    },
+			legend: {
+		        // orient: 'vertical',
+		         top: 'top',
+		        left: 'center',
+		        data: nameData
+		    },
+		    series: [
+		        {
+		            name: '',
+		            type: 'pie',
+		            radius: ['50%', '70%'],
+		            avoidLabelOverlap: false,
+		            label: {
+		                show: false,
+		                position: 'center'
+		            },
+		            emphasis: {
+		                label: {
+		                    show: true,
+		                    fontSize: '30',
+		                    fontWeight: 'bold'
+		                }
+		            },
+		            labelLine: {
+		                show: false
+		            },
+		            data: valueData
+		        }
+		    ]
+		};
+	myChart.setOption(option);
+}
+function shixinyuan(myChart,nameData,valueData){
+	var option = {
+		    tooltip: {
+		        trigger: 'item',
+		        formatter: ' <br/>{b} : {c} '
+		        /* 	formatter: function (params,ticket,callback) {
+		                console.log(params)
+		                var res = params.name+' :'  + conver(params.value);
+		    //使用for可以将需要的数据全部加到res 
+		    //注意下边的<br/>  
+		    for (var i = 0, l = params.length; i < l; i++) {
+		                    res += '<br/>' + params.name + ' : ' + conver(params.value);
+		                }          
+		                return res;
+		            } */
+		    },
+		    legend: {
+		        top: 'top',
+		        left: 'center',
+		        data: nameData
+		    },
+		    series: [
+		        {
+		            name: '',
+		            type: 'pie',
+		            radius: '55%',
+		            center: ['50%', '60%'],
+		            label: {
+		                show: false
+		            },
+		            data: valueData,
+		            emphasis: {
+		                itemStyle: {
+		                    shadowBlur: 10,
+		                    shadowOffsetX: 0,
+		                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+		                }
+		            }
+		        }
+		    ]
+		};
+	myChart.setOption(option);
+}
+	function echartsInit(myChart, nameData, valueData, colorData) {
+		option = {
+			tooltip : {
+				trigger : 'item',
+				formatter : "{a} <br/>{b} : {c} ({d}%)"
+			},
+			legend : {
+				show : false,
+				orient : 'vertical',
+				x : 'left',
+				data : nameData
+			},
+			calculable : true,
+			series : [ {
+				name : '文档数目',
+				type : 'pie',
+				radius : [ '50%', '70%' ],
+				avoidLabelOverlap : false,
+				label : {
+					normal : {
+						show : false,
+						position : 'center'
+					},
+					emphasis : {
+						show : true,
+						textStyle : {
+							fontSize : '30',
+							fontWeight : 'bold'
+						}
+					}
+				},
+				labelLine : {
+					normal : {
+						show : false
+					}
+				},
+				data : valueData
+			} ],
+			color : colorData
+		};
+		myChart.setOption(option);
+	}
+</script>
+
+</html>

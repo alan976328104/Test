@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../assets/css/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+		<title></title>
+		<script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+		<script src="../assets/js/alldata.js"></script>
+    <script>
+        function righttableMenu(e, rowIndex, rowData) { //该方法通知浏览器不要执行与此事件关联的默认动作
+            //即屏蔽了浏览器在tab页上的鼠标右键事件
+            e.preventDefault();
+            var mm = $("#home-tabs-menu");
+            //显示右键菜单
+            mm.menu("show", {
+                top: e.pageY,
+                left: e.pageX
+            });
+            //为右键菜单选项绑定事件
+            mm.menu({
+                onClick: function(item) {
+                    $("#bq").dialog("open");
+                    $('#bq').window('center');
+                    document.getElementById("tabIndex").value = rowIndex;
+                    for(var i = 0; i < aliasData.length; i++) {
+                        if(aliasData[i].tabIndex == rowIndex) {
+                            console.log(123)
+                            if(aliasData[i].aliasval.length != 0) {
+                                document.getElementById('myalias').innerHTML=""
+                                for(var j = 0; j < aliasData[i].aliasval.length; j++) {
+                                    document.getElementById('myalias').innerHTML += '<span style="border: 1px solid royalblue;border-radius: 5px;padding:3px;margin-right:5px">' + aliasData[i].aliasval[j] + '</span>';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        $(function() {
+            console.log(parseUrl())
+            var softwareData = [{
+                "softwareId": "1",
+                "softwareName": "Chrome"
+            }, {
+                "softwareId": "2",
+                "softwareName": "WebStorm"
+            }, {
+                "softwareId": "3",
+                "softwareName": "Myeclipse"
+            }, {
+                "softwareId": "4",
+                "softwareName": "MySQL"
+            }, {
+                "softwareId": "5",
+                "softwareName": "PLSQL"
+            }]
+            var tabids = [];
+            for(var i = 0; i < datalist.length; i++) {
+                if(datalist[i].tabid == 0) {
+                    tabids.push(datalist[i])
+                }
+            }
+            $("#dg").datagrid({
+                method: 'get', //这个是最重要的，不写这个table加载不出来
+                data: tabids,
+                loadFilter: pagerFilter,
+                onRowContextMenu: righttableMenu
+            });
+            $("#collect").click(function() {
+                alert(1);
+            })
+            var chageFlist = [];
+            var chageJlist = [];
+            var chageMlist = [];
+            for(var i = 0; i < datalist.length; i++) {
+                if(datalist[i].lv == "非密") {
+                    chageFlist.push(datalist[i]);
+                } else if(datalist[i].lv == "机密") {
+                    chageJlist.push(datalist[i]);
+                } else if(datalist[i].lv == "绝密") {
+                    chageMlist.push(datalist[i]);
+                }
+            }
+            $("#selectLV").on("change", function() {
+                if($(this).val() == "非密") {
+                    $("#dg").datagrid("loadData", chageFlist);
+                } else if($(this).val() == "机密") {
+                    $("#dg").datagrid("loadData", chageJlist);
+                } else if($(this).val() == "绝密") {
+                    $("#dg").datagrid("loadData", chageMlist);
+                } else {
+                    $("#dg").datagrid("loadData", datalist);
+                }
+            });
+            $("#dlg").dialog({
+                title: '收藏',
+                width: 400,
+                height: 170,
+                closed: true,
+                modal: true,
+                buttons: [{
+                    text: '保存',
+                    handler: function() {
+                        $("#dlg").window("close");
+                    }
+                }, {
+                    text: '关闭',
+                    handler: function() {
+                        $("#dlg").window("close");
+                    }
+                }]
+            });
+
+            $(".coll").click(function() {
+                $("#dlg").window("open");
+                return false;
+            });
+            $("#retrieve").click(function() {
+                location.href = 'retrieve.html'
+            });
+            $('#software').panel('close');
+            $("#softwaredg").datagrid({
+                data: softwareData,
+                columns: [
+                    [{
+                        field: 'ck',
+                        checkbox: true
+                    },
+                        {
+                            field: 'softwareId',
+                            title: '软件id',
+                            width: "10%"
+                        },
+                        {
+                            field: 'softwareName',
+                            title: '软件名称',
+                            width: "50%"
+                        }
+                    ]
+                ]
+            });
+
+            //在结果中搜索
+            $("#twicesDialog").window("close");
+            $("#twices").click(function() {
+                $("#twicesDialog").window("center");
+                $("#twicesDialog").window("open");
+            })
+            //结果搜索中的搜索按钮
+            $("#twicesbtn").click(function() {
+                $("#twicesDialog").window("close");
+            })
+            //选择文件移动
+            $('#dd').dialog('close');
+            $('#tree').tree({
+                data: [obj[0]],
+                onClick: function(node) {
+                    var treetab = document.getElementById("treetab");
+                    treetab.style.display = ""
+                    $('#treetabdg').datagrid({
+                        method: 'get',
+                        data: node.tabsData
+                    });
+                }
+            });
+            $("#filemove").click(function() {
+                var rows = $("#dg").datagrid('getSelections');
+                if(rows.length <= 0) {
+                    $.messager.alert("系统提示", "请选择你要移动的数据");
+                    return false;
+                }
+                $('#dd').dialog('open');
+                $('#dd').window('center');
+            });
+        })
+
+        function formasorter(a, b) {
+            a = a.split('-');
+            b = b.split('-');
+            if(a[2] == b[2]) {
+                if(a[0] == b[0]) {
+                    return(a[1] > b[1] ? 1 : -1);
+                } else {
+                    return(a[0] > b[0] ? 1 : -1);
+                }
+            } else {
+                return(a[2] > b[2] ? 1 : -1);
+            }
+        }
+
+        function pagerFilter(data) {
+            if(typeof data.length == 'number' && typeof data.splice == 'function') {
+                data = {
+                    total: data.length,
+                    rows: data
+                }
+            }
+            var dg = $(this);
+            var opts = dg.datagrid('options');
+            var pager = dg.datagrid('getPager');
+            pager.pagination({
+                onSelectPage: function(pageNum, pageSize) {
+                    opts.pageNumber = pageNum;
+                    opts.pageSize = pageSize;
+                    pager.pagination('refresh', {
+                        pageNumber: pageNum,
+                        pageSize: pageSize
+                    });
+                    dg.datagrid('loadData', data);
+                }
+            });
+            if(!data.originalRows) {
+                if(data.rows)
+                    data.originalRows = (data.rows);
+                else if(data.data && data.data.rows)
+                    data.originalRows = (data.data.rows);
+                else
+                    data.originalRows = [];
+            }
+            var start = (opts.pageNumber - 1) * parseInt(opts.pageSize);
+            var end = start + parseInt(opts.pageSize);
+            data.rows = (data.originalRows.slice(start, end));
+            return data;
+        }
+
+        function forma(value, row, index) {
+            if(row.name) {
+                //	alert(JSON.stringify(value))
+                //alert(JSON.stringify(row))
+                return "<a style='color: blue;text-decoration: none;' href='javascript:void(0)' onclick='showfile(this)'>" + row.name + "<a/>";
+            }
+
+        }
+
+        function forma1(value, row, index) {
+
+            return "<a style='color:blue' href=''>下载</a>  <a style='color:blue' href='' class='coll'>收藏</a>";
+
+        }
+
+        function showfile(file) {
+            var fileName = file.innerText;
+            var filestr=fileName.substr(0,fileName.lastIndexOf(".")+1);
+            var fileType = fileName.replace(filestr,"");
+            if(fileType == "pdf") {
+                showPdf(true);
+            } else if(fileType == "doc" || fileType == "docx") {
+                $('#software').panel('open');
+                $('#software').window('center');
+
+            } else if(fileType == "xlsx" || fileType == "xls") {
+                console.log("execl文档")
+                location.href = 'list.html'
+            } else {
+                console.log("文档不支持打开")
+            }
+
+        }
+        function parseUrl() {
+            var url = location.href;
+            var i = url.indexOf('?');
+            if(i == -1) return;
+            var querystr = url.substr(i + 1);
+            var arr1 = querystr.split('&');
+            var str = new Array();
+            var num = 0;
+            for(i in arr1) {
+                var ta = arr1[i].split('=');
+                str[num] = decodeURI(ta[1]);
+                num++;
+            }
+            return str;
+        }
+    </script>
+</head>
+
+<body class="easyui-layout" style="height:100%; padding: 0px;width: 96.5%;">
+<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-fanhui',plain:true" onclick="javascript:history.back(-1);">返回</a>
+<table class="easyui-datagrid" id="dg" toolbar="#tb" pagination="true" fitColumns="false" remoteSort="false" pageSize="15" pageList="[10, 15, 20, 30,50]" style="width: 88%;height: 96%;">
+    <thead>
+    <tr>
+        <th data-options="field:'ck',checkbox:true"></th>
+        <th data-options="field:'id'" width="3%" sortable="true">id</th>
+        <th data-options="field:'name'" width="15%" formatter="forma">名称</th>
+        <th data-options="field:'lv'" width="13%">文档密级
+            <select id="selectLV" style="width:50px;height: 20px;" panelHeight="80px">
+                <option value="全部">全部</option>
+                <option value="非密">非密</option>
+                <option value="机密">机密</option>
+                <option value="绝密">绝密</option>
+            </select>
+        </th>
+        <th data-options="field:'type'" width="5%">文档类型</th>
+        <th data-options="field:'date'" width="15%" sortable="true" sorter="formasorter">日期</th>
+        <th data-options="field:'version'" width="3%">版本</th>
+        <th data-options="field:'size'" width="5%">大小</th>
+        <th data-options="field:'persion'" width="8%">发布人</th>
+        <th data-options="field:'caozuo'" width="10%" formatter="forma1">操作</th>
+        <th data-options="field:'aa'" width="7%">预留字段1</th>
+        <th data-options="field:'aa'" width="7%">预留字段2</th>
+        <th data-options="field:'aa'" width="7%">预留字段3</th>
+    </tr>
+    </thead>
+</table>
+<!--<a href="#" style="color: blue;" id="twices">在结果中搜索</a>-->
+
+<!--<div id="tb">-->
+    <!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-tianjia',plain:true">添加</a>-->
+    <!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-shanchu',plain:true">删除</a>-->
+    <!--<input id="btn_file" type="file" style="display: none;">-->
+    <!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-up',plain:true" onclick="uploadingFile()">上传</a>-->
+    <!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-down',plain:true">下载</a>-->
+    <!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-shoucang',plain:true" id="collect">收藏</a>-->
+    <!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-daoru',plain:true">导入</a>-->
+    <!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-yidong',plain:true" id="filemove">移动</a>-->
+    <!---->
+    <!--<input class="easyui-textbox" style="width:137px" id="condition" />-->
+    <!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-sousuo',plain:true" id="search">搜索</a>-->
+<!--</div>-->
+<!--<div id="dlg" class="easyui-dialog" title="收藏" width="330" height="300" data-options="resizable:true,modal:true,closed:true">-->
+    <!--<table style="margin: 0px auto;height: 80px;">-->
+        <!--<tr style="margin-top: 0px;">-->
+            <!--<td>选择分类: </td>-->
+            <!--<td>-->
+                <!--<select id="cc" class="easyui-combobox" name="dept" style="width:200px;">-->
+                    <!--<option value="aa">我喜欢的</option>-->
+                    <!--<option>精品</option>-->
+                    <!--<option>大纲</option>-->
+                <!--</select>-->
+            <!--</td>-->
+        <!--</tr>-->
+
+        <!--<tr>-->
+            <!--<td>添加标签</td>-->
+            <!--<td><input id="vv" class="easyui-validatebox" /> </td>-->
+        <!--</tr>-->
+
+    <!--</table>-->
+<!--</div>-->
+<!--PDF全屏展示开始-->
+<div class="lightbox" id="lightbox">
+    <div id="pop" class="pop">
+        <div class="topBtn">
+            <a href="javascript:closePDF()" id="close">关闭</a>
+            <button id="prev">上一页</button>
+            <button id="next">下一页</button>
+            <span><span id="page_num"></span> / <span id="page_count"></span></span>
+        </div>
+        <canvas id="the-canvas"></canvas>
+    </div>
+</div>
+<!--PDF全屏展示结束-->
+<!--文件上传覆盖版本控制开始-->
+<!--<div id="fg" class="easyui-dialog" title="系统提示" style="width:300px;height:150px;" buttons="#fgbb" data-options="resizable:true">-->
+    <!--文件已存在，是否要覆盖-->
+<!--</div>-->
+<!--<div id="fgbb">-->
+    <!--<a href="#" class="easyui-linkbutton" onclick="fgbtn()">覆盖</a>-->
+    <!--<a href="#" class="easyui-linkbutton" onclick="bbbtn()">生产新的版本</a>-->
+    <!--<a href="#" class="easyui-linkbutton" onclick="nobtn()">取消</a>-->
+<!--</div>-->
+<!--文件上传覆盖版本控制结束-->
+<!--添加标签开始-->
+<!--<div id="home-tabs-menu" class="easyui-menu">-->
+    <!--<div data-options="name:1">添加标签</div>-->
+<!--</div>-->
+<!--<div id="bq" class="easyui-dialog" title="系统提示" style="width:500px;height:250px;text-align: center;padding-top:30px;" buttons="#bqbb" data-options="resizable:true">-->
+    <!--<div style="margin-bottom: 10px;">-->
+        <!--标签名称 <input type="text" id="labelVal" />-->
+    <!--</div>-->
+    <!--<input id="tabIndex" type="text" style="display: none;"/>-->
+    <!--<div id="aliasAll" style="width: 48%;margin: 0px auto;text-align: left;">-->
+        <!--<label >我的标签:</label>-->
+        <!--<label id="myalias"></label>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div id="bqbb">-->
+    <!--<a href="#" class="easyui-linkbutton" onclick="savealiasbtn($('#tabIndex').val())">保存</a>-->
+    <!--<a href="#" class="easyui-linkbutton" onclick="nobtn()">取消</a>-->
+<!--</div>-->
+<!--添加标签结束-->
+<!--第三方软件开始-->
+<!--<div id="software" class="easyui-dialog" title="系统提示" style="width:800px;height:400px;" buttons="#softwarebb" data-options="resizable:true">-->
+    <!--<h2>无法在线预览，请选择本地软件打开</h2>-->
+    <!--&lt;!&ndash; 表格begin &ndash;&gt;-->
+    <!--&lt;!&ndash;<table class="easyui-datagrid" id="softwaredg" style="width: 100%;height: 85%;" fitColumns='true' pagination='true' singleSelect="true">-->
+        <!--<thead>-->
+            <!--<tr>-->
+                <!--<th data-options="field:'softwareId'" width="100">软件id</th>-->
+                <!--<th data-options="field:'softwareName'" width="100">软件名称</th>-->
+            <!--</tr>-->
+        <!--</thead>-->
+    <!--</table>&ndash;&gt;-->
+    <!--<input type="file" id="softname">-->
+    <!--&lt;!&ndash; 表格end &ndash;&gt;-->
+<!--</div>-->
+<!--<div id="softwarebb">-->
+    <!--<a href="#" class="easyui-linkbutton" onclick="softbtn()">确定</a>-->
+    <!--<a href="#" class="easyui-linkbutton" onclick="nobtn()">取消</a>-->
+<!--</div>-->
+<!--第三方软件结束-->
+
+<!--结果中搜索start-->
+<!--<div id="twicesDialog" class="easyui-dialog" title="结果搜索" data-options="resizable:true,closed:true" style="width:300px;height:150px;padding:5px;background: #fafafa;">-->
+    <!--<table style="margin: 0px auto">-->
+        <!--<tr>-->
+            <!--<td style="width: 100px"> <label for="name">搜索名称:</label> </td>-->
+            <!--<td> <input id="filedname" type="text" /></td>-->
+        <!--</tr>-->
+    <!--</table>-->
+    <!--<div style="text-align: center;margin-top: 5px;">-->
+        <!--<button id="twicesbtn">搜索</button>-->
+    <!--</div>-->
+<!--</div>-->
+<!--结果中搜索end-->
+
+<!--文件移动start-->
+<!--<div id="dd" class="easyui-dialog" title="选择移动文件" style="width:800px;height:400px;" data-options="resizable:true,modal:true,buttons:'#bb'">-->
+    <!--<div style="width:18%;float: left;height: 100%;">-->
+        <!--<ul class="easyui-tree" id="tree"></ul>-->
+    <!--</div>-->
+    <!--<div style="width:82%;height: 100%;float: left;display: none;" id="treetab">-->
+        <!--<table class="easyui-datagrid" style="width:100%;height: 100%;" id="treetabdg" fitColumns='true' pagination='true' pageSize="5" pageList="[5, 10, 15]">-->
+            <!--<thead>-->
+            <!--<tr>-->
+                <!--<th data-options="field:'ck',checkbox:true"></th>-->
+                <!--<th data-options="field:'id'" width="50">id</th>-->
+                <!--<th data-options="field:'biaoti'" width="100">工况情况</th>-->
+            <!--</tr>-->
+            <!--</thead>-->
+        <!--</table>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div id="bb">-->
+    <!--<a href="#" class="easyui-linkbutton" onclick="movefile()">移动</a>-->
+    <!--<a href="#" class="easyui-linkbutton" onclick="cancelbtn()">取消</a>-->
+<!--</div>-->
+<!--文件移动end-->
+
+</body>
+<script>
+    function uploadingFile() {
+        document.getElementById('btn_file').click();
+    }
+
+    function fgbtn() {
+        $("#fg").dialog("close");
+        $.messager.alert("系统提示", "文件覆盖成功");
+    }
+
+    function savebtn() {
+        $("#bq").dialog("close");
+        $.messager.alert("系统提示", "添加标签成功");
+    }
+
+    function softbtn() {
+        if($("#softname").val() == "") {
+            $.messager.alert("系统提示", "您未选择任何软件");
+        } else {
+            $("#software").dialog("close");
+            //				window.open("../file/test.docx");
+        }
+    }
+
+    function nobtn() {
+        $("#bq").dialog("close");
+        $("#fg").dialog("close");
+        $("#software").dialog("close");
+
+    }
+
+    function savealiasbtn(tabIndex) {
+        var val = $("#labelVal").val();
+        var vals = [];
+        for(var i = 0; i < aliasData.length; i++) {
+            if(aliasData[i].tabIndex == tabIndex) {
+                aliasData[i].aliasval.push(val);
+            }
+        }
+        $("#bq").dialog("close");
+        document.getElementById("tabIndex").value = "";
+        document.getElementById("labelVal").value = "";
+    }
+
+    function bbbtn() {
+        $("#fg").dialog("close");
+        $.messager.alert("系统提示", "新的版本已生成");
+    }
+
+    function movefile() {
+        $("#dd").dialog("close");
+        $.messager.alert("系统提示", "文件移动成功");
+    }
+
+    function cancelbtn() {
+        $("#dd").dialog("close");
+    }
+    $(function() {
+
+        document.getElementById("btn_file").addEventListener("change", function() {
+            var file = document.getElementById("btn_file").files[0];
+            console.log(file);
+            if(file['name'] != "") {
+                $("#fg").dialog("open");
+                $('#fg').window('center');
+            }
+        });
+        $("#fg").dialog("close");
+        $("#bq").dialog("close");
+    })
+</script>
+<script>
+    var url = 'http://127.0.0.1:8020/数据验证数据系统原型/file/1.pdf';
+
+    var pdfDoc = null;
+    var pageNum = 1;
+    var pageRendering = false;
+    var pageNumPending = null;
+    var scale = 1;
+    var canvas = document.getElementById('the-canvas');
+    var ctx = canvas.getContext('2d');
+    var pop = document.getElementById("pop");
+    var lightbox = document.getElementById("lightbox");
+    var page_cont = document.getElementById('page_count');
+    /**
+     * 加载PDF
+     */
+    function showPdf(isShow) {
+        var state = "";
+        if(isShow) {
+            state = "block";
+        } else {
+            state = "none";
+        }
+        pop.style.display = state;
+        console.log(pop)
+        lightbox.style.display = state;
+        PDFJS.getDocument(url).then(function(pdfDoc_) {
+            pdfDoc = pdfDoc_;
+            page_cont.textContent = pdfDoc.numPages;
+            renderPage(pageNum);
+        });
+    }
+
+    //页面跳转函数
+    function renderPage(num) {
+        pageRendering = true;
+        pdfDoc.getPage(num).then(function(page) {
+            var viewport = page.getViewport(scale);
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            var renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            var renderTask = page.render(renderContext);
+
+            renderTask.promise.then(function() {
+                pageRendering = false;
+                if(pageNumPending !== null) {
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+
+        document.getElementById('page_num').textContent = num;
+    }
+
+    /**
+     * 改变pageNumRending并实现页面跳转
+     */
+    function queueRenderPage(num) {
+        if(pageRendering) {
+            pageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    }
+
+    /**
+     * 上一页函数
+     */
+    function onPrevPage() {
+        if(pageNum <= 1) {
+            return;
+        }
+        pageNum--;
+        queueRenderPage(pageNum);
+    }
+    document.getElementById('prev').addEventListener('click', onPrevPage);
+
+    /**
+     * 下一页函数
+     */
+    function onNextPage() {
+        if(pageNum >= pdfDoc.numPages) {
+            return;
+        }
+        pageNum++;
+        queueRenderPage(pageNum);
+    }
+    document.getElementById('next').addEventListener('click', onNextPage);
+
+    function closePDF() {
+        pop.style.display = "none"
+        lightbox.style.display = "none"
+    }
+</script>
+
+</html>

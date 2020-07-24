@@ -1,0 +1,1235 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!-- 解决部分兼容性问题，如果安装了GCF，则使用GCF来渲染页面，如果未安装GCF，则使用最高版本的IE内核进行渲染。 -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=9" />
+<!--[if IE 7]>
+    <link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css">
+    <![endif]-->
+<!--[if lt IE 9]>
+<script src="assets/js/bootstrap/html5shiv.min.js"></script>
+<script src="assets/js/bootstrap/respond.min.js"></script>
+<![endif]-->
+<title>软件验证数据库系统</title>
+<script src="assets/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="pageoffice.js" id="po_js_main"></script>
+<!--[bootstrap]-->
+<link href="assets/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+<!--bootstrap tab]-->
+<link href="assets/css/bootstrap/bootstrap-tab.css" rel="stylesheet" />
+<!-- <script src="assets/js/sidebar-menu.js"></script> -->
+<script src="assets/js/bootstrap/bootstrap-tab.js"></script>
+
+<link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+<!--if IE 7-->
+<link rel="stylesheet" href="assets/css/font-awesome-ie7.min.css" />
+<!--endif-->
+<!-- ace styles -->
+<link rel="stylesheet" href="assets/css/ace.min.css" />
+<link rel="stylesheet" href="assets/css/ace-rtl.min.css" />
+<link rel="stylesheet" href="assets/css/ace-skins.min.css" />
+<link rel="stylesheet" href="assets/css/ace-ie.min.css" />
+<!--ace-->
+<script type="text/javascript" src="assets/js/ace-extra.min.js"></script>
+<script type="text/javascript" src="assets/js/html5shiv.js"></script>
+<script type="text/javascript" src="assets/js/respond.min.js"></script>
+
+ <script type="text/javascript" src="assets/js/alldata.js"></script> 
+
+<!--bootstrap-table-->
+<script type="text/javascript" src="assets/js/bootstrap/bootstrap-table.js"></script>
+<link rel="stylesheet" href="assets/css/bootstrap/bootstrap-table.css" />
+<script src=""></script>
+<script src="assets/js/bootstrap/bootstrap.min.js"></script>
+<link rel="stylesheet" href="assets/css/bootstrap/bootstrap-dialog.css">
+<script type="text/javascript" src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+
+<link rel="stylesheet" href="assets/css/zTreeStyle.css" type="text/css">
+<script type="text/javascript" src="assets/js/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="assets/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="assets/js/jquery.ztree.exedit.js"></script>
+<style>
+.ztree li .curSelectedNode span:last-child{
+background-color:#cc7003;
+color: #fff;
+}
+.ztree *{
+font-size: 14px  !important;
+}
+
+</style>
+<script th:inline="javascript">
+//获取登录者信息
+var sessionUser;
+$.ajax({
+	type : "post",
+	url : "/getSessionByIp",
+	async : false,
+	success : function(data) {
+		if(data!=null){
+			sessionUser=data
+		}else{
+			location.href = 'login.html';
+		}
+	}
+})
+	var lang = getUrlParam("lang");
+	var menusData;
+	function callbackbylist(){
+		var odiv = document.getElementById("pbox");
+		var p = odiv.getElementsByTagName("p");
+		var content = [];
+		var cells = [];
+		for (var i = 0; i < p.length; i++) {
+			content.push(
+				//name : p[i].children[0].innerText,
+				//type : 'line',
+				 p[i].innerText.split(",")
+			)
+			cells.push(p[i].children[0].innerText)
+		}
+		 post("/exportExcel",{"data":JSON.stringify(content)} );
+		//alert()
+	}
+	
+	function post(URL, PARAMS) {
+	    var temp = document.createElement('form');
+	    temp.action = URL;
+	    temp.method = 'post';
+	    temp.style.display = 'none';
+	    for (var x in PARAMS) {
+	        var opt = document.createElement('textarea');
+	        opt.name = x;
+	        opt.value = PARAMS[x];
+	        //alert(opt.value);
+	        //alert(opt.name);
+	        temp.appendChild(opt);
+	    }
+	    document.body.appendChild(temp);
+	    temp.submit();
+	    return temp;
+	}   
+	function callback(){
+		//alert(1);
+		$('.menu').children("div").nextAll().remove();
+		menuData();
+		
+	}
+	var setting = { //此处根据自己需要进行配置
+			view : {
+				showIcon: false,//是否显示节点的图标
+	            showLine: false,//显示节点之间的连线。
+	            expandSpeed: "slow",//节点展开、折叠时的动画速度
+	            selectedMulti: false,//不允许同时选中多个节点
+	            addDiyDom: addDiyDom
+			},
+			data : {
+				simpleData : {
+					enable : true
+				}
+			},
+			callback : {
+				onClick : zTreeOnClickRight,
+				onMouseUp:treeUp,
+				beforeCheck:beforeCheck
+			}
+		};
+	//获取用户的菜单权限
+	function menuData(){
+		$.ajax({
+			type : "post",
+			url : "/getUserMenu",
+			data : {
+				"userId" : sessionUser.userId
+			},
+			dataType : "json",
+			async : false,
+			success : function(data) {
+				console.log(data)
+				menusData=data[0];
+				var html = '';
+				$.each(data,function(k,v){
+					if (lang == "en_US") {
+						if(v.ename!=""){
+							v.name=v.ename
+						}
+					}
+					var str = '';
+					var html1="";
+					var parentTitle = v.name;
+					if(v.children.length>0){
+						str = '<li class="menu-li"><a href="javascript:;"><div class="menu-li-title"><i class="'+v.icon+' caidan-icon"></i><span>'+v.name+'</span></div></a>';
+					}else{
+						str = '<li class="menu-li-list"><a href="javascript:addTabs({last:true,id:\''+v.id+'\',title: \''+v.name+'\',close: true,url: \''+v.url+'\',icon:\''+v.icon+'\',parentTitle:\'undefined\',parent2Title:\'undefined\'});"><div class="menu-li-title dianji'+v.id+'"><i class="'+v.icon+' caidan-icon"></i><span>'+v.name+'</span></div></a>';
+					}
+					$.each(v.children,function(k1,v1){
+						if (lang == "en_US") {
+							if(v1.ename!=""){
+								v1.name=v1.ename
+							}
+						}
+						var str1="";
+						var html2="";var html3="";
+						var parent2Title = v1.name;
+						if(v1.children.length>0){
+							str1 = '<li class="sub_list"><a href="javascript:;">'+v1.name+'<i class="icon-angle-down" style="float: right;"></i></a>';
+						}else{
+							str1 = '<li class="duoji dianjiduoji'+v1.id+'"><a href="javascript:addTabs({id:\''+v1.id+'\',title: \''+v1.name+'\',close: true,url: \''+v1.url+'\',icon:\''+v1.icon+'\',parentTitle:\''+parentTitle+'\',parent2Title:\'undefined\'});">'+v1.name+'</a>';
+						}
+						//html2 = aa(v1,parentTitle,parent2Title,1);
+						html2 = aa(v1,parentTitle,parent2Title);
+						html1 += str1+
+				                    //'<ul style="margin-top: 5px;">'+
+				                    html2+
+				                	//'</ul>'+
+				                '</li>';
+					})
+					html += str+
+		                        '<ul class="sub-menu">'+
+		                            html1+
+		                        '</ul>'+
+		                    '</li>';
+				})
+				$('.menu').append(html);
+				 $.each(data,function(k,v){
+					 if(v.children.length>0){
+					 $.each(v.children,function(k1,v1){
+						 if(v1.children.length>0){
+							var tree=$.fn.zTree.init($("#tree"+v1.id), setting,getChildren(v1.children));
+							// tree.expandAll(tree);//默认是展开的
+						 }
+					})
+					 }
+				}) 
+			}
+		})
+		if (lang == "en_US") {
+			$(".menu-li-title").css({"font-size":"12px"})
+			$(".sub-menu a").css("font-size","12px")
+			
+		}
+	}
+	function getChildren(array) {
+		for (var i = 0; i < array.length; i++) {
+			if( array[i].url!=""){
+				array[i].menuUrl=array[i].url
+				delete array[i].url
+			}
+			if (array[i].children != "undefined"
+					|| array[i].children != undefined) {
+				if (array[i].children != "null" && array[i].children != null
+						&& array[i].children.length != 0) {
+					getChildren(array[i].children)
+				} else {
+					delete array[i].children
+				}
+			}
+		}
+		return array;
+	}
+	function aa(data,parentTitle,parent2Title){
+		/*  var html = '';
+		var str = 'html'+i;
+		i++;
+		var kongge = '&nbsp';
+		for(j=3;j<=i;j++){
+			kongge += '&nbsp;';
+		}
+		
+		var kongge = i*
+		$.each(data.children,function(k,v){
+			if (lang == "en_US") {
+				if(v.ename!=""){
+					v.name=v.ename
+				}
+			}
+			var html4="";
+			var parent3Title = v.name;
+			if(v.children.length>0){
+				str = '<li class="duoji duijilist dianjiduoji'+v.id+'"><a  title="'+v.name+'" href="javascript:;">'+kongge+v.name+'<i class="icon-angle-down" style="float: right;"></i></a>';
+				
+			}else{
+			str = '<li class="duoji dianjiduoji'+v.id+'"><a title="'+v.name+'" href="javascript:addTabs({id:\''+v.id+'\',title: \''+v.name+'\',close: true,url: \''+v.url+'\',icon:\''+v.icon+'\',parentTitle:\''+parent2Title+'\',parent2Title:\''+parentTitle+'\'});">'+kongge+v.name+'</a>';
+				
+			}
+			if(v.children.length>0){
+				var str1 = aa(v,parentTitle,parent2Title,i);
+			}
+			html += str+	
+				 '<ul style="margin-top: 5px;">'+
+                    str1+
+                	'</ul>'+
+                '</li>';
+		})  */
+		var html = '';
+		$.each(data.children,function(k,v){
+			html = '<ul class="ztree"  id="tree'+data.id+'"></ul>'+'</li>';
+			/* if(v.children.length>0){
+				var str1 = aa(v,parentTitle,parent2Title,i);
+			} */
+		})
+		return html;
+	}
+	function treeUp(action,objId,data){
+		 var data=menusData.children;
+		for(var i=0;i<data.length;i++){
+			if(data[i].children!=null&&data[i].children.length!=0){
+				var treeObj=$.fn.zTree.getZTreeObj("tree"+data[i].id);
+				treeObj.cancelSelectedNode();
+			}
+		} 
+	}
+	function beforeCheck(treeId, treeNode) {
+        if (treeNode.isParent) {
+        	selectedNodeErr()
+            return false;
+        }
+	}
+	// 树的单击事件
+	function zTreeOnClickRight(event, treeId, treeNode) {
+		if (treeNode.isParent) {
+            return false;
+        }else{
+        	var data=menusData.children;
+    		var parentTile="";
+    		for(var i=0;i<data.length;i++){
+    			if(data[i].children!=null&&data[i].children.length!=0){
+    				var treeObj=$.fn.zTree.getZTreeObj("tree"+data[i].id);
+    				var nodes=treeObj.getSelectedNodes();
+    				if(nodes.length!=0){
+    					parentTile=data[i].name;
+    				}
+    			}
+    		}
+    		var title="";
+    		parentTile+=getPartentTitle(treeNode,title)
+    		console.log(parentTile)
+    		var id=treeNode.id+""
+    		console.log(treeNode.menuUrl!='undefined')
+    		if(treeNode.menuUrl!=undefined){
+    			if(treeNode.menuUrl=="html/yanzhengjuzhen.html"){
+        			addTabs({id:id, title: treeNode.name, url:treeNode.menuUrl+'?id='+id,close: true,parent2Title: menusData.name,parentTitle: parentTile});
+        		}else{
+        			addTabs({id:id, title: treeNode.name, url:treeNode.menuUrl,close: true,parent2Title: menusData.name,parentTitle: parentTile});	
+        		}
+    		}
+    		
+        }
+		
+	}
+	function getPartentTitle(treeNode,title){
+		if(treeNode.getParentNode()!=null&&treeNode.getParentNode()!="null"){
+			title=title.slice(0,">")+'>'+treeNode.name+title.slice(0); 
+			return	getPartentTitle(treeNode.getParentNode(),title);
+		}else{
+			title=title.slice(0,">")+'>'+treeNode.name+title.slice(0); 
+			return title;
+		}
+	}
+	function indexData(){
+		//历史纪录
+		$.ajax({
+			type : 'POST',
+			url : "/record",
+			data : {
+				userId : sessionUser.userId
+			},
+			dataType : "json",
+			success : function(data) {
+				if (data != "" || data != null) {
+					dataAll(data)
+				}
+			}
+		});
+		//最常访问
+		$.ajax({
+			type : 'POST',
+			url : "/listCountByUserId",
+			data : {
+				userId : sessionUser.userId
+			},
+			dataType : "json",
+			success : function(data) {
+				if (data != "" || data != null) {
+					tbCountAll(data)
+				}
+			}
+		});
+		//智能推送
+		$.ajax({
+			type : 'POST',
+			url : "/listCount",
+			data : {
+				userId : sessionUser.userId
+			},
+			dataType : "json",
+			success : function(data) {
+				if (data != "" || data != null) {
+					tbPushAll(data)
+				}
+			}
+		});
+	}
+	$(function() {
+		//获取系统标题
+		$.ajax({
+			type : 'POST',
+			url : "/getDataName",
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				console.log(data)
+				document.getElementById("titleDemo").innerText=data.dataName;
+				document.getElementById("infoError").innerText=data.infoError;
+				document.getElementById("info").innerText=data.info;
+			}
+		});
+		menuData();
+		//$('.sub_list').find('ul').eq(0).hide();
+		$(".sub_list").each(function(){
+	        $(this).find("ul:first").hide();
+	    })
+		messageCount()
+		document.getElementById("userName").innerText = sessionUser.username;
+		$.ajax({
+			type : 'POST',
+			url : "/getUserById",
+			data : {
+				userId : sessionUser.userId
+			},
+			success : function(data) {
+				if (data == null) {
+					location.href = 'login.html';
+				}
+			}
+		});
+		indexData()
+ $("div").on('click','.nav-right',function(){
+	    	 var num = $(".lun-box").find(".lun").length;
+	    	var width = $(".lun-box").find(".lun").width();
+	        index = index + 1;
+	        if(index >= num){
+	            index = num-1;
+	            return false;
+	        }
+	        $(".lun-box").find(".lun").eq(index).css('left',width);
+	        $(".lun-box").find(".lun").eq(index-1).animate({"left":-width},500,function(){
+	            $(this).hide();
+	        });    
+	        $(".lun-box").find(".lun").eq(index).show().animate({"left":0},500);
+	    })
+		$("div").on('click','.menu-li',function(){
+			   if($(this).is('.click-status') == false){
+				   $(".click-status").addClass('menu-li');
+				   $(".duoji").removeClass('xuanzhongduoji');
+$(".click-status").find('div').css('color','#fff');
+				   $(".menu-li-title").removeClass('xuanzhong');
+			        $(".click-status").removeClass('click-status');
+			        $(this).addClass('click-status');
+			        $(this).removeClass('menu-li');
+			        $(".sub-menu").hide(500);
+			        $(this).find(".sub-menu").show(500);
+ $(this).find('div').css({'color':'#f6fe1d','text-shadow':'-3px 4px 10px #181735'});
+			   }
+			   
+		        
+		        
+		    })
+		    $("div").on('click','.sub_list',function(){
+		    	$(".sub_list").each(function(){
+			        $(this).find("ul:first").hide();
+			    })
+		    	$('.sub_list').find('i').addClass('icon-angle-down');
+		    	$(this).find('ul').eq(0).show();
+		    	$(this).find('i').eq(0).removeClass('icon-angle-down');
+		    	$(this).find('i').eq(0).addClass('icon-angle-right');
+		    })
+		    $("body").on('click','.duijilist',function(){
+		    	$(this).siblings().find('ul').hide();
+		    	$(this).siblings().find('i').addClass('icon-angle-down');
+		    	$(this).find('ul').eq(0).show();
+		    	$(this).find('i').eq(0).removeClass('icon-angle-down');
+		    	$(this).find('i').eq(0).addClass('icon-angle-right');
+				})
+				
+					$("#exit").click(function() {
+			window.location.href = "/";
+		})
+		//菜单栏搜索
+		$("#searchMenu").click(function() {
+			$("#menuModel").modal("show")
+		})
+		//搜索按钮
+		$("#searchName").click(function() {
+			if($("#searchVal").val()!=""){
+				$.ajax({
+					type : "post",
+					url : "/searchAliasByName",
+					data : {
+						"userId" : sessionUser.userId,
+						"searchType" : $("#searchType").val(),
+						"searchVal" : $("#searchVal").val()
+					},
+					dataType : "json",
+					success : function(data) {
+						if (data.length != 0) {
+							$("#all").css("display", "none")
+							$("#searchmenu").css("display", "")
+					var html = '';
+					$.each(data,function(k,v){
+						var str = '';
+						var html1="";
+						var parentTitle = v.name;
+						if(v.children.length>0){
+							str = '<li class="menu-li"><a href="javascript:;"><div class="menu-li-title"><i class="'+v.icon+' caidan-icon"></i><span>'+v.name+'</span></div></a>';
+						}else{
+							str = '<li class="menu-li-list"><a href="javascript:menuClickGetTitle(\''+v.id+'\',\''+v.url+'\');"><div class="menu-li-title dianji'+v.id+'"><i class="'+v.icon+' caidan-icon"></i><span>'+v.name+'</span></div></a>';
+						}
+						/* $.each(v.children,function(k1,v1){
+							var str1="";
+							var html2="";
+							var parent2Title = v1.name;
+							if(v1.children.length>0){
+								str1 = '<li class="sub_list"><a href="javascript:;">'+v1.name+'<i class="icon-angle-right" style="float: right;"></i></a>';
+							}else{
+								str1 = '<li class="duoji dianjiduoji'+v1.id+'"><a href="javascript:addTabs({id:\''+v1.id+'\',title: \''+v1.name+'\',close: true,url: \''+v1.url+'\',icon:\''+v1.icon+'\',parentTitle:\''+parentTitle+'\',parent2Title:\'undefined\'});">'+v1.name+'</a>';
+							}
+							$.each(v1.children,function(k2,v2){
+								
+								html2 += '<li class="duoji dianjiduoji'+v2.id+'"><a href="javascript:addTabs({id:\''+v2.id+'\',title: \''+v2.name+'\',close: true,url: \''+v2.url+'\',icon:\''+v2.icon+'\',parentTitle:\''+parentTitle+'\',parent2Title:\''+parent2Title+'\'});">'+v2.name+'</a>';
+								
+							})
+							html1 += str1+
+					                    '<ul style="margin-top: 5px;">'+
+					                    html2+
+					                	'</ul>'+
+					                '</li>'
+						}) */
+						html += str+
+			                        '<ul class="sub-menu">'+
+			                            html1+
+			                        '</ul>'+
+			                    '</li>';
+					})
+					$('.searchmenu').append(html);
+						} else {
+							$.showErr("未搜索到数据");
+						}
+						//$("#menuModel").modal("hide");
+						$("#searchVal").val("")
+					}
+				})
+			}else{
+				$.showErr("未填写数据");
+			}
+			
+		})
+		
+		//帮助按钮
+		$("#indexhelp").click(function(){
+			window.location.href = "/downloadHelp";
+			return false;
+		})
+		
+		//搜索页面的返回按钮
+		$("#backMenu").click(function() {
+			$('#searchmenu li').remove();
+			$("#searchmenu").css("display", "none")
+			$("#all").css("display", "")
+			
+		})
+		$("#contColse").click(function() {
+			$("#contrast").css("display", "none")
+		});
+		$("#comparison")
+				.click(
+						function() {
+							var odiv = document.getElementById("pbox");
+							var p = odiv.getElementsByTagName("p");
+							var content = [];
+							var cells = [];
+							for (var i = 0; i < p.length; i++) {
+								content.push({
+									name : p[i].children[0].innerText,
+									type : 'line',
+									data : p[i].innerText.split(",")
+								})
+								cells.push(p[i].children[0].innerText)
+							}
+							//cells.push(p[0].children[0].innerText);
+							//console.log(cells)
+							var contentHead = JSON.stringify(cells);
+							var con = JSON.stringify(content);
+							$
+									.ajax({
+										type : 'POST',
+										url : "/graphing",
+										data : {
+											contentHead : contentHead,
+											content : con
+										},
+										success : function(result) {
+											if (result != null) {
+												//window.location.href="../html/Graphing.html";
+												window
+														.open(
+																'../html/Graphing.html',
+																'target',
+																'height=660, width=1200,left=50, menubar=no, scrollbars=no, resizable=no, location=no, status=no, titlebar=no')
+											}
+										}
+									});
+						})
+
+		$("#message")
+				.click(
+						function() {
+							window
+									.open(
+											'../office?url=html/message.html&lang='+lang,
+											'_blank',
+											'height=630, width=900, top=0, left=200, scrollbars=no, resizable=no, location=yes, status=no')
+						})
+						
+	})
+	//消息数量
+	function messageCount(){
+		$.ajax({
+			type : 'POST',
+			url : "/getMessageByState",
+			data : {
+				userId : sessionUser.userId
+			},
+			async : false,
+			success : function(data) {
+				//console.log(data)
+				//alert(data)
+				if(data.length>0){
+					$("#messageCount").text(data.length)
+					$("#messageCount").css("display","")
+				}
+			}
+		});
+	}
+	function menuClickGetTitle(id,url){
+		$.ajax({
+			type : "post",
+			url : "/getMenuTitle",
+			data : {
+				"menuId" : id
+			},
+			async : false,
+			success : function(data) {
+				if(data!=null&&data!=""){
+					addTabs({id:id,title: data,close: true,url: url,parentTitle:'',parent2Title:''});
+				}
+			}})
+	}
+	function dataAll(mydata) {
+		$(".lsjl-list").html('')
+		//初始化Table
+		var html = '';
+		$.each(mydata,function(k,v){
+			if(k%2 == 0){
+				var bianse = '';
+			}else{
+				var bianse = 'biaoti';
+			}
+			
+			html += '<li class="listp '+bianse+'">'+
+						'<p style="display: none;">'+v.file.fileId+'</p>'+
+						'<a href="javascript:void(0);" onclick="showfile(this)" title="'+v.file.fileName+'"><p>'+v.file.fileName+'</p></a>'+
+						'<p>'+v.logDate+'</p>'+
+						'<p>'+v.operation+'</p>'+
+						'<p style="word-wrap: break-word;word-break: break-all;">'+formatUrl(v.file.location)+'</p>'+
+					'</li>';
+		})
+		
+		$(".lsjl-list").append(html);
+	}
+	function tbCountAll(mydata) {
+		//初始化Table
+		$(".zcfw-list").html('')
+		var html = '';
+		$.each(mydata,function(k,v){
+			if(k%2 == 0){
+				var bianse = '';
+			}else{
+				var bianse = 'biaoti';
+			}
+			
+			html += '<li class="listp '+bianse+'">'+
+						'<p style="display: none;">'+v.file.fileId+'</p>'+
+						'<a href="javascript:void(0);" onclick="showfile(this)" title="'+v.file.fileName+'"><p style="width:40%;">'+v.file.fileName+'</p></a>'+
+						'<p style="width:20%;">'+v.counts+''+ "[[#{clicks}]]"+'</p>'+
+						'<p style="width:40%;word-wrap: break-word;word-break: break-all;">'+formatUrl(v.file.location)+'</p>'+
+					'</li>';
+		})
+		html=html.replace(/'/g,"")
+		$(".zcfw-list").append(html);
+	}
+	function formatUrl(location){
+		if(location!=null&&location!=""){
+			var str=location.replace(/>/g,"<span style='color:blue'>➜</span>");
+			//console.log(str)
+			str=str.replace(/→/g,"<span style='color:blue'>➜</span>")
+			return str;
+		}
+	}
+	function tbPushAll(mydata) {
+		//初始化Table
+		$(".znts-list").html('');
+		var html = '';
+		$.each(mydata,function(k,v){
+			if(k%2 == 0){
+				var bianse = '';
+			}else{
+				var bianse = 'biaoti';
+			}
+			
+			html += '<li class="listp '+bianse+'">'+
+						'<p style="display: none;">'+v.file.fileId+'</p>'+
+						'<a href="javascript:void(0);" onclick="showfile(this)" title="'+v.file.fileName+'"><p style="width:40%;">'+v.file.fileName+'</p></a>'+
+						'<p style="width:10%;">'+v.counts+''+ "[[#{clicks}]]"+'</p>'+
+						'<p style="width:40%;word-wrap: break-word;word-break: break-all;">'+formatUrl(v.file.location)+'</p>'+
+						'<p style="width:10%;">'+v.file.format+'</p>'+
+					'</li>';
+		})
+		html=html.replace(/'/g,"")
+		$(".znts-list").append(html);
+	}
+	function forma(value, row, index) {
+		if (row.file.fileName) {
+			return "<a style='color: #1963AA;text-decoration: none;' href='javascript:void(0);' onclick='showfile(this)'>"
+					+ row.file.fileName + "</a>";
+		}
+	}
+	//打开文件
+	function showfile(file) {
+		var fileId = file.previousSibling.innerText;
+		 var fileName = file.innerText;
+		var filestr = fileName.substr(0, fileName.lastIndexOf(".") + 1);
+		var fileType = fileName.replace(filestr, "");
+		/* if (user.secretlevel == "B") {
+		var cont = updateCount(fileId);
+		if (cont) {
+			openFile(fileType, fileId);
+		}
+	} else if (user.secretlevel == "C") {
+		if (secName != "机密") {
+			var cont = updateCount(fileId);
+			if (cont) {
+				openFile(fileType, fileId);
+			}
+		} else {
+			$.showErr("您没有此权限");
+		}
+	} else if (user.secretlevel == "D") {
+		if (secName == "非密") {
+			var cont = updateCount(fileId);
+			if (cont) {
+				openFile(fileType, fileId);
+			}
+		} else {
+			$.showErr("您没有此权限");
+		}
+	} */
+	var cont = updateCount(fileId);
+	if (cont) {
+		openFile(fileType, fileId);
+		indexData()
+	}
+	}
+	var pageofficeHeight= window.screen.height
+	var pageofficeWidth= window.screen.width
+	//根据文件类型判断打开方式
+	function openFile(fileType, fileId) {
+		if (fileType == "pdf") {
+			POBrowser.openWindowModeless("/pdf?fileId=" + fileId,
+					"width="+pageofficeWidth+"px;height="+pageofficeHeight+"px;");
+		} else if (fileType == "xls" || fileType == "xlsx") {
+			/* var boxheight = document.documentElement.clientHeight;
+			var contheight = bodyheight-130;
+			document.getElementById("page-content").style.display="none"
+			document.getElementById("list-content").style.display=""
+			document.getElementById("list-content").style.height=contheight+"px"
+			document.getElementById("list-iframe").src='/list?fileId=' + fileId */
+			//window.location.href = '/list?fileId=' + fileId
+			//window.open('/list?fileId=' + fileId,'_blank');  
+			console.log(fileId)
+			addTabs({id:'list',title: '',close: true,url: '/list?fileId=' + fileId+'&state=0',parentTitle:'',parent2Title:''});
+		} else if (fileType == "doc" || fileType == "docx"||fileType == "ppt" || fileType == "pptx") {
+			POBrowser.openWindowModeless("/word?type=0&fileId=" + fileId,
+					"width="+pageofficeWidth+"px;height="+pageofficeHeight+"px;");
+		}else if(fileType =="jpg"||fileType =="JPG"||fileType =="PNG"||fileType =="png"){
+			 window.open("/openJpg?fileId="+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		} else if(fileType == "txt"||fileType == "TXT"||fileType == "OUT"||fileType == "out"||fileType == "ric"||fileType == "RIC"||fileType == "bin"||fileType == "BIN"){
+			window.open('html/Opentxt.html?fileId='+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else if(fileType == "csv") {
+			//	window.location.href = 'html/OpenCSV.html?fileId=' + fileId+'&type=0'
+				//window.open('html/OpenCSV.html?fileId=' + fileId+'&type=0');
+				window.open('html/OpenCSV.html?fileId=' + fileId+'&type=1','newwindow', 'height=600, width=800,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');		
+		}else if(fileType =="wmv"||fileType =="WMV"){
+			 window.open("html/OpenVideo.html?fileId="+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else if(fileType =="MP4"||fileType =="mp4"){
+			 window.open("html/OpenMp4.html?fileId="+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else{
+			$("#notOpenModel").modal("show");
+		}
+	}
+	//更新文件点击次数
+	function updateCount(fId){
+		var isSuccess;
+		$.ajax({
+			type : 'POST',
+			url : "/updateCounts",
+			async : false,
+			data : {
+				userId : sessionUser.userId,
+				fileId : fId
+			},
+			success : function(data) {
+				if(data!=null && data>0){
+					isSuccess=data;
+				}else{
+					isSuccess=0;
+				}
+			}
+		})
+		return isSuccess;
+	}
+	function addDiyDom(treeId, treeNode) {
+		var spaceWidth = 5;
+		var switchObj = $("#" + treeNode.tId + "_switch"),
+		icoObj = $("#" + treeNode.tId + "_ico");
+		switchObj.remove();
+		icoObj.before(switchObj);
+ 
+		if (treeNode.level > 1) {
+			var spaceStr = "<span style='display: inline-block;width:" + (spaceWidth * treeNode.level)+ "px'></span>";
+			switchObj.before(spaceStr);
+		}
+		var spantxt=$("#" + treeNode.tId + "_span").html();
+		if(spantxt.length>10){
+			spantxt=spantxt.substring(0,10)+"...";
+			$("#" + treeNode.tId + "_span").html(spantxt);
+		}
+
+	}
+function callbackIndex(){
+	//$("#znts-list").remove();
+	indexData();
+	$(".tab-pane").removeClass('active');
+	$('#all li div').removeClass('xuanzhong');
+	$("#Index").addClass("active");
+	if (lang == "en_US") {
+		$("#text").text('SystemHome')
+	}else{
+		$("#text").text('系统首页')
+	}
+	//addTabs({id:'Index',title: '系统首页',close: true,url: '',parentTitle:'',parent2Title:''});
+}
+</script>
+<style>
+#tb_order th {
+	background: #FFF;
+	color: #333;
+}
+
+img {
+	cursor: pointer;
+}
+.xuanzhong{
+       background: #cc7003  !important;}
+    .caidan-icon{margin-right:10px;}
+    .icon-trash{margin-right:20px;}
+.xuanzhongduoji {background: #cc7003  !important;}
+.leng-mor a:hover{color:#fff;}
+
+.menu input::-webkit-input-placeholder{color:#fff;}
+.leng-mor a:hover{background: #0085ff;color:#fff}
+.nav > li > a{height: 30px;
+    line-height: 30px;
+    top: -7px;    font-size: 16px;}
+.nav > li > a:hover{background:none  !important;color:#fff;border:none !important;}
+/* #searchType{-webkit-appearance: none;}
+#searchType > option:hover{background-color: #ddd;} */
+#contrast{
+    position: relative;
+    background-color: rgb(255, 255, 255);
+    border-width: 0.5px 2px 2px;
+    border-style: solid;
+    border-color: rgb(221, 221, 221);
+    border-image: initial;
+    min-height: 140px !important;
+    word-break: break-all;
+    word-wrap: break-word;
+    display: block;
+    margin-right: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    left: 267px;
+}
+#pbox p{    float: left;
+    margin-right: 10px;}
+    #contrast > button:focus{
+    border:none
+    }
+.znts-list a>p:hover{
+color:#0085ff !important;
+text-decoration: underline;
+}
+.lsjl-list a>p:hover{
+color:#0085ff !important;
+text-decoration: underline;
+}
+.zcfw-list a>p:hover{
+color:#0085ff !important;
+text-decoration: underline;
+}
+</style>
+</head>
+<body style="padding:0px;">
+	<div class="navbar navbar-default" id="navbar">
+		<script type="text/javascript">
+			try {
+				ace.settings.check('navbar', 'fixed')
+			} catch (e) {
+			}
+		</script>
+
+		<div class="navbar-container" id="navbar-container">
+			<div class="navbar-header pull-left" id="headheight">
+				<a href="#" class="navbar-brand"> <small> <!-- <div id="logo" class="logo"></div> --><img  id="logo" src="assets/images/logo.png" height=" 40px" /> 
+				<span id="titleDemo" style="padding-left: 14px;border-left: 1px solid rgba(255, 254, 254, 0.38);" onclick="callbackIndex()"></span>
+				</small>
+				</a>
+				<!-- /.brand -->
+			</div>
+			<!-- /.navbar-header -->
+
+			<div class="navbar-header pull-right" role="navigation">
+				<ul class="nav ace-nav">
+					
+					<li>
+						<a class="btn " id="message" >
+							<i class="icon-comment-alt" style="padding-top: 0px;"></i><span th:text="#{message}">消息</span>
+						</a>
+						<span class="xiaoxi" id="messageCount" style="display:none"></span>
+					</li>
+					<li class="light-blue">
+						<a data-toggle="dropdown" href="#" class="dropdown-toggle">
+					 		<!-- <img class="nav-user-photo" id="Img" /> -->
+							<span class="user-info"><i class="icon-user-md"></i></small><span style="margin-left: 10px;" id="userName"></span>
+					</span>
+					</a></li>
+					<li id="more" class="light-blue" style="padding-right: 0px !important;">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+						<span th:text="#{lang}">中文</span>
+						<i style="color: #fff;" class="icon-sort-down"></i></a>
+						 
+						<div class="leng-mor">
+							<a href="/office?url=index.html&lang=zh_CN">中文</a>
+							<a href="/office?url=index.html&lang=en_US">English</a>
+						</div> 
+					</li>	
+					<li><a href="#" id="indexhelp" th:text="#{indexhelp}">帮助</a></li>
+					<li class="light-blue"><a data-toggle="dropdown" href="#" class="dropdown-toggle"
+						id="exit"><i class="icon-off"></i><span style="margin-left: 10px;" th:text="#{exit}">退出 </span></a></li>
+				</ul>
+				<!-- /.ace-nav -->
+			</div>
+			<!-- /.navbar-header -->
+		</div>
+		<!-- /.container -->
+	</div>
+
+	<div class="main-container" id="main-container">
+		<script type="text/javascript">
+			try {
+				ace.settings.check('main-container', 'fixed')
+			} catch (e) {
+			}
+			$("#more").click(function(){
+				if($(".leng-mor").css('display') == 'none'){
+					$(".leng-mor").show();
+				}else{
+					$(".leng-mor").hide();
+				}
+				
+			})
+		</script>
+
+		<div class="main-container-inner">
+			<!--左侧导航start-->
+			<div class="sidebar" id="sidebar" style="overflow: hidden;">
+				<script type="text/javascript">
+					try {
+						ace.settings.check('sidebar', 'fixed')
+					} catch (e) {
+					}
+				</script>
+				<!--<div class="sidebar-collapse">
+					<i class="icon-search" id="searchMenu"></i> <i class="icon-reply" id="backMenu"
+						style="display: none"></i>
+					 <i class="icon-double-angle-left" data-icon1="icon-double-angle-left"
+						data-icon2="icon-double-angle-right"></i> 
+				</div>-->
+				<ul class="menu" id="all">
+					<div style="margin: 10px 0px;border-radius: 5px;background: #1466de;position: relative;">
+						<select id="searchType" style="float:left;background: #1466de;border:none;color:#fff;width: 67px;font-size:12px;border-top-left-radius: 5px;border-bottom-left-radius: 5px;">
+							<option value="0" th:text="#{item}">项目名</option>
+						    <option value="1" th:text="#{alias}">标签</option>
+							<option value="2" th:text="#{basic}">基本信息表属性</option>
+						</select>
+						<input class="form-control" th:placeholder="#{keyword}" type="text" id="searchVal" autocomplete="off"  style="height:30px;width:50%;border:none;    background: none;color:#fff;font-size:12px;" />
+						<i class="icon-search" id="searchName" style="position: absolute;top: 0px;right: 0px;color: #fff;height: 30px;width: 30px;text-align: center;line-height: 30px;border-top-right-radius: 5px;border-bottom-right-radius: 5px;background: #1466de;"></i>
+					</div>
+				</ul>
+				<ul class="searchmenu" id="searchmenu" style="display: none">
+				<div id="backMenu" style="margin: 10px 0px;border-radius: 5px;background: #1466de;text-align: center;padding:0px 20px;">
+				<i class="icon-reply" style="color: #fff;height: 30px;width: 30px;text-align: center;line-height: 30px;border-radius: 5px;background: #1466de;"></i>
+				</div>
+				</ul>
+			</div>
+			<!--左侧导航end-->
+			<div class="main-content">
+				<div class="breadcrumbs" id="breadcrumbs" style="padding-top:40px;">
+					<script type="text/javascript">
+						try {
+							ace.settings.check('breadcrumbs', 'fixed')
+						} catch (e) {
+						}
+					</script>
+
+					<ul class="breadcrumb">
+						<li><input type="hidden" id="textId" /><a href="#" id="text" th:text="#{system}">系统首页</a></li>
+					</ul>
+					<!-- .breadcrumb -->
+				</div>
+
+				<div class="page-content" id="page-content">
+					<div >
+						<div  style="overflow: auto;">
+							<!-- <ul class="nav nav-tabs" id="ulheight" style="height:35px;">
+								<li class="active"><a href="#Index" role="tab" data-toggle="tab"><i
+										class="icon-home"></i>系统首页<i></i></a></li>
+							</ul> -->
+							<div class="tab-content" id="cont" style="overflow: auto;">
+								<div role="tabpanel" class="tab-pane active" id="Index" style="width: 99%;padding: 3px 15px;overflow: hidden;">
+									<table id="tb_order">
+							            	<div class="znts listbiao" style="margin: 0px;">
+							            		<div class="tilte" th:text="#{znts}"></div>
+							            		<ul>
+							            			<li class="biaoti" style="padding-right:17px;">
+							            				<h3 style="width:40%; border-right: 1px solid #ccc;" th:text="#{fileName}"></h3>
+							            				<h3 style="width:10%; border-right: 1px solid #ccc;" th:text="#{lls}"></h3>
+							            				<h3 style="width:40%; border-right: 1px solid #ccc;" th:text="#{wjly}"></h3>
+							            				<h3 style="width:10%;" th:text="#{wjgs}"></h3>
+							            			</li>
+							            			<div id="znts-list" class="znts-list" style="overflow: auto;">
+								            			
+								            		</div>
+							            		</ul>
+							            	</div>
+							            	<div class="lsjl listbiao">
+							            		<div class="tilte" th:text="#{lsjl}"></div>
+							            		<ul>
+							            			<li class="biaoti" style="padding-right:17px;">
+							            				<h3  style="border-right: 1px solid #ccc;" th:text="#{fileName}"></h3>
+							            				<h3 style="border-right: 1px solid #ccc;" th:text="#{date}"></h3>
+							            				<h3 style="border-right: 1px solid #ccc;" th:text="#{zxcz}"></h3>
+							            				<h3 th:text="#{wjly}"></h3>
+							            			</li>
+							            			<div id="lsjl-list"  class="lsjl-list" style="overflow: auto;">
+							            			
+							            			</div>
+							            		</ul>
+							            	</div>
+							            	<div class="zcfw listbiao">
+							            		<div class="tilte" th:text="#{zcfw}"></div>
+							            		<ul>
+							            			<li class="biaoti" style="padding-right:17px;">
+							            				<h3 style="width:40%;border-right: 1px solid #ccc;" "  th:text="#{fileName}"></h3>
+							            				<h3 style="width:20%;border-right: 1px solid #ccc;" " th:text="#{grlls}"></h3>
+							            				<h3 style="width:40%;" th:text="#{wjly}"></h3>
+							            			</li>
+							            			<div id="zcfw-list" class="zcfw-list" style="overflow: auto;">
+								            		
+								            		</div>
+							            		</ul>
+							            	</div>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!--page-content-->
+				<!-- 数据对比图表 -->
+					<!-- <div id="contrast"
+					style="position: absolute;
+    bottom: -15px;
+    width: 80%;background-color:#FFF; border: 2px solid #DDDDDD;border-top:0.5px solid #DDDDDD; word-break: break-all;word-wrap: break-word;display:none">
+					<div style="border-bottom: 1px solid #DDDDDD;    padding: 5px 10px;">
+						<label style="font-size:1em;font-weight: bolder;">对比</label> <img id="contColse"
+							src="assets/images/exit.png"
+							style="right:0px;position: absolute;cursor: pointer;margin-top: 3px;    margin-right: 5px;" />
+					</div>
+					<div id="pbox" style="position: relative;padding: 18px 10px;width: 100%;display: block;"></div>
+					<div style="position: absolute;display: block; right:5px;bottom:5px;"><button type="button" class=" btn new-tijiao queding" style="background: #0085ff !important;color:#fff;" id="comparison">
+						<i class="icon-bar-chart"></i>生成图表
+					</button></div>
+				</div> -->
+				<!-- 数据对比图表 -->
+			</div>
+			<!--main-content-->
+
+			<!-- /#ace-settings-container -->
+		</div>
+		<!-- /.main-container-inner -->
+
+		<!--<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">-->
+		<!--<i class="icon-double-angle-up icon-only bigger-110"></i>-->
+		<!--</a>-->
+	</div>
+	<!-- /.main-container -->
+	<!-- end -->
+	<div style="background: #382c8e;width:100%;height:35px;color: #fff;margin: 0px;padding: 0px;">
+	<div if="endLeft"></div>
+	<div if="endright" style="line-height: 35px;margin-right:20px;margin: 0px;padding: 0px;font-size: 14px;">
+<marquee style="width: 400px;margin:0px;padding:0px;position: relative;top:3px;line-height: 25px;"  direction="left"   height="20"   >
+	<font   size="2" id="infoError">如遇到系统问题请联系XX手机号18888888888</font>
+</marquee>
+
+<span style="float:right;margin: 0px;padding: 0px;" id="info">Copyright(C)2019-2039s, 中国核动力研究设计院  程序研发：设计所反应堆系统软件与信息技术研究室(九室)</span></div>
+	</div>
+	<!-- /end -->
+	<!--搜索菜单开始-->
+	<div class="modal fade" id="menuModel" tabindex="-1" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header" style="height: 50px;">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title">系统提示</h4>
+				</div>
+				<div class="modal-body" style="padding: 0px 10px;">
+					<div class="row">
+						<div class="col-md-12">
+							<table>
+								<tr>
+									<td><select id="searchType"><option value="0">项目名</option>
+											<option value="1">标签</option>
+											<option value="2">基本信息表属性</option></select></td>
+									<td><input class="form-control" type="text" id="searchVal" autocomplete="off" /></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-default" id="">搜索</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	<!--搜索菜单结束-->
+	<!-- basic scripts -->
+
+	<script type="text/javascript">
+		if ("ontouchend" in document)
+			document
+					.write("<script src='assets/js/jquery.mobile.custom.min.js' />"
+							+ "<" + "/script>");
+	</script>
+	<script src="assets/js/typeahead-bs2.min.js"></script>
+
+	<!-- page specific plugin scripts -->
+
+	<!--[if lte IE 8]>
+<script src="assets/js/excanvas.min.js"></script>
+<![endif]-->
+
+	<script src="assets/js/jquery-ui-1.10.3.custom.min.js"></script>
+	<script src="assets/js/jquery.ui.touch-punch.min.js"></script>
+	<script src="assets/js/jquery.slimscroll.min.js"></script>
+	<script src="assets/js/jquery.easy-pie-chart.min.js"></script>
+	<script src="assets/js/jquery.sparkline.min.js"></script>
+
+	<!-- ace scripts -->
+
+	<script src="assets/js/ace-elements.min.js"></script>
+	<script src="assets/js/ace.min.js"></script>
+	<script type="text/javascript" src="../assets/js/divscroll.js"></script>
+<script>
+
+	var bodyheight = document.documentElement.clientHeight;
+	var menuheight = bodyheight-115;
+	$(".menu").css('height',menuheight+'px');
+	var conheight = bodyheight-85;
+	$("#main-container").css('height',conheight+'px');
+	var homeheight=(bodyheight-50-35-40-25)/3;
+	$(".listbiao").css('height',homeheight+'px');
+	var ulheight=homeheight-40;
+	$(".znts_list").css('height',ulheight+'px');
+	$(".lsjl-list").css('height',(ulheight-10)+'px');
+	$(".zcfw-list").css('height',(ulheight-10)+'px');
+	var divheight=ulheight-35;
+	$("#znts-list").css('height',divheight+'px');
+	$("#lsjl-list").css('height',divheight+'px');
+	$("#zcfw-list").css('height',divheight+'px');
+	$(function(){
+		//$("#page-content").perfectScrollbar();
+		//$("#znts-list").perfectScrollbar();
+		//$("#lsjl-list").perfectScrollbar();
+		//$("#zcfw-list").perfectScrollbar();
+	})
+	
+	
+	
+	function clickMenuid(menuid){
+		
+	}
+	
+	　var oldTime = new Date().getTime();
+    var newTime = new Date().getTime();
+    var outTime = 10 *60* 1000; //设置超时时间： 10分钟
+
+    $(function(){
+    	document.onselectstart = function(){
+    	    event.returnValue = false;
+    	}
+    	
+    	document.oncontextmenu = function () {
+            event.returnValue = false;
+        }
+    	
+        /* 鼠标移动事件 */
+        $(document).mouseover(function(){
+            oldTime = new Date().getTime(); //鼠标移入重置停留的时间
+
+        });
+    });
+
+    function OutTime(){
+        newTime = new Date().getTime(); //更新未进行操作的当前时间
+        if(newTime - oldTime > outTime){ //判断是否超时不操作
+           window.location='/'
+        }
+    }
+
+    /* 定时器  判断每5秒是否长时间未进行页面操作 */
+    window.setInterval(OutTime, 5000);
+	
+</script>
+	<!-- inline scripts related to this page -->
+</body>
+
+</html>
+

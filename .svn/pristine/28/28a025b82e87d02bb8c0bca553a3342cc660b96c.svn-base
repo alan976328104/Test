@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" content="ie=edge" />
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<link rel="stylesheet" type="text/css" href="../themes/bootstrap/easyui.css">
+		<link rel="stylesheet" type="text/css" href="../css/Task.css">
+		<link rel="stylesheet" type="text/css" href="../themes/icon.css">
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="../js/Role.js"></script>
+		<script type="text/javascript" src="../js/alldata.js"></script>
+		<script type="text/javascript">
+			var datap = JSON.parse(parseUrl());
+			var col = JSON.parse(parseUrl());
+			var colDat = [{
+				field: 'ck',
+				hidden: true,
+				formatter: function (value, rec, rowIndex) {
+                        return "<input type='checkbox'  name='PD' />";
+                    }
+			}];
+			for(var i = 0; i < col.length; i++) {
+				colDat.push({
+					field: col[i].ename,
+					title: col[i].name + "<input class='ck' name='PL' type='checkbox' onClick='ckbSome(this.value)' value=" + col[i].id + " />",
+					width: "20%"
+				})
+			}
+			//部分选
+			function ckbSome(valCKb) {
+				var selectedCkb = document.getElementsByName("PL");
+				if(selectedCkb[1]==undefined){
+				}else{
+					selectedCkb[0].checked=false;
+					selectedCkb[1].checked=true;
+					selectedCkb[2].checked=false;
+				}
+//				for (var i = 0; i < selectedCkb.length; i++) {
+////					selectedCkb[i].checked=false;
+////					if(selectedCkb[i]==selectedCkb[valCKb]){
+//						
+////					}
+//				}
+			}
+
+			function onLoad() {
+//				$(this).closest('div.datagrid-view').find('div.datagrid-header td').click(function() {
+//					var checkboxs = $("input[type='checkbox']");
+//					var checkboxl = $("input[name='ckox']");
+//					var cellIndex = this.cellIndex;
+//					console.log(cellIndex)
+//					var cfield = colDat[cellIndex].field;
+//					var rows = $('#dg').datagrid('getRows') //获取当前页的数据行  
+//					var total = 0;
+//					for(var i = 0; i < rows.length; i++) {
+//						//total += rows[i][cellIndex]; //获取指定列  
+//						//console.log(rows[i][cfield])
+//					}
+//				});
+				
+
+			}
+			var IsCheckFlag = true; //标示是否是勾选复选框选中行的，true - 是 , false - 否
+			window.onload = function() {
+				ckbSome();
+				$('#dg').datagrid({
+					method: 'get', //这个是最重要的，不写这个table加载不出来
+					data: datap,
+					nowrap: true,
+					fitColumns: true,
+					checkOnSelect: false,
+					selectOnCheck: true,
+					columns: [colDat],
+					onClickCell: function(rowIndex, field, value) {
+						IsCheckFlag = false;
+					},
+					onSelect: function(rowIndex, rowData) {
+						if(!IsCheckFlag) {
+							IsCheckFlag = true;
+							$("#dg").datagrid("unselectRow", rowIndex);
+						}
+					},
+					onUnselect: function(rowIndex, rowData) {
+						if(!IsCheckFlag) {
+							IsCheckFlag = true;
+							$("#dg").datagrid("selectRow", rowIndex);
+						}
+					},
+					onLoadSuccess: onLoad()
+				});
+				var obj = document.getElementsByClassName("ck");
+				var gh = document.getElementById("graphing");
+				for(var i = 0; i < obj.length; i++) {
+					var mya = obj[i];
+					mya.style.display = "none";
+				}
+				gh.style.display = "none";
+				$("#dg").datagrid('reload');
+				$("#statistics").click(function() {
+					var bigcon=document.getElementsByTagName("html")[0];
+					var con = window.parent.document.getElementById('topCont');
+					if(colDat[0].hidden == false) {
+						window.parent.closePanel(con);
+						window.parent.closePanel(bigcon);
+						gh.style.display = "none";
+						colDat[0].hidden = true;
+						$('#dg').datagrid({
+							method: 'get', //这个是最重要的，不写这个table加载不出来
+							data: datap,
+							nowrap: true,
+							fitColumns: true,
+							checkOnSelect: false,
+							selectOnCheck: true,
+							columns: [colDat],
+							onClickCell: function(rowIndex, field, value) {
+								IsCheckFlag = false;
+							},
+							onSelect: function(rowIndex, rowData) {
+								if(!IsCheckFlag) {
+									IsCheckFlag = true;
+									$("#dg").datagrid("unselectRow", rowIndex);
+								}
+							},
+							onUnselect: function(rowIndex, rowData) {
+								if(!IsCheckFlag) {
+									IsCheckFlag = true;
+									$("#dg").datagrid("selectRow", rowIndex);
+								}
+							},
+							onLoadSuccess: onLoad()
+						});
+						for(var i = 0; i < obj.length; i++) {
+							if(obj[i].style.display = "block") {
+								obj[i].style.display = "none";
+								$("#dg").datagrid('reload');
+							}
+						}
+					} else {
+						window.parent.openPanel(con);
+						window.parent.openPanel(bigcon);
+						colDat[0].hidden = false;
+						gh.style.display = "";
+						for(var i = 0; i < obj.length; i++) {
+							if(obj[i].style.display = "none") {
+								obj[i].style.display = "block";
+								$('#dg').datagrid({
+									method: 'get', //这个是最重要的，不写这个table加载不出来
+									data: datap,
+									nowrap: true,
+									fitColumns: true,
+									checkOnSelect: false,
+									selectOnCheck: true,
+									columns: [colDat],
+									onClickCell: function(rowIndex, field, value) {
+										IsCheckFlag = false;
+									},
+									onSelect: function(rowIndex, rowData) {
+										if(!IsCheckFlag) {
+											IsCheckFlag = true;
+											$("#dg").datagrid("unselectRow", rowIndex);
+										}
+									},
+									onUnselect: function(rowIndex, rowData) {
+										if(!IsCheckFlag) {
+											IsCheckFlag = true;
+											$("#dg").datagrid("selectRow", rowIndex);
+										}
+									},
+									onLoadSuccess: onLoad()
+								});
+							}
+						}
+					}
+				});
+				//生成图表
+				$("#graphing").click(function() {
+
+				});
+
+			}
+
+			function parseUrl() {
+				var url = location.href;
+				var i = url.indexOf('?');
+				if(i == -1) return;
+				var querystr = url.substr(i + 1);
+				var arr1 = querystr.split('&');
+				var str = new Array();
+				var num = 0;
+				for(i in arr1) {
+					var ta = arr1[i].split('=');
+					str[num] = decodeURI(ta[1]);
+					num++;
+				}
+				return str;
+			}
+			
+		</script>
+	</head>
+
+	<body id="bigcon" style="height:100%;width: 100%;padding: 0px; margin: 0px;">
+		<table id="dg" class="easyui-datagrid" toolbar="#tb" pagePosition="bottom" pagination="true" fitColumns="false" pageSize="15" pageList="[10,15,20,30,50]" style="width:100%;height:100%;">
+		</table>
+
+		<div id="tb">
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-tianjia',plain:true" id="addUser">添加</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-daochu',plain:true" id="exprotExcel">导出Excel</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-tianjia',plain:true" id="statistics">统计</a>
+			<a href="Graphing.html" class="easyui-linkbutton" data-options="iconCls:'icon-tianjia',plain:true" id="graphing" style="margin: 0px; padding: 0px;">生成图表</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-daoru',plain:true">导入Excel</a>
+			<input type="file" id="upfile" style="margin-top: 3px;padding: 0px;width: 69px;" />
+			<!--<input class="easyui-textbox" style="width:300px" id="condition" />-->
+			<!--<a href="#" class="easyui-linkbutton" data-options="iconCls: 'icon-sousuo',plain:true" id="search">搜索</a>-->
+		</div>
+
+		<!-- 添加弹出窗口begin -->
+		<div id="dd" class="easyui-dialog" title="添加部门" width="80%" height="60%" data-options="resizable:true,modal:true,closed:true">
+			<form id="ff" method="post" style="padding-top: 20px">
+				<table style="margin: 0px auto">
+					<tr>
+						<td style="width: 60px"> <label for="deptname">部门名称:</label> </td>
+						<td> <input class="easyui-textbox" type="text" name="text" data-options="required:true" missingMessage="请填写信息" /></td>
+					</tr>
+				</table>
+			</form>
+			<div style="text-align: center;">
+				<button class="setsub">提交</button>
+			</div>
+		</div>
+		<!-- 添加弹出窗口end -->
+
+		<!-- 修改窗口begin -->
+		<div id="setUserwindw" class="easyui-dialog" title="修改部门" width="80%" height="60%" data-options="resizable:true,modal:true,closed:true">
+			<form id="setrolefrom" method="post" style="padding-top: 20px">
+				<table style="margin: 0px auto">
+					<tr>
+						<td style="width: 50px"> <label for="deptname">部门名称:</label> </td>
+						<td> <input class="easyui-textbox" type="text" name="deptname" data-options="required:true" missingMessage="请填写信息" /></td>
+					</tr>
+				</table>
+			</form>
+			<div style="text-align: center;">
+				<button class="setupdatesub">提交</button>
+			</div>
+		</div>
+
+		<!-- 修改窗口end -->
+
+		<!--修改选择部门窗口begin -->
+
+		<!--修改选择部门窗口end-->
+		<div class="easyui-window" data-options="resizable:true,modal:true,closed:true" style="width:500px;height:280px;padding:5px;background: #fafafa;"></div>
+
+	</body>
+
+</html>

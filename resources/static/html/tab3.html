@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"
+	content="ie=edge" />
+<meta charset="UTF-8">
+<title>例题</title>
+<link href="../assets/css/font-awesome.min.css" rel="stylesheet">
+<!--[if IE 7]>
+    <link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css">
+    <![endif]-->
+<script src="../assets/js/jquery-2.0.3.min.js"></script>
+<!--[bootstrap]-->
+<link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="../assets/js/alldata.js"></script>
+<link rel="stylesheet"
+	href="../assets/css/bootstrap/bootstrap-dialog.css">
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+<link rel="stylesheet" href="../assets/css/newstyle.css">
+<link rel="stylesheet" href="../assets/css/zTreeStyle.css"
+	type="text/css">
+<script type="text/javascript" src="../assets/js/jquery.ztree.core.js"></script>
+<script type="text/javascript"
+	src="../assets/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.ztree.exedit.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.actual.js"></script>
+<style>
+* {
+	outline: 0;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+.nav-tabs {
+	display: block;
+}
+
+.nav-tabs>li {
+	margin-right: 10px !important;
+	float: left
+}
+
+.nav-tabs>li>a {
+	padding: 8px 12px;
+	color: #fff;
+}
+
+.nav-tabs>li>a:first-child:hover {
+	background: #cc7003 !important;
+}
+
+.nav a:hover .caret {
+	border-top-color: #fff;
+	border-bottom-color: #fff;
+}
+
+.nav-tabs>li>a,.nav-tabs>li>a:focus {
+	border-radius: 0 !important;
+	/*	color: #999;*/
+	margin-right: -1px;
+	line-height: 16px;
+	position: relative;
+	z-index: 11;
+	border: 1px solid hsla(0, 0%, 100%, 0.2);
+}
+
+.nav-tabs .active a {
+	color: #fff !important;
+	font-weight: bold;
+	background-color: none !important;
+}
+
+.active .dropdown-menu li a {
+	color: #333 !important;
+	background-color: #fff !important;
+	font-weight: normal;
+}
+
+.dropdown-menu li {
+	margin: 0px !important;
+	list-style: none;
+}
+/*main*/
+#list {
+	list-style: none;
+	width: 80px;
+	height: 30px;
+	border: 1px solid #DDDDDD;
+	/* box-shadow: 0px 0px 5px #DDDDDD; */
+	display: none;
+	/*一定要用绝对定位*/
+	position: absolute;
+	z-index: 999;
+	background-color: #FFFFFF
+}
+
+#list li {
+	height: 80px;
+	line-height: 30px;
+	font-size: 14px;
+	text-align: center;
+	cursor: pointer;
+}
+
+.nav-tabs {
+	
+}
+
+.modal-header {
+	border-radius: 5px;
+}
+
+#tab_content_14 .nav-tabs {
+	/*margin: 20px 80px;*/
+}
+/*滚动条样式*/
+/*滚动条整体样式*/
+/*高宽分别对应横竖滚动条的尺寸*/
+/* iframe::-webkit-scrollbar { 
+	width: 4px; 
+	height: 4px;
+} */
+/*滚动条里面小方块*/
+/* iframe::-webkit-scrollbar-thumb { 
+	border-radius: 5px;
+	-webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+	background: rgba(0, 0, 0, 0.2);
+} */
+/*滚动条里面轨道*/
+/* iframe::-webkit-scrollbar-track { 
+	-webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+	border-radius: 0;
+	background: rgba(0, 0, 0, 0.1);
+} */
+
+/*   .tab-content{margin-top: 10px;}    */
+.nav .caret {
+	border-top-color: #fff;
+	border-bottom-color: #fff;
+}
+
+.nav-tabs .active .aa {
+	background: #cc7003;
+}
+</style>
+<script th:inline="javascript">
+//获取登录者信息
+	var sessionUser;
+	$.ajax({
+		type : "post",
+		url : "/getSessionByIp",
+		async : false,
+		success : function(data) {
+			sessionUser = data
+		}
+	})
+	var lang = getUrlParam("lang");
+	var thistabid = 0;
+	var roleBtns;
+	var status = false;
+	/*获取iframe的id 也就是menuId*/
+	var str = window.frameElement.id;
+	var index = str.lastIndexOf("_");
+	var menuId = str.substring(index + 1, str.length);
+	var tabsAll;
+//根据用户Id和菜单Id查询用户拥有的操作权限
+	$.ajax({
+		type : 'POST',
+		url : "/getUserButtonByMenuId",
+		data : {
+			userId : sessionUser.userId,
+			menuId : menuId
+		},
+		async : false,
+		dataType : "json",
+		success : function(data) {
+			//console.log(data)
+			//console.log(menuId)
+			if (data != null) {
+				roleBtns = data
+				for (var i = 0; i < roleBtns.length; i++) {
+					if (roleBtns[i].btnName == '系统标签') {
+						status = true
+					}
+				}
+			}
+		}
+	})
+	$(function() {
+		tabshow()
+		$('#conNav0 a:first').tab('show'); //初始化显示哪个tab
+		ulLiLength(0, 1)
+		infoTabLoad();
+		tabLoad()
+		//console.log($("#conNav1").outerWidth(true))
+		//$("#conNav>li").removeClass('active').eq(3).addClass('active');
+		/* $(".menu").on('click', function (e) {
+			console.log("点击了")
+			//$('.menu').dropdown()
+			$('.dropdown-toggle').dropdown();
+			// $('.dropdown-menu').addClass('open');
+			//$('.dropdown-menu').css("display"," ");
+		});
+		$('.dropdown-toggle').dropdown(); */
+	})
+	//加载基本信息选项卡
+	function infoTabLoad(){
+		if (status == 'true') {
+			$("#state").show();
+			$("#tab_li_0").children('.dropdown-menu').append('<li><a href="javascript:void(0);" onclick="openUpdateInfoModal()">'+[[#{updateInfo}]]+'</a></li>')
+		} else {
+			$("#state").hide()
+		}	
+		$("#tab_li_0").children('.dropdown-menu').children().eq(0).remove();
+		$("#tab_li_0").children('.dropdown-menu').children().eq(0).remove();
+		$("#tab_li_0").children('.dropdown-menu').children().eq(0).remove();
+		if (roleBtns != null) {
+			//console.log(roleBtns)
+			for (var i = 0; i < roleBtns.length; i++) {
+				if (roleBtns[i].btnName == '下载') {
+					$(".download").css("display", "");
+					$("#tab_li_0").children('.dropdown-menu').children().eq(1).remove();
+					$("#tab_li_0").children('.dropdown-menu').append('<li><a href="javascript:void(0);" onclick="downloadFiles(this)">'+[[#{dowItem}]]+'</a></li>');
+				}
+			}
+		}
+}
+	//加载选项卡
+	function tabLoad() {
+		if (roleBtns != null) {
+			//console.log(roleBtns)
+			for (var i = 0; i < roleBtns.length; i++) {
+				if (roleBtns[i].btnName == '删除') {
+					$(".delete").css("display", "");
+				}
+				if (roleBtns[i].btnName == '下载') {
+					$(".download").css("display", "");
+				//	$("#tab_li_0").children('.dropdown-menu').children().eq(1).remove();
+				//	$("#tab_li_0").children('.dropdown-menu').append('<li><a href="javascript:void(0);" onclick="downloadFiles(this)">'+[[#{dowItem}]]+'</a></li>');
+				}else{
+					//$("#tab_li_0").children('.dropdown-menu').children().eq(1).remove()
+				}
+				if (roleBtns[i].btnName == '重命名') {
+					$(".rename").css("display", "");
+				}
+			//	console.log(roleBtns[i].btnName=='置最前')
+				if (roleBtns[i].btnName=='置最前') {
+					$(".first").css("display", "");
+				//	console.log($(".first"))
+				}
+			}
+		}
+	}
+	//获取选项卡信息
+	function tabshow() {
+		$.ajax({
+			type : 'POST',
+			url : "/listTabByLv",
+			data : {
+				menuId : menuId,
+				lv:1,
+				parentId:0
+			},
+			async : false,
+			success : function(data) {
+				data=JSON.stringify(data)
+				data=data.replace(/\s*/g,"")
+			//	console.log(data)
+				data=JSON.parse(data)
+				tabsAll = data;
+			}
+		})
+
+		if (tabsAll != null || tabsAll.length != 0) {
+			addTab("conNav0", 0, "基本信息", "cont0");
+			addContent(0, "../html/info.html", "800px");
+			for (var i = 0; i < tabsAll.length; i++) {
+				addTab("conNav0", tabsAll[i].id, tabsAll[i].name, "cont0",
+						tabsAll, tabsAll[i]);
+			}
+			//forTab(tabsAll, 1);
+		}
+	}
+//追加添加选项卡按钮
+	function ulLiLength(tabMainName, lv) {
+		var btnstr = '<li><button type="button" style="border-radius: 4px !important;margin: 0px; padding: 5px 10px; color: #333; width: 38px !important;background: #fff !important;" onclick="plusTab(this,'
+				+ lv
+				+ ','
+				+ tabMainName
+				+ ')"><input type="hidden" value='+lv+' /><i class="icon-plus"></i></button></li>'
+		var state = true;
+		var sumWidth = 0;
+		$("#conNav" + tabMainName).children('li').each(
+				function(index, element) {
+					sumWidth += $(this).actual('outerWidth', {
+						includeMargin : true
+					})
+					if (sumWidth > $("#conNav" + tabMainName).actual(
+							'outerWidth', {
+								includeMargin : true
+							}) - 100) {
+						$(this).hide();
+						state = false
+					}
+				});
+		//console.log(state)
+		if (!state) {
+			$("#conNav" + tabMainName)
+					.append(
+							'<li><a style="display:-webkit-box;margin-right: 5px;top: 0px;" class="menu" href="#" data-toggle="dropdown">...</a><ul class="dropdown-menu" style="color:#333;" id="lidisplay'+tabMainName+'">'
+									+ liappend(tabMainName) + '<ul><li>')
+			$("#conNav" + tabMainName).append(btnstr)
+		} else {
+			$("#conNav" + tabMainName).append(btnstr)
+		}
+		
+	}
+	//添加选项卡下列列表
+	function liappend(tabMainName) {
+		var liappendstr = '';
+		$("#conNav" + tabMainName)
+				.children('li')
+				.each(
+						function(index, element) {
+							if ($(element).css("display") === "none"
+									&& $(element).attr('id') != undefined) {
+								var litext = $(element).get(0).firstChild.innerText
+								if (litext != 'undefined') {
+									liappendstr += '<li><a href="javascript:void(0);"  onclick="liClick('
+											+ tabMainName
+											+ ',this)"><input type="hidden" value='
+											+ $(element).attr('id')
+											+ '>'
+											+ litext + '</a></li>'
+								}
+							}
+						});
+		return liappendstr;
+	}
+	//选项卡下列列表点击事件
+	function liClick(tabMainName, info) {
+		var liId = $(info).children('input').get(0).value
+		$("#conNav" + tabMainName + ">li").removeClass('active');
+		var liIndex = 0;
+		$("#conNav" + tabMainName).children('li').each(
+				function(index, element) {
+					if ($(element).css("display") === "block"
+							&& $(element).attr('id') != undefined) {
+						liIndex = index
+					}
+				});
+		$("#conNav" + tabMainName).children('li').get(liIndex).style.display = "none"
+		$("#" + liId).css("display", "block");
+		lishow(tabMainName, liIndex)
+		var liIdstr = liId.substring(liId.lastIndexOf("_") + 1, liId.length)
+		$("#tab_a_" + liIdstr).click();
+
+	}
+	//添加选项卡下列列表
+	function lishow(tabMainName, liIndex) {
+		var sumWidth = 0;
+		$("#conNav" + tabMainName).children('li').each(
+				function(index, element) {
+					if ($(element).css("display") === "block"
+							&& $(element).attr('id') != undefined) {
+						sumWidth += $(this).actual('outerWidth', {
+							includeMargin : true
+						})
+						if (sumWidth > $("#conNav" + tabMainName).actual(
+								'outerWidth', {
+									includeMargin : true
+								}) - 100) {
+							$("#conNav" + tabMainName).children('li').get(
+									liIndex - 1).style.display = "none"
+						}
+					}
+				});
+		$("#lidisplay" + tabMainName).html('')
+		$("#lidisplay" + tabMainName).append(liappend(tabMainName))
+	}
+	
+	//添加子项选项卡
+	function forTab(data, tabIndex) {
+		if (data.length != 0) {
+			for (var i = 0; i < data.length; i++) {
+				if (data[i].children != undefined && data[i].children != "null") {
+					if (data[i].children.length != 0) {
+						var childrenData = data[i].children;
+						//console.log(data[i].id)
+						//console.log(data[i].children)
+						addTabs(tabIndex + 1, data[i].id, childrenData);
+						forTab(childrenData, tabIndex + 1);
+					} else {
+						//console.log(data[i].id)
+						///addContent(data[i].id, "../html/tabs.html", "");
+					}
+				}
+			}
+		}
+	}
+	/**
+	 * 添加选项卡
+	 * @param {Object} tabMainName tab所在容器
+	 * @param {Object} tabName tab名称
+	 * @param {Object} tabTitle tab标题
+	 * @param {Object} tabContentMainName tab内容所在容器
+	 */
+	function addTab(tabMainName, tabName, tabTitle, tabContentMainName, array,
+			children) {
+		var tabchildren = JSON.stringify(children)
+		var tabarray = JSON.stringify(array)
+		var exists = checkTabIsExists(tabMainName, tabName);
+		if (!exists) {
+			var tab = "<li id='tab_li_" + tabName + "' ><a href='#tab_content_"
+					+ tabName
+					+ "' data-toggle='tab' class='aa' id='tab_a_"
+					+ tabName
+					+ "' onclick='tabClick("
+					+ tabarray
+					+ ","
+					+ tabchildren
+					+ ",this,"
+					+ tabName
+					+ ")' style='float:left;'>"
+					+ tabTitle
+					+ '</a><input type="hidden" value=' + tabName + ' />'
+					+ '<a style="display:-webkit-box;margin-right: 5px;top: 0px;" class="menu" href="#" data-toggle="dropdown">'
+					+ '<b class="caret"></b></a>'
+					+ "<ul class='dropdown-menu' style='color:#333;'>"
+					+ "<li><a href='javascript:void(0);' class='first' style='display:none' onclick='tabTop(this)'>[[#{prepender}]]</a></li>"
+					+ "<li><a href='javascript:void(0);' onclick='aliasAdd(this)'>[[#{addlabel}]]</a></li>"
+					+ "<li><a href='javascript:void(0);' class='rename' style='display:none' onclick='tabrename(this)'>[[#{rename}]]</a></li>"
+					+ "<li><a href='javascript:void(0);' class='download' style='display:none' onclick='downloadFiles(this)'>[[#{download}]]</a></li>"
+					+ "<li><a href='javascript:void(0);' class='delete' style='display:none' onclick='removtab(this)'>[[#{delete}]]</a></li></ul>"
+					+ '<i class="icon-angle-down" style="padding-top: 0px;font-size: 20px;color: #cc7003;position: relative;top: 0;left: 50%;display:none;"></i></li>'
+			tab = tab.replace(/'/g, "")
+			$("#" + tabMainName).append(tab);
+			var cont = '<div id="tab_content_' + tabName + '" role="tabpanel" class="tab-pane" style="position:relative;z-index:1;"></div>';
+			$("#" + tabContentMainName).append(cont);
+		} else {
+			//$("#" + tabMainName).html("");
+		}
+	}
+	 function addTabChildren(tabchildren,node){
+		 var lv=tabchildren.lv+1
+			var tabArray;
+			$.ajax({
+				type : 'POST',
+				url : "/listTabByLv",
+				data : {
+					menuId : menuId,
+					lv:lv,
+					parentId:tabchildren.id
+				},
+				async : false,
+				success : function(data) {
+					data=JSON.stringify(data)
+					data=data.replace(/\s*/g,"")
+					data=JSON.parse(data)
+					tabArray=data;
+					//console.log(tabArray)
+					$("#conNav"+tabchildren.id).html("");
+					$("#tab_content_" + tabchildren.id).html("");
+					if(tabArray!=null&&tabArray.length>0){
+						addTabs(lv, tabchildren.id, tabArray);
+						sessionTab(tabArray[0].id);
+						$(node).siblings('.icon-angle-down').show();
+						//console.log($("#tab_a_" + tabArray[0].id).click())
+						$("#tab_a_" + tabArray[0].id).click()
+					}else{
+						sessionTab(tabchildren.id);
+						addContent(tabchildren.id, "../office?url=html/tabs.html", "");
+					}
+					ulLiLength(tabchildren.id, lv)
+					tabLoad()
+				}
+			})
+	 }
+	
+//选项卡点击事件
+	function tabClick(array, tabchildren, node, tabName) {
+		$(node).parent().parent().children().children('.icon-angle-down').hide();
+		if (tabchildren != undefined) {
+			addTabChildren(tabchildren,node)
+			/* if (tabchildren.children.length > 0) {
+				$(this).tab('show'); //显示当前选中的链接及关联的content
+				var tabId = getTabsId(array, $(node).next().val())
+				$(node).siblings('.icon-angle-down').show();
+				console.log(tabId)
+				console.log($(node).next().val())
+				console.log(array)
+				console.log(tabchildren)
+				sessionTab(tabId);
+				addContent(tabId, "../office?url=html/tabs.html", "");
+			} else {
+				console.log("哈哈")
+				$(this).tab('show'); //显示当前选中的链接及关联的content
+				var tabId = $(node).next().val();
+				$(node).parent().parent().children().children('.icon-angle-down').hide();
+				addContent(tabId, "../office?url=html/tabs.html", "");
+				//$(".tab-content").css('margin-top','10px');
+				sessionTab(tabId);
+			} */
+			//ulLiLength(tabName)
+		}
+	}
+
+	/**
+	 * 添加选项卡指定内容
+	 * @param {Object} tabName
+	 * @param {Object} tabUrl
+	 */
+	function addContent(tabName, tabUrl, height) {
+		var hri = $(window.parent).height();
+		hri = parseInt(hri) - 194 + 'px';
+		$("#tab_content_" + tabName).html("");
+		var content = '<iframe id="iframe_'
+				+ tabName
+				+ '" src="'
+				+ tabUrl
+				+ '" frameborder="no" border="0" width="100%" height="'
+				+ hri
+				+ '" marginwidth="0" marginheight="0" style="margin-top:5px;" scrolling="yes" allowtransparency="yes"></iframe>';
+		$("#tab_content_" + tabName).append(content);
+	}
+	/**
+	 * 创建子级选项卡
+	 * @param {Object} lv 等级
+	 * @param {Object} id 选项卡id
+	 * @param {Object} data 选项卡集合
+	 */
+	function addTabs(lv, id, data) {
+		//console.log("id:" + id)
+		var jiantou='<i class="icon-angle-down" style="padding-top: 0px;font-size: 20px;color: #cc7003;position: relative;top: 0;left: 50%;display:none;"></i>'
+		var ul = '<p class="kuang" style="height: 7px;border:1px solid hsla(0,0%,100%,0.7);border-bottom:0px;padding:0px 5px;"></p><ul class="nav nav-tabs" id="conNav' + id + '" ></ul>';
+		var div = '<div class="tab-content" id="cont' + id + '" ></div>'
+		$("#tab_content_" + id).append(jiantou);
+		$("#tab_content_" + id).append(ul);
+		$("#tab_content_" + id).append(div);
+		for (var i = 0; i < data.length; i++) {
+			addTab("conNav" + id, data[i].id, data[i].name, "cont" + id, data,
+					data[i])
+		}
+	//	$('#conNav' + id ).append('<li><button type="button"  style="border-radius: 4px !important;border: 1px solid #fff;margin: 0px; padding: 5px 10px; color: #333;background: #fff !important; width: 38px !important;" onclick="plusTab(this,'+lv+','+id+')"><i class="icon-plus"></i></button></li>')
+		$('#conNav' + id + ' a:first').tab('show'); //初始化显示哪个tab
+	//	$("#tab_a_" + id + ' a:first').click()
+	//	ulLiLength(id, lv)
+		//console.log($('#conNav' + id).actual('outerWidth',{includeMargin:true}))
+		//$('#conNav' + id).actual('outerWidth',{includeMargin:true});
+	}
+	 //重新加载选项卡
+	function againTab(id, lv, data) {
+		if (id == 0) {
+			addTab("conNav0", 0, "基本信息", "cont");
+			addContent(0, "../html/info.html", "800px");
+		}
+		for (var i = 0; i < data.length; i++) {
+			addTab("conNav" + id, data[i].id, data[i].name, "cont" + id, data,
+					data[i]);
+		}
+		ulLiLength(id, lv)
+	}
+	 //判断选项卡是否存在
+	function checkTabIsExists(tabMainName, tabName) {
+		var tab = $("#" + tabMainName + " > #tab_li_" + tabName);
+		//console.log(tab.length)
+		return tab.length > 0;
+	}
+	 //获取选项卡Id
+	function getTabsId(data, id) {
+	//	console.log(data)
+		var tabId;
+		for (var i = 0; i < data.length; i++) {
+			if (data[i].id == id) {
+				if (data[i].children.length != 0) {
+					if (data[i].children[0].children != "null"
+							&& data[i].children[0].children != undefined) {
+						if (data[i].children[0].children.length > 0) {
+							$("#tab_li_" + data[i].children[0].id).children(".icon-angle-down").show()
+							tabId = data[i].children[0].children[0].id;
+							if (data[i].children[0].children[0].children != 'undefined'
+									&& data[i].children[0].children[0].children != "null") {
+								if (data[i].children[0].children[0].children.length > 0) {
+									$("#tab_li_" + data[i].children[0].children[0].id).children(".icon-angle-down").show()
+									tabId = data[i].children[0].children[0].children[0].id;
+								} else {
+									tabId = data[i].children[0].children[0].id;
+								}
+							} else {
+								tabId = data[i].children[0].id;
+							}
+						} else {
+							$("#tab_li_" + data[i].children[0].id).children(".icon-angle-down").hide()
+							tabId = data[i].children[0].id;
+							$("#tab_li_" + tabId).children(".icon-angle-down")
+							.hide()
+						}
+					} else {
+						tabId = data[i].children[0].id;
+					}
+				} else {
+					tabId = data[i].id;
+					$("#tab_li_" + tabId).children(".icon-angle-down").show()
+				}
+			}
+		}
+		return tabId;
+	}
+	/**
+	 * 选项卡id存到session中
+	 * @param {Object} tabId
+	 */
+	function sessionTab(tabId) {
+		$.ajax({
+			type : "POST",
+			url : "/getDataBySession",
+			data : {
+				"menuId" : menuId,
+				"tabsId" : tabId
+			}
+		});
+	}
+//选项卡重命名
+	function tabrename(node) {
+		var retabId = $(node).parent().parent().prev().prev().val();//tabId
+		var retname = $(node).parent().parent().prev().prev().prev().text();
+		$("#tabsrenameText").val(retname)
+		thistabid = retabId;
+		$("#renametab").modal("show");
+		var conNavId = $(node).parent().parent().parent().parent().attr('id');
+		conNavId = conNavId.replace('conNav', '');
+		var lv = $(node).parent().parent().parent().parent().children(
+				"li:last-child").children().children().eq(0).val()
+		$("#conId").val(conNavId)
+		$("#conlv").val(lv)
+	}
+	//下载文件
+	function downloadFiles(node) {
+		var tabId = $(node).parent().parent().prev().prev().val();//tabId
+	//	console.log(tabId)
+	//	console.log(menuId)
+	//	console.log(node.innerText)
+		 if (tabId == 0) {
+			if(node.innerText=='downloadItem'||node.innerText=='下载项目'){
+				location.href = "/downloadFiles?menuId=" + menuId;
+			}else{
+				location.href = "/exportExcel?menuid=" + menuId;
+			}
+		} else {
+			window.location.href = "/downloadFiles?tabsId=" + tabId + "&type=0";
+		} 
+	}
+	//重命名保存按钮事件
+	function tabrename1() {
+	//	console.log($("#conlv").val())
+	 	$.ajax({
+			type : "POST",
+			url : "/updateTabsforindex",
+			data : {
+				"tabsId" : thistabid,
+				"tabsname" : $("#tabsrenameText").val(),
+				"menuId" : menuId,
+				lv:$("#conlv").val()
+			},
+			async : false,
+			success : function(data) {
+				if(data==0){
+					existErr()
+				}else{
+					$("#renametab").modal("hide");
+					updateSuccess();
+
+					$('#conNav' + $("#conId").val() + '>li').remove();
+					$('#con' + $("#conId").val()).html('');
+					tabsData($("#conId").val(), $("#conlv").val())
+					$("#tab_a_" + thistabid).click()
+					tabLoad()
+				}
+				
+			}
+		}); 
+
+		//alert(retabId)
+	}
+
+	/* 	function removtab(info) {
+	 var retabId = $(info).parent().parent().prev().prev().val();//tabId
+	 //alert(retabId);
+	 var lv = $(info).parent().parent().parent().parent().children(
+	 "li:last-child").children().children().eq(0).val()
+	 $.ajax({
+	 type : "POST",
+	 url : "/delTabsforindex",
+	 data : {
+	 "tabsId" : retabId
+	 },
+	 async : false,
+	 success : function(data) {
+	 //alert(data);
+	 //app.reloadtabs();
+	 var conNavId = $(info).parent().parent().parent().parent()
+	 .attr('id');
+	 var prevId = $(info).parent().parent().parent().prev()
+	 .children().eq(0).attr('id')
+	 var nextId = $(info).parent().parent().parent().next()
+	 .children().eq(0).attr('id')
+	 $(info).parent().parent().prev().prev().parent().parent()
+	 .children().remove()
+	 conNavId = conNavId.replace('conNav', '');
+	 tabsData(conNavId, lv)
+	 // if (conNavId == "conNav0") {
+	 //	ulLiLength(0, 1)
+	 //}
+	 if (prevId != "undefined") {
+	 $("#" + prevId).click()
+	 } else {
+	 $("#" + nextId).click()
+	 }
+	 //$('#conNav li:eq(-2) a').tab('show');
+	 //if(tabMainName=="conNav0"){
+	 //	ulLiLength(0, 1)
+	 //}
+	 }
+	 });
+
+	 //app.reloadtabs();
+	 } */
+
+	 //添加标签
+	function aliasAdd(node) {
+		var tabId = $(node).parent().parent().prev().prev().val();//tabId
+		$("#tabsId").val(tabId);
+		aliasByUser();
+		$("#aliasIdChange").val("")
+		$("#labelVal").val("")
+		$("#aliasType").val("")
+		$("#selectAliasName").text("")
+		var aliasTable=document.getElementById('tb_alias')
+		aliasTable.rows[0].style.display=""
+		aliasTable.rows[1].style.display="none"
+		$("#aliasModel").modal("show");
+	}
+	 //选项卡置最前
+	function tabTop(node) {
+		// console.log(node)
+		var lithis = $(node).parent().parent().parent();
+		var lithisq = $(node).parent().parent().parent().parent();
+		var lifirst=$(node).parent().parent().parent().parent().children().eq(0)
+		var html = $(lithis).prop("outerHTML");
+		$(lithis).remove();
+		$(lithisq).prepend(html);
+		if(lifirst[0].id=='tab_li_0'){
+			var jiben= $(lifirst).prop("outerHTML");
+			$(lifirst).remove();
+			$(lithisq).prepend(jiben);
+		}
+		var tabId=lithis[0].id;
+		var parentId=lithisq[0].id
+		//console.log(lithis)
+   		tabId=tabId.substring(tabId.lastIndexOf("_")+1,tabId.length);
+		parentId=parentId.substring(parentId.lastIndexOf("v")+1,parentId.length);
+		 $.ajax({
+			type : 'POST',
+			url : "/getTabsOrderById",
+			data : {
+				tabsId : tabId,
+				menuId:menuId,
+				parentId:parentId
+			},
+			
+			success : function(data) {
+				//console.log(data)
+			}
+		}) 
+		
+	}
+	//手动添加选项卡
+	function plusTab(node, lv, pId) {
+		$("#lv").val(lv);
+		$("#parentId").val(pId)
+		$("#plusTabsModel").modal("show");
+	}
+	var setting = { //此处根据自己需要进行配置
+		view : {
+			enable : true,
+			showLine : true,
+			showIcon : true, //设置是否显示节点图标
+			nameIsHTML : true
+		},
+		data : {
+			simpleData : {
+				enable : true
+
+			}
+		},
+		callback : {
+			onClick : zTreeOnClickRight,
+			onMouseUp : treeUp
+		}
+	};
+	/**
+	 * 获取用户的标签
+	 * 
+	 */
+	function aliasByUser() {
+		$
+				.ajax({
+					type : 'POST',
+					url : "/aliasByUser",
+					data : {
+						userId : sessionUser.userId
+					},
+					async : false,
+					success : function(data) {
+						if (data != null) {
+							data = JSON.parse(JSON.stringify(data).replace(
+									/aliasName/g, "name"));
+							data = getChildren(data);
+							document.getElementById('myalias').innerHTML = ""
+							for (var i = 0; i < data.length; i++) {
+								if (data[i].aliasType != 2) {
+									document.getElementById('myalias').innerHTML += '<span onclick="attention(this,1)" title="系统标签" style="border-radius: 5px;padding:3px;margin-right:5px;background-color:#C2E1EF;cursor:pointer">'
+											+ data[i].name + '</span>';
+									$.fn.zTree.init($("#systree"), setting,
+											data[i].children);
+
+								} else {
+									document.getElementById('myalias').innerHTML += '<span onclick="attention(this,2)" title="个人标签" style="background-color:#EFEDC2;border-radius: 5px;padding:3px;margin-right:5px;cursor:pointer">'
+											+ data[i].name + '</span>';
+									$.fn.zTree.init($("#pertree"), setting,
+											data[i].children);
+								}
+							}
+							if (data.length != 0) {
+							} else {
+								document.getElementById('aliasUser').style.display = "none"
+							}
+						}
+					}
+				})
+	}
+//设置节点全部不选择
+	function treeUp(action, objId, data) {
+		var pertreeobj = $.fn.zTree.getZTreeObj("pertree");
+		pertreeobj.cancelSelectedNode();
+		var systreeobj = $.fn.zTree.getZTreeObj("systree");
+		systreeobj.cancelSelectedNode();
+	}
+	// 树的单击事件
+	function zTreeOnClickRight(event, treeId, treeNode) {
+		var str = treeNode.tId
+		var treeName = str.substring(0, str.indexOf("_"))
+		var aliasTable=document.getElementById('tb_alias')
+		aliasTable.rows[0].style.display="none"
+		aliasTable.rows[1].style.display=""
+		if (treeName == "pertree") {
+			var zTreeObj = $.fn.zTree.getZTreeObj("pertree");
+			//$("#labelVal").val(zTreeObj.getSelectedNodes()[0].name);
+			$("#aliasType").val(2)
+			 document.getElementById("selectAliasName").innerText=zTreeObj.getSelectedNodes()[0].name;
+			$("#aliasIdChange").val(zTreeObj.getSelectedNodes()[0].aliasId);
+			$("#aliaslistgeren").modal("hide");
+		} else if (treeName == "systree") {
+			var zTreeObj = $.fn.zTree.getZTreeObj("systree");
+			//$("#labelVal").val(zTreeObj.getSelectedNodes()[0].name);
+			$("#aliasType").val(1)
+			 document.getElementById("selectAliasName").innerText=zTreeObj.getSelectedNodes()[0].name;
+			$("#aliasIdChange").val(zTreeObj.getSelectedNodes()[0].aliasId);
+			$("#aliaslistxitong").modal("hide");
+		}
+	}
+	//判断是否有子项
+	function getChildren(array) {
+		for (var i = 0; i < array.length; i++) {
+			if (array[i].children != "undefined"
+					|| array[i].children != undefined) {
+				if (array[i].children != "null" && array[i].children != null
+						&& array[i].children.length != 0) {
+					getChildren(array[i].children)
+				} else {
+					delete array[i].children
+				}
+			}
+		}
+		return array;
+	}
+	//判断点击是系统标签还是个标签
+	function attention(node, type) {
+		if (type == 1) {
+			$("#aliaslistxitong").modal("show");
+		} else {
+			$("#aliaslistgeren").modal("show");
+		}
+	}
+</script>
+</head>
+
+<body>
+	<div id="box" style="background: none;padding:5px;">
+		<input id="lv" style="display:none;" /> <input id="parentId"
+			style="display:none;" />
+		<ul class="nav nav-tabs" id="conNav0">
+
+		</ul>
+		<div class="tab-content" id="cont0"></div>
+
+		<!--添加标签开始-->
+		<div class="modal fade" id="aliasModel" tabindex="-1" role="dialog">
+			<div class="modal-dialog" style="    width: 500px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title">添加标签</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px; margin:20px 0px;">
+						<div class="row">
+							<div class="col-md-12" style="width: 100%;">
+								<table id="tb_alias">
+									<tr>
+										<td align="right"><label>创建新标签:</label></td>
+										<td><input class="form-control" type="text" id="labelVal"
+											autocomplete="off"
+											style="display: inline; width: 180px;color: #393939 !important;" />
+											<select class="form-control" id="state"
+											style="display: inline;width: 110px;color: #393939 !important; "><option
+													value="2">个人标签</option>
+												<option value="1">系统标签</option>
+										</select></td>
+									</tr>
+									 <tr>
+										<td><span
+											style="margin-bottom: 15px;font-weight: bolder;margin-bottom: 5px;">您选择的标签:</span></td>
+										<td><span id="selectAliasName"></span></td>
+									</tr> 
+									<tr id="aliasUser">
+										<td><label style="margin-top: 8px;">选择已有的标签:</label></td>
+										<td><label id="myalias" style="margin-top: 8px;"></label></td>
+									</tr>
+									<tr>
+										<td><input type="text" id="tabsId" style="display: none" /></td>
+										<td><input type="hidden" id="aliasType" /><input type="hidden" id="aliasIdChange" /></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn btn-default"
+							style="background: #0085ff !important;color: #fff;"
+							onclick="saveAlias()" th:text="#{submit}">保存</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!--添加标签结束-->
+		<!--系统标签列表-->
+		<div class="modal fade" id="aliaslistxitong" tabindex="-1"
+			role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content" style=" width: 440px;">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title">系统标签</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px;">
+						<div class="row">
+							<div class="col-md-12" style="padding: 10px 0px;">
+								<ul id="systree" class="ztree"
+									style="margin: 10px 0px 0px; padding: 0px; width: 100%; height: 45%; "></ul>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!--系统标签结束-->
+		<!--个人标签列表-->
+		<div class="modal fade" id="aliaslistgeren" tabindex="-1"
+			role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content" style=" width: 440px;">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title">个人标签</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px;">
+						<div class="row">
+							<div class="col-md-12" style="padding: 10px 0px;">
+								<ul id="pertree" class="ztree"
+									style="margin: 10px 0px 0px; padding: 0px; width: 100%; height: 45%;"></ul>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!--个人标签结束-->
+		<!--添加选项卡开始-->
+		<div class="modal fade" id="plusTabsModel" tabindex="1" role="dialog">
+			<div class="modal-dialog" style="width: 320px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title">添加文件夹</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px;">
+						<div class="row">
+							<div class="col-md-12" style="margin: 20px 0;">
+								<table>
+									<tr>
+										<td>名称：</td>
+										<td><input class="form-control" type="text" id="tabsText"
+											autocomplete="off"
+											style=" width: 180px;color: #333 !important;" /></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn btn-default" onclick="saveTabs()"
+							style="background: #0085ff !important;color: #fff;"
+							th:text="#{submit}">保存</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!--添加选项卡结束-->
+
+		<!-- 重命名开始 -->
+		<div class="modal fade" id="renametab" tabindex="1" role="dialog">
+			<div class="modal-dialog" style="width: 320px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title">重命名</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px;">
+						<div class="row">
+							<div class="col-md-12" style="margin: 20px 0;">
+								<table>
+									<tr>
+										<td>名称：</td>
+										<td><input class="form-control" type="text"
+											id="tabsrenameText" autocomplete="off"
+											style=" width: 180px;color: #333 !important;" /><input
+											type="hidden" id="conId" /><input type="hidden" id="conlv" /></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn btn-default"
+							onclick="tabrename1()"
+							style="background: #0085ff !important;color: #fff;"
+							th:text="#{submit}">保存</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+
+		<!-- 重命名结束 -->
+		<!-- 更新基本信息开始 -->
+		<div class="modal fade" id="updateInfo" tabindex="1" role="dialog">
+			<div class="modal-dialog" style="width: 320px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title">更新基本信息表</h4>
+					</div>
+					<div class="modal-body"
+						style="padding: 0px 10px;height: 50px;text-align: center;">
+
+						<form id="infofileForm" enctype="multipart/form-data">
+							<input id="infofile" name="folder" type="file"
+								style="margin-top:20px;" />
+						</form>
+
+
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn btn-default"
+							onclick="updateInfo()"
+							style="background: #0085ff !important;color: #fff;"
+							th:text="#{submit}">保存</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+
+		<!-- 更新基本信息结束 -->
+	</div>
+</body>
+<script type="text/javascript">
+	$.showConfirm = function(str, funcok, title, confirm, node) {
+		BootstrapDialog.confirm({
+			title : title,
+			message : str,
+			type : BootstrapDialog.TYPE_WARNING,
+			closable : true, // 点击对话框以外的页面内容可关闭
+			//draggable : true, // 可拖拽
+			btnOKLabel : confirm,
+			btnOKClass : 'btn-warning',
+			size : BootstrapDialog.SIZE_SMALL,
+			// 对话框关闭的时候执行方法
+			onhide : title,
+			callback : function(result) {
+				if (result) {
+					$.post("/delTabsforindex", {
+						tabsId : funcok,
+						menuId : menuId
+					}, function(data) {
+						if (data != null) {
+						//	console.log(node)
+							deleteSuccess()
+							var lv = $(node).parent().parent().parent()
+									.parent().children("li:last-child")
+									.children().children().eq(0).val()
+							var conNavId = $(node).parent().parent().parent()
+									.parent().attr('id');
+							var prevId = $(node).parent().parent().parent()
+									.prev().children().eq(0).attr('id')
+							var nextId = $(node).parent().parent().parent()
+									.next().children().eq(0).attr('id')
+							$(node).parent().parent().prev().prev().parent()
+									.parent().children().remove()
+							conNavId = conNavId.replace('conNav', '');
+							tabsData(conNavId, lv)
+							if (prevId != undefined) {
+								$("#" + prevId).click()
+							} else {
+								$("#" + nextId).click()
+							}
+							tabLoad()
+						}
+					});
+				}
+			}
+		});
+	};
+	function DataAll() {
+		$.ajax({
+			type : 'POST',
+			url : "/getUserById",
+			data : {
+				userId : sessionUser.userId
+			},
+			datatype : "json",
+			success : function(data) {
+				app.user = data;
+				$.ajax({
+					type : 'POST',
+					url : "/getRoleButtonById",
+					data : {
+						roleId : data.role.roleId
+					},
+					success : function(result) {
+						if (result != null) {
+							app.rolebtn = JSON.parse(result);
+						}
+					}
+				})
+			}
+		})
+	}
+	function saveAlias() {
+		var aliasType,aliasName;
+		if ($("#aliasType").val() == "") {
+			aliasType = $("#state").val()
+		} else {
+			aliasType = $("#aliasType").val()
+		}
+		//console.log(aliasType)
+		if($("#labelVal").val()!=""){
+			aliasName=$("#labelVal").val();
+		}else{
+			aliasName=$("#selectAliasName").text()
+		}
+	//	console.log(aliasName)
+		console.log($("#aliasIdChange").val())
+		$.ajax({
+			type : 'POST',
+			url : "/insertTabAlias",
+			data : {
+				aliasName : aliasName,
+				tabsId : $("#tabsId").val(),
+				aliasType : aliasType,
+				aliasId:$("#aliasIdChange").val()
+			},
+			success : function(data) {
+				if (data != null && data != "null" && data != "") {
+					$("#aliasModel").modal("hide");
+					addSuccess()
+					$("#tab_a_" + $("#tabsId").val()).click()
+					//self.opener.location.reload();
+				} else {
+					//$("#aliasModel").modal("hide");
+					$.showErr("不存在数据");
+				}
+			}
+		})
+	}
+	function saveTabs() {
+		console.log($("#tabsText").val())
+		if ($("#tabsText").val() != "") {
+			$.ajax({
+						type : 'POST',
+						url : "/insertTabs",
+						data : {
+							name : $("#tabsText").val(),
+							parentId : $("#parentId").val(),
+							lv : $("#lv").val(),
+							menuId : menuId
+						},
+						async : false,
+						success : function(data) {
+							if (data == "ok") {
+								$("#plusTabsModel").modal("hide");
+								//self.location.reload();
+								$('#conNav' + $("#parentId").val() + '>li')
+										.remove();
+								$('#con' + $("#parentId").val()).html('');
+								tabsData($("#parentId").val(), $("#lv").val())
+								if ($('#conNav' + $("#parentId").val() + '>li')
+										.eq(-2).children().eq(0)[0].innerText == "其他数据") {
+									$('#conNav' + $("#parentId").val() + '>li')
+											.eq(-3).children().eq(0).click()
+								} else if ($(
+										'#conNav' + $("#parentId").val()
+												+ '>li').eq(-2).children()
+										.eq(0)[0].innerText == "...") {
+									/* console.log($('#conNav' + $("#parentId").val() + '>li').eq(0)
+									.children().eq(0))*/
+									$('#conNav' + $("#parentId").val() + '>li')
+											.eq(0).children().eq(0).click()
+								} else {
+									$('#conNav' + $("#parentId").val() + '>li')
+											.eq(-2).children().eq(0).click()
+								}
+								addSuccess()
+								tabLoad()
+							} else if (data = "exist") {
+								aliasErr()
+							} else {
+								addErr()
+							}
+						}
+					})
+		} else {
+			contentErr()
+		}
+
+	}
+	//根据选项卡Id跟等级重新加载选项卡
+	function tabsData(tabsId, lv) {
+		$.ajax({
+			type : 'POST',
+			url : "/listTabsById",
+			data : {
+				tabsId : tabsId,
+				menuId : menuId
+			},
+			async : false,
+			success : function(result) {
+				againTab(tabsId, lv, result)
+			}
+		})
+	}
+	//删除选项卡
+	function removtab(node) {
+		var retabId = $(node).parent().parent().prev().prev().val();//tabId
+		//alert(retabId);
+		if (lang != "en_US") {
+			$
+					.showConfirm(
+							"<i style='color: red;position: relative;top: 2px;font-size: 27px;left: -6px;' class='icon-remove new-icon'></i>确认要删除吗？",
+							retabId, "删除文件", "确认", node);
+		} else {
+			$
+					.showConfirm(
+							"<i style='color: red;position: relative;top: 2px;font-size: 20px;left: -6px;' class='icon-remove new-icon'></i>Are you sure you want to delete it?",
+							tabsId, "DeleteFile", "confirm", node);
+		}
+		/* $.ajax({
+			type : "POST",
+			url : "/delTabsforindex",
+			data : {
+				"tabsId" : retabId
+			},
+			async : false,
+			success : function(data) {
+				//alert(data);
+				//app.reloadtabs();
+				var conNavId = $(info).parent().parent().parent().parent()
+						.attr('id');
+				var prevId = $(info).parent().parent().parent().prev()
+						.children().eq(0).attr('id')
+				var nextId = $(info).parent().parent().parent().next()
+						.children().eq(0).attr('id')
+				$(info).parent().parent().prev().prev().parent().parent()
+						.children().remove()
+				conNavId = conNavId.replace('conNav', '');
+				tabsData(conNavId, lv)
+				// if (conNavId == "conNav0") {
+				//	ulLiLength(0, 1)
+				//}
+				if (prevId != "undefined") {
+					$("#" + prevId).click()
+				} else {
+					$("#" + nextId).click()
+				}
+				//$('#conNav li:eq(-2) a').tab('show');
+				//if(tabMainName=="conNav0"){
+				//	ulLiLength(0, 1)
+				//}
+			}
+		}); */
+
+		//app.reloadtabs();
+	}
+
+	/* var app = new Vue({
+		el : "#box",
+		data : {
+			rolebtn : []
+		},
+		mounted : function() {
+			DataAll();
+		},
+		methods : {
+			saveAlias : function() {
+				 $.ajax({
+					type : 'POST',
+					url : "/insertTabAlias",
+					data : {
+						aliasName : $("#labelVal").val(),
+						tabsId : $("#tabsId").val(),
+						aliasType : $("#state").val(),
+						
+					},
+					success : function(data) {
+						if (data != null && data != "null"&& data != "") {
+							$("#aliasModel").modal("hide");
+							$.showSuccessTimeout("添加标签成功");
+							self.opener.location.reload(); 
+						}else{
+							//$("#aliasModel").modal("hide");
+							$.showErr("不存在数据");
+						}
+					}
+				}) 
+			},
+			saveTabs : function() {
+				$.ajax({
+					type : 'POST',
+					url : "/insertTabs",
+					data : {
+						name : $("#tabsText").val(),
+						parentId : $("#parentId").val(),
+						lv : $("#lv").val(),
+						menuId : menuId
+					},
+					success : function(data) {
+						if (data == "ok") {
+							$("#plusTabsModel").modal("hide");
+							self.location.reload();
+							$.showSuccessTimeout("添加成功");
+						}
+					}
+				})
+			},
+			reloadtabs:function(){
+				//alert(1);
+				self.location.reload();
+			}
+		}
+	}) */
+	function openUpdateInfoModal() {
+		$("#updateInfo").modal("show");
+	}
+	var clickcount = 0;
+	function updateInfo() {
+
+		if (clickcount == 0) {
+			clickcount++;
+			$("#infofile").val();
+			if ($("#infofile").val().indexOf('基本信息') >= 0
+					&& $("#infofile").val().indexOf('xls') >= 0) {
+				var formData = new FormData(document
+						.getElementById("infofileForm"));
+				formData.append("menuid", menuId);
+				formData.append("miji", "1");
+				formData.append("alistype", "");
+				formData.append("alisname", "");
+				$.ajax({
+					type : "POST",
+					enctype : 'multipart/form-data',
+					url : '/upload',
+					data : formData,
+					cache : false,
+					processData : false,
+					contentType : false,
+					success : function(result) {
+						alert('修改成功');
+						clickcount = 0;
+						$("#updateInfo").modal("hide");
+						location = location
+					}
+				});
+
+			} else {
+				alert('请选择正确的文件');
+				clickcount = 0;
+			}
+		} else {
+			alert('请勿重复点击添加按钮')
+		}
+		//alert(menuId)
+	}
+	function menu() {
+		$('.dropdown-menu').css("display", "none");
+	}
+	function returnjuzhen() {
+		$.ajaxSetup({
+			cache : false
+		});
+		$.ajax({
+			url : '/getPhenomenonmenuid',
+			async : false,
+			success : function(data) {
+				if (data > 0) {
+					//alert(1);
+					$.ajax({
+						url : '/delPhenomenonmenuid',
+						async : false
+					})
+
+					location.href = 'html/yanzhengjuzhen.html?menuid=' + data
+
+				} else {
+					//alert(2);
+					window.parent.location.reload();
+				}
+			}
+
+		})
+	}
+
+	function parseUrl() {
+		var url = location.href;
+		var i = url.indexOf('?');
+		if (i == -1)
+			return;
+		var querystr = url.substr(i + 1);
+		var arr1 = querystr.split('&');
+		var str = new Array();
+		var num = 0;
+		for (i in arr1) {
+			var ta = arr1[i].split('=');
+			str[num] = decodeURI(ta[1]);
+			num++;
+		}
+		return str;
+	}
+</script>
+</html>

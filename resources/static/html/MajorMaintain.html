@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" content="ie=edge" />
+<meta charset="UTF-8">
+
+<link rel="stylesheet" href="../assets/css/bootstrap/easyui.css" />
+<link rel="stylesheet" href="../assets/css/icon.css" />
+<title></title>
+<script src="../assets/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/jquery.easyui.min.js"></script>
+<title>节点管理</title>
+
+<!--[if IE 7]>
+    <link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css">
+    <![endif]-->
+
+<link rel="stylesheet" href="../assets/css/newstyle.css">
+
+<!--bootstrap-table-->
+<style>
+
+tr{
+    height: 30px;
+}
+progress {
+	background-color: #56BE64;
+	width: 100%;
+	margin-top: 6px;
+	margin-bottom: 5px;
+}
+
+progress::-webkit-progress-bar {
+	background: #ccc;
+}
+
+progress::-webkit-progress-value {
+	background: #56BE64;
+}
+
+percentage {
+	position: absolute;
+	left: 207px;
+	margin-top: 4px;
+}
+
+.shangchaun {
+	height: 40px;
+	width: 100px;
+	background: #32dc97;
+	border-radius: 7px;
+	color: #fff;
+	border: none;
+	float: right;
+}
+
+#miji {
+	float: right;
+	margin-right: 20px;
+	background: none;
+	border:1px solid #CCCCCC;
+	padding:10px 5px !important;
+	color: #333;
+	font-size: 15px;
+	border-radius: 5px;
+	text-align: center;
+}
+
+tjjd {
+	width: 100px;
+	height: 30px;
+	line-height: 30px;
+	border: 1px solid #fff;
+	background: #6474fa;
+	color: #fff;
+}
+
+.l-btn-text {
+	line-height: 30px;
+	font-size: 16px;
+}
+
+#tt .tree-title {
+	font-size: 16px !important;
+}
+
+
+</style>
+</head>
+
+<body class="easyui-layout" style="height: 100%;margin: 0px;">
+
+	<div data-options="region:'west',"
+		style="width:250px;border-bottom-left-radius: 5px; border-top-left-radius: 5px;background: #fbfbfb;">
+		<div style="    margin: 10px;">
+			<a href="#" class="easyui-linkbutton tjjd" onclick="addnode()"
+				style="float: left; width: 65px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #fff;
+    background: #6474fa;
+    color: #fff;" th:text="#{add}">添加节点</a>
+
+<a href="#" class="easyui-linkbutton tjjd" id="setnode" onclick="setnode()"
+				style=" width: 65px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #fff;
+    background: #6474fa;
+    color: #fff;    margin-left: 4px;" th:text="#{modification}">修改</a>
+
+			<a href="#" class="easyui-linkbutton tjjd" id="delnode" onclick="delnode()"
+				style=" width: 65px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #fff;
+    background: #6474fa;
+    color: #fff;    margin-left: 0px;" th:text="#{delete}">删除</a>
+		</div>
+		<ul id="tt" class="easyui-tree"></ul>
+	</div>
+	<div data-options="region:'center'"
+		style="padding-left: 20px;border-bottom-right-radius: 5px; border-top-right-radius: 5px;background: #fbfbfb;">
+		<!-- 	upload -->
+		<button
+			style="float: right; width: 100px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #fff;
+    background: #6474fa;
+    color: #fff;    border-radius: 5px;"
+			onclick="downtemp()" th:text="#{template}">模板下载</button>
+		<h1 th:text="#{folder}">文件夹上传文件</h1>
+
+		<form id="FileuploadForm" method="POST" action="/upload" enctype="multipart/form-data">
+
+			<div style="border:1px solid #fff;margin-top: 30px;    background: #fbfbfb;border-radius: 5px;">
+				<div style="height:200px;border:3px dashed #ccc;margin: 20px 100px;border-radius: 10px;">
+				
+			
+					<div id="scbutton" style="text-align: center;padding: 63px 0;position: relative;">
+				
+							<div style="margin-top:10px;padding-right: 150px" ><input type="checkbox" id="upsingel" /><span th:text="#{single}">上传单个文件</span></div>
+						<input  style="margin-top:10px;"  type="file"  name="folder" id="uploadFile" multiple="multiple"
+							webkitdirectory="" />
+								
+								<input  style="margin-top:10px;display: none;" disabled="disabled" type="file" name="folder" id="uploadFile01"  />	
+						<div style="color: red;    margin-top: 24px; " th:text="#{note}">*注意:上传的文件夹名称不得包含特殊字符"."</div>
+					</div>
+					<!--进度条部分(默认隐藏)-->
+					<div id="msg" style="color: red"></div>
+					<div style="display: none;" class="progress-body">
+						<div
+							style="height: 100px;position: relative;border-radius: 10px;margin-top: 15px;border: 1px solid #ccc;margin-bottom: 20px;">
+							<div class="shnaghcuantubiao"></div>
+							<div style="margin-left: 53px;padding-right: 10px;    margin-left: 60px;">
+								<span style="width: 300px;" class="progress-info">请选择文件并点击上传文件按钮</span>
+									<progress class="progress1"></progress>
+								<span style="width: 300px;" class="progress-speed1">第10个, 共40个</span>
+								
+								<progress  class="progress2"></progress>
+								<percentage>0%</percentage>
+								<span style="width: 300px;" class="progress-speed">0 M/S, 0/0M</span>
+							</div>
+	
+						</div>
+					</div>
+				
+    				
+					<input type="button" class="shangchaun" th:value="#{upload}" onclick="upload()" /> 
+					
+					<select id="miji">
+						<option value="0" th:text="#{psecurity}">请选择密级</option>
+					</select>
+					<span style="color:red;float: right;margin-right: 5px;font-size: 16px">*</span>
+					<input type="button"  th:value="#{addlabel}" onclick="addalis()"
+    				style="float: right;
+	margin-right: 15px;
+	width: 80px;
+	background: none;
+	border:1px solid #CCCCCC;
+	padding:11px 5px;
+	color: #333;
+	font-size: 15px;
+	height:41px;
+	border-radius: 5px;
+	text-align: center;"
+    				/> 
+				</div>
+
+			</div>
+			<!-- 标签<input> -->
+
+		</form>
+
+		<!-- 	upload -->
+		
+	</div>
+	<div id='loading' style="position:absolute; left:0px; top:0px; width:100%; height:100%; z-index:999;background: rgba(0, 0, 0, 0.5);display:none"><span style="position:absolute; left:50%; top:50%;color:#fff">
+	正在执行,请稍等.....
+	</span>
+</div>
+	<div id="addNodewindos" class="easyui-window" th:title="#{addNode}"
+		data-options="resizable:true,modal:true,closed:true"
+		style="width:389px;height:143px;padding:5px;background: #fafafa;top:100px">
+		<table id="tableNode" style="margin: 0px auto">
+			<tr>
+				<td style="width: 80px"><label for="name" th:text="#{nodeName}">节点名称3:</label></td>
+				<td><input id="addnodename" type="text" name="addname" data-options="required:true"
+					missingMessage="请填写信息" style="width: 195px;" /></td>
+			</tr>
+			<tr>
+				<td style="width: 80px"><label for="name" th:text="#{nodeType}">节点类型:</label></td>
+				<td><select id="cc" class="easyui-combobox" name="xxX" style="width:200px;">
+				<option th:text="#{structureNode}">目录节点</option>
+						<option th:text="#{baseNode}">数据节点</option>
+						
+						<option th:text="#{matrix}">验证矩阵</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><button style="float: right;" onclick="queding()" th:text="#{confirm}">确定</button>
+					
+			</tr>
+		</table>
+	</div>
+				
+        <div id="setNodewindos" class="easyui-window" th:title="#{modification}"
+		data-options="resizable:true,modal:true,closed:true,collapsible:false,minimizable:false,maximizable:false"
+		style="width:389px;height:143px;padding:5px;background: #fafafa;top:100px">
+		<table id="tableNode" style="margin: 0px auto">
+			<tr>
+				<td style="width: 80px"><label for="name" th:text="#{nodeName}">节点名称3:</label></td>
+				<td><input id="setnodename" type="text" name="setname" data-options="required:true"
+					missingMessage="请填写信息" style="width: 195px;" /></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><button style="float: right;" onclick="setqueding()" th:text="#{confirm}">确定</button>
+			</tr>
+		</table>
+	</div>
+ 
+		
+
+	<div id="addaliswinow" class="easyui-window" title="添加标签" 
+				data-options="resizable:true,modal:true,closed:true,collapsible:false,minimizable:false,maximizable:false" 
+				style="width:500px;padding:5px;background: #fafafa;top:100px">  
+    			   <table id="tableNode" class="addalistables" style="margin: 0px auto;">
+    			   
+						<tr>
+							<td> <label for="name">标签名称:</label> </td>
+							<td> <input id="labelVal"   type="text" name="addname" class="aliasinputval" data-options="required:true" missingMessage="请填写信息" />
+							</td>
+							<td>
+				<select id="cc1" class="easyui-combobox" name="dept" style="width:100px;">   
+   				 
+    				<option value="1">系统标签</option>   
+				</select>
+				
+							</td>
+							<td><button id="addalistinputbtn">+</button></td>
+						</tr>
+						<tr><td><label for="name">选择已有的标签:</label></td><td><label id="myalias" class="myalias" style="margin-top: 30px;"></label></td></tr>
+						
+					</table>
+					
+					<table style="margin: 0px auto;">
+					<tr>
+						<td colspan="3" style="text-align: center;"><span style="color: red">*</span>标签用于数据高效检索及数据分类</td>
+						</tr>
+						<tr>
+						<td></td>
+						<td></td>
+						<td><button id="alisbtn" style="float: right;" onclick="" th:text="#{submit}">确定</button></td>
+						</tr>
+					</table>
+</div> 
+
+<!-- 系统标签start -->
+<div id="addSysAliswinow" class="easyui-window" title="系统标签"
+		data-options="resizable:true,modal:true,closed:true,collapsible:false,minimizable:false,maximizable:false"
+		style="width:387px;height:158px;padding:5px;background: #fafafa;top:100px">
+		<ul id="systree" class="easyui-tree"></ul>
+	</div>
+<!-- 系统标签end -->
+<!-- 个人标签start -->
+<div id="addPerAliswinow" class="easyui-window" title="个人标签"
+		data-options="resizable:true,modal:true,closed:true,collapsible:false,minimizable:false,maximizable:false"
+		style="width:387px;height:158px;padding:5px;background: #fafafa;top:100px">
+		<ul id="pertree" class="easyui-tree"></ul>
+	</div>
+<!-- 个人标签end -->
+
+</body>
+<script th:inline="javascript">
+$.ajaxSetup({cache:false});
+//获取登录者信息
+var sessionUser;
+$.ajax({
+	type : "post",
+	url : "/getSessionByIp",
+	async : false,
+	success : function(data) {
+		sessionUser=data
+	}
+})
+var cookieUser = sessionUser;
+var alisname = "";
+var alistype="";
+var selettype=0;
+	function addalis(){
+		aliasByUser()
+		$("#addaliswinow").window('open');
+		
+	}
+	
+	function downtemp() {
+		//downloadTemplate
+		window.location.href = "/downloadTemplate";
+	}
+
+	var thisnode;
+	function queding() {
+		var url;
+		var parentid;
+		var lv;
+
+		if ($("#addnodename").val() == '' || $("#addnodename").val() == null) {
+			alert('请输入名称')
+			return;
+		}
+		
+		var ishavename=false;
+		
+		$.ajax({
+			url:"/ishavemenuname",
+			data:{'name':$("#addnodename").val()},
+			  async:false, 
+			success:function(data){
+				if(data>0){
+					ishavename = true;
+				}else{
+					ishavename =false;
+				}
+				
+			}
+			
+		})
+		
+		if(ishavename){
+			alert('该项目名称已存在')
+			return ;
+		}
+		var combonodetext = $("#cc").combo('getText');
+		console.log(combonodetext)
+		if ( combonodetext== "数据节点"||combonodetext=="baseNode") {
+			url = "html/tab3.html"
+		} else if(combonodetext== "目录节点"||combonodetext=="structureNode") {
+			url = ""
+		}else{
+			url = "html/yanzhengjuzhen.html"
+		}
+		console.log(url)
+		if (thisnode == undefined) {
+			parentid = 1;
+			lv = 1;
+		} else {
+			parentid = thisnode.id;
+			lv = thisnode.lv + 1;
+		}
+		
+		if(thisnode!=undefined){
+			if(thisnode.url=="html/yanzhengjuzhen.html"){
+				alert("验证矩阵下不可存在子节点");
+				return ;
+			}
+			
+			if(thisnode.url=="html/tab3.html"){
+				alert("数据节点下不可存在子节点");
+				return ;
+			}
+		}
+		console.log(sessionUser)
+		$.ajax({
+			url : '/insertMenuforManager',
+			type : 'GET',
+			data : {
+				'text' : $("#addnodename").val(),
+				'url' : url,
+				'parentid' : parentid,
+				'lv' : lv,
+				'userid':sessionUser.userId
+			},
+			success : function(data) {
+				if (data > 0) {
+					alert('添加成功');
+					$("#addNodewindos").window('close');
+					$('#tt').tree('reload')
+					window.parent.callback();
+				} else {
+					alert('添加失败');
+				}
+			}
+		})
+	}
+	
+	function setqueding() {
+		
+		
+		$.ajax({
+			url : '/updateMenu',
+			type : 'POST',
+			data : {
+				'name' : $("#setnodename").val(),
+				'menuId':thisnode.id
+			},
+			success : function(data) {
+				if (data > 0) {
+					alert('修改成功');
+					$("#setNodewindos").window('close');
+					$('#tt').tree('reload')
+					window.parent.callback();
+				} else {
+					alert('修改失败');
+				}
+			}
+		})
+	}
+	
+	function cancel() {
+		$("#addNodewindos").window('close');
+	}
+	
+	var addname=[[#{addNode}]];
+	function addnode() {
+		
+		//alert(JSON.stringify(thisnode))387158
+		if(thisnode==undefined){
+			alert('请选择节点');
+			return;
+		}else{
+			addname=thisnode.text;
+		}
+		$('#addNodewindos').dialog({    
+		    title: addname,
+		    width: 387,    
+		    height: 158 
+		});  
+		$("#addNodewindos").window('open');
+		
+		
+	}
+
+	
+	function setnode(){
+		if (thisnode == undefined) {
+			alert("请选择节点")
+			return;
+		}
+		
+		if(sessionUser.userId!=1){
+		if(thisnode.userid!=sessionUser.userId){
+			alert("不可以修改其他用户创建的节点")
+		return;	
+		}
+		}
+		//alert(thisnode)
+		//alert(sessionUser)
+		$("#setnodename").val(thisnode.text);
+		$("#setNodewindos").window('open');
+		
+	}
+	
+	function delnode() {
+		if (thisnode == undefined) {
+			alert("请选择节点")
+			return;
+		}
+		
+		if(sessionUser.userId!=1){
+			if(thisnode.userid!=sessionUser.userId){
+				alert("不可以修改其他用户创建的节点")
+			return;	
+			}
+			}
+		$.messager.confirm('确认', '您确认想要删除记录吗？', function(r) {
+			if (r) {
+				$.ajax({
+					url : '/updateMenuforManager',
+					type : 'GET',
+					data : {
+						'id' : thisnode.id
+					},
+					async:true,
+					beforeSend:function(){
+						 document.getElementById('loading').style.display=""
+					},
+					success : function(data) {
+						if (data > 0) {
+							document.getElementById('loading').style.display="none"
+							alert('删除成功');
+							$('#tt').tree('reload')
+							window.parent.callback();
+						} else {
+							alert('删除失败')
+						}
+					}
+				})
+			}
+		});
+
+	}
+	var filecount =0;
+	$(function() {
+		var ffiles = document.getElementById('uploadFile');
+		ffiles.addEventListener('change', function() {
+		    var t_files = this.files;
+		    console.log(t_files.length);
+		    filecount = t_files.length;
+		    //document.getElementById('content').innerHTML = str;
+		}, false);
+		
+		
+		
+		
+		$("#addalistinputbtn").click(function(){
+			//alert(1);
+			$(".addalistables").append('<tr><td> <label for="name">标签名称:</label> </td><td> <input id="labelVal"   type="text" name="addname" class="aliasinputval" data-options="required:true" missingMessage="请填写信息" /></td><td>		<select id="cc1" class="easyui-combobox" name="dept" style="width:100px;"> 			 		<option value="1">系统标签</option>		</select>							</td>					<td><button class="remalistinputbtn">-</button></td>				</tr>				<tr><td><label for="name">选择已有的标签:</label></td><td><label id="myalias" class="myalias" style="margin-top: 30px;"></label></td></tr>				');
+			
+			aliasByUser();
+		})
+		//remalistinputbtn
+		$("body").on("click", ".remalistinputbtn", function() {
+		 $(this).parent().parent().next().remove();
+       $(this).parent().parent().remove();
+       return false;
+    })
+		
+		$('#upsingel').change(function(){
+			
+			if($("#upsingel").is(":checked")){
+				$('#uploadFile01').attr("disabled",false)
+				$('#uploadFile').attr("disabled","disabled")
+				$('#uploadFile').hide()
+				$('#uploadFile01').show();
+			}else{
+				$('#uploadFile01').attr("disabled","disabled")
+				$('#uploadFile').attr("disabled",false)
+				$('#uploadFile01').hide()
+				$('#uploadFile').show();
+			}
+			
+		})
+		
+		$('#tt').tree({
+			url : '/findallmenuforManager2',
+			lines:true,
+			dnd:true,
+			onDragOver:function(	target, source){
+				var targetnode = $('#tt').tree('getNode',target);
+				if(targetnode.url=="html/yanzhengjuzhen.html"){
+				//alert("验证矩阵下不可存在子节点");
+					return false;
+				}
+				
+				if(targetnode.url=="html/tab3.html"){
+				//alert("基本节点下不可存在子节点");
+					return false;
+				}
+				
+			},
+			onDrop:function(target,source,point){
+				var targetnode = $('#tt').tree('getNode',target);
+				if(targetnode.url=="html/yanzhengjuzhen.html"){
+				//	alert("验证矩阵下不可存在子节点");
+					return false;
+				}
+				
+				if(targetnode.url=="html/tab3.html"){
+					//alert("基本节点下不可存在子节点");
+					return false;
+				}
+				
+				
+				$.ajax({
+					url:"/yidongmenu",
+					//Integer id,Integer targetid,Integer lv
+					data:{'id':source.id,'targetid':targetnode.id,'lv':targetnode.lv},
+					 async: false,
+					success:function(data){
+						if(data>0){
+							alert('移动成功');
+							window.parent.callback();
+							
+						}else{
+							alert('移动失败')
+						}
+					}
+					
+				})
+				
+				console.log($('#tt').tree('getNode',target))
+				console.log(source)
+				console.log(point)
+				
+			},
+			onClick : function(node) {
+				thisnode = node;
+			
+			},
+			onLoadSuccess:function(node,data){
+				
+				
+			}
+		});
+		$.ajax({
+			type : 'POST',
+			url : "/getSecurityAll",
+			datatype : "json",
+			success : function(data) {
+				//$("#miji").append("<option value='0'>请选择密级</option>");
+				for (var i = 0; i < data.length; i++) {
+					$("#miji").append(
+							"<option value='"+data[i].securityId+"'>"
+									+ data[i].securityName + "</option>");
+				}
+			}
+		})
+		
+		$("#alisbtn").click(function(){
+			
+			if($('.aliasinputval').val()==''){
+				alert('标签信息不能为空');
+				return ;
+			}
+			var b =false;
+			$(".aliasinputval").css("background", "white");
+			$(".aliasinputval").each(function () {
+				
+				var i = $(this).val();
+				//alert($(this).val())
+				$(".aliasinputval").not($(this)).each(function () {
+				if ($(this).val() == i && $(this).val() != "") {
+				$(this).css("background", "pink");
+				b =true;
+				}
+				});
+				});
+			
+			if(b){
+				alert("不能添加相同的标签");
+				return;
+			}
+			alistype = $("#cc1").combo("getValue");
+			alisname = "";
+			$(".aliasinputval").each(function () {
+				
+				alisname += $(this).val()+",";
+			})
+			
+			$("#addaliswinow").window('close')
+			//alert(alisname+alistype);
+			
+			
+		})
+		
+	})
+	// 上传文件
+	var b = true;
+	function upload() {
+		b = true;
+		if (thisnode == undefined) {
+			alert("请选择节点")
+			return;
+		}
+
+		if (thisnode.url == "html/yanzhengjuzhen.html") {
+			alert("请选择“数据节点”上传")
+			return;
+		}
+		if (thisnode.url == "") {
+			alert("请选择“数据节点”上传")
+			return;
+		}
+		/* $.ajax({
+			url : "/getishavetabs",
+			data : {
+				"menuid" : thisnode.id
+			},
+			async : false,
+			success : function(data) {
+				if (data.length == 0) {
+					b = false;
+				}
+			}
+		})
+		if (b) {
+			alert("请选择未上传过数据的节点");
+			return;
+		} */
+		if( $('#miji').val()=='0'){
+			alert("请选择密级");
+			return;
+		}
+		
+		$("#msg").text("");
+		var checkFile = $("#uploadFile").val();
+		if (null == checkFile || "" == checkFile) {
+			
+			checkFile=$("#uploadFile01").val();
+		
+		} 
+		
+		var msgInfo = "";
+		if (null == checkFile || "" == checkFile) {
+			$("#msg").text("文件为空,请选择文件!");
+		} else {
+			var formData = new FormData(document
+					.getElementById("FileuploadForm"));
+			formData.append("menuid", thisnode.id);
+			formData.append("miji", $('#miji').val());
+			formData.append("alistype", alistype);
+			
+			
+			formData.append("alisname",alisname);
+			window.parent.outTime=1000 *60* 1000;
+			
+			$.ajax({
+				type : "POST",
+				enctype : 'multipart/form-data',
+				url : '/upload',
+				data : formData,
+				cache : false,
+				processData : false,
+				contentType : false,
+				error : function(result) {
+					
+					flag = false;
+					$("#msg").text("访问服务器错误，请重试！");
+				},
+				success : function(result) {
+					
+				},
+				xhr : function() {
+					var xhr = $.ajaxSettings.xhr();
+					if (xhr.upload) {
+						//处理进度条的事件
+						xhr.upload.addEventListener("progress", progressHandle,
+								false);
+						//加载完成的事件 
+						xhr.addEventListener("load", completeHandle, false);
+						//加载出错的事件 
+						xhr.addEventListener("error", failedHandle, false);
+						//加载取消的事件 
+						xhr.addEventListener("abort", canceledHandle, false);
+						//开始显示进度条 
+						showProgress();
+						return xhr;
+					}
+				}
+			}, 'json');
+		}
+	}
+	var start = 0;
+	//显示进度条的函数 
+	function showProgress() {
+		start = new Date().getTime();
+		$(".progress-body").css("display", "block");
+	}
+	//隐藏进度条的函数 
+	function hideProgress() {
+		$("#uploadFile").val('');
+		$('.progress-body .progress-speed').html("0 M/S, 0/0M");
+		$('.progress-body percentage').html("0%");
+		$('.progress-body .progress-info').html("请继续选择文件并点击上传文件按钮");
+		alert('上传完成')
+		//$(".progress-body").css("display", "none"); 
+	}
+	//进度条更新 
+	function progressHandle(e) {
+		
+		$('.progress-body .progress2').attr({
+			value : e.loaded,
+			max : e.total
+		});
+		
+		var ploade=e.loaded;
+		var ptotal =e.total/filecount;
+		if(ploade>=ptotal){
+			ploade=e.loaded- Math.floor(e.loaded/(e.total/filecount))*(e.total/filecount)
+		}
+		if( e.loaded==e.total){
+			$('.progress-body .progress1').attr({
+				value : e.loaded,
+				max : e.total
+			});
+		}else{
+			$('.progress-body .progress1').attr({
+				value : ploade,
+				max : ptotal
+			});
+		}
+		
+		
+		var percent = e.loaded / e.total * 100;
+		var time = ((new Date().getTime() - start) / 1000).toFixed(3);
+		if (time == 0) {
+			time = 1;
+		}
+		$('.progress-body .progress-speed').html(
+				((e.loaded / 1024) / 1024 / time).toFixed(2) + "M/S, "
+						+ ((e.loaded / 1024) / 1024).toFixed(2) + "/"
+						+ ((e.total / 1024) / 1024).toFixed(2) + " MB. ");
+		$('.progress-body .progress-speed1').html("第"+Math.floor(e.loaded/(e.total/filecount))+"个, 共"+filecount+"个");
+		
+		$('.progress-body percentage').html(percent.toFixed(2) + "%");
+		if (percent == 100) {
+			$('.progress-body .progress-info').html("上传完成,后台正在处理...");
+		} else {
+			$('.progress-body .progress-info').html("文件上传中...");
+		}
+	};
+	//上传完成处理函数 
+	function completeHandle(e) {
+		window.parent.outTime=10 *60* 1000;
+		$('.progress-body .progress-info').html("上传文件完成。");
+		setTimeout(hideProgress, 2000);
+	};
+	//上传出错处理函数 
+	function failedHandle(e) {
+		console.log(e);
+		$('.progress-body .progress-info').html("文件数量过多");
+	};
+	//上传取消处理函数 
+	function canceledHandle(e) {
+		$('.progress-body .progress-info').html("上传文件取消。");
+	};
+	var $tinput;
+	function attention(info,type) {
+		$tinput = $(info).parent().parent().parent().prev().children().eq(1).children();
+		//alert()
+		if(type ==1){
+			$("#addSysAliswinow").window('open');
+		}else{
+			$("#addPerAliswinow").window('open');
+		}
+	}
+	
+	
+	function aliasByUser() {
+		$
+				.ajax({
+					type : 'POST',
+					url : "/aliasByUser",
+					data : {
+						userId : sessionUser.userId
+					},
+					async : false,
+					success : function(data) {
+						if (data != null) {
+							console.log(data)
+							data = JSON.parse(JSON.stringify(data).replace(
+									/aliasName/g, "text"));
+							data = getChildren(data);
+							$(".myalias").html("");
+							var myaliashtml="";
+							for (var i = 0; i < data.length; i++) {
+								if (data[i].aliasType != 2) {
+									myaliashtml+='<span onclick="attention(this,1)" title="系统标签" style="border-radius: 5px;padding:3px;margin-right:5px;background-color:#C2E1EF;cursor:pointer">'
+										+ data[i].text + '</span>'
+								//	document.getElementById('myalias').innerHTML += ;
+											$(".myalias").html(myaliashtml);
+									$('#systree').tree({
+										data : data[i].children,
+										lines : true,
+										onClick : function(node) {
+											$tinput.val(node.text);
+											$("#addSysAliswinow").window('close');
+										},
+										onLoadSuccess : function(node, data) {
+
+										}
+									});
+
+								} 
+							}
+							if (data.length != 0) {
+							} else {
+								document.getElementById('aliasUser').style.display = "none"
+							}
+						}
+					}
+				})
+	}
+	
+	
+	
+	function getChildren(array) {
+		for (var i = 0; i < array.length; i++) {
+			if (array[i].children != "undefined"
+					|| array[i].children != undefined) {
+				if (array[i].children != "null" && array[i].children != null
+						&& array[i].children.length != 0) {
+					getChildren(array[i].children)
+				} else {
+					delete array[i].children
+				}
+			}
+		}
+		return array;
+	}
+</script>
+</html>

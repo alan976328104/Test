@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html style="width: 100%;height: 100%;">
+
+<head>
+<meta charset="UTF-8">
+<link href="../assets/css/font-awesome.min.css" rel="stylesheet" />
+<!--[if IE 7]>
+    <link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css">
+    <![endif]-->
+<script type="text/javascript" src="../assets/js/jquery-1.9.1.min.js"></script>
+
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="pageoffice.js" id="po_js_main"></script>
+
+<!--[bootstrap]-->
+<link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="../assets/js/vue/vue.js"></script>
+<script type="text/javascript" src="../assets/js/alldata.js"></script>
+<!-- handsontable -->
+<link rel="stylesheet" type="text/css"
+	href="../assets/css/handsontable/handsontable.full.css" />
+<script src="../assets/js/handsontable/handsontable.full.min.js"></script>
+<script src="../assets/js/handsontable/xlsx.full.min.js"></script>
+<script src="../assets/js/handsontable/zh-CN.js"></script>
+<title></title>
+<style>
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	overflow: auto;
+	background: #fbfbfb;
+}
+/* body::-webkit-scrollbar {
+    display: none;
+} */
+i {
+	padding-right: 5px;
+}
+
+.nav-tabs>li {
+	float: left;
+}
+
+.nav-tabs>li>a {
+	padding: 2px;
+}
+
+.nav-tabs>li.active>a,.nav-tabs>li.active>a:hover,.nav-tabs>li.active>a:focus
+	{
+	color: #555;
+	cursor: default;
+	background-color: #fff;
+	border: 1px solid #ddd;
+	border-top-color: transparent;
+}
+
+.nav-tabs>li>a,.nav-tabs>li>a:focus {
+	border-radius: 0 !important;
+	background-color: #f9f9f9;
+	color: #999;
+	margin-right: -1px;
+	line-height: 16px;
+	position: relative;
+	z-index: 11;
+	border-color: #c5d0dc;
+}
+
+.nav-tabs .active a {
+	font-weight: bold;
+}
+
+#toolbar button {
+	color: #fff;
+	margin-bottom: 10px;
+	background: #0085ff !important;
+	border-radius: 5px;
+	margin-right: 5px;
+	border: 0px;
+	padding: 3px 5px;
+}
+td{
+border: 1px solid #ddd;
+}
+</style>
+<script>
+//获取登录者信息
+	var sessionUser;
+	$.ajax({
+		type : "post",
+		url : "/getSessionByIp",
+		async : false,
+		success : function(data) {
+			sessionUser = data
+		}
+	})
+	function getUrlParam(name) {
+		var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+		var r = window.location.search.substr(1).match(reg); //匹配目标参数
+		if (r != null)
+			return unescape(r[2]);
+		return null; //返回参数值
+	}
+	$(function() {
+		$.ajaxSetup({
+			cache : false
+		});
+		//关联检索按钮
+
+		$("body")
+				.on(
+						"click",
+						".relationa",
+						function() {
+
+							var name = $(this).html();
+							var fileid = getUrlParam('fileId');
+
+							window
+									.open(
+											'html/OpenRelation.html?name='
+													+ name + '&fileid='
+													+ fileid + '&lang=zh_CN',
+											'newwindow',
+											'height=600, width=800,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+
+							//alert($(this).html()+getUrlParam('fileId'))
+							/* $.ajax({
+								url:'/getRelationSearch',
+								data:{'name':$(this).html(),'fileid':getUrlParam('fileId')},
+								type:'GET',
+								success:function(data){
+									console.log(data);
+								}
+								
+							}) */
+
+							return false;
+						});
+
+		$.ajax({
+			type : 'POST',
+			url : "/filesById",
+			data : {
+				fileId : getUrlParam('fileId')
+			},
+			success : function(data) {
+
+				document.getElementById("fileName").innerText = data.fileName
+			}
+		})
+
+		//alert( getUrlParam('fileId'))
+		$
+				.ajax({
+					type : 'POST',
+					url : "/readExecl",
+					data : {
+						fileUrl : $("#fileUrl").val()
+					},
+					dataType : 'json',
+					success : function(data) {
+						console.log(data)
+						if (data.length != 0) {
+							$("#loadtext").css("display", "none")
+						} else {
+							//$("#loadtext").css("display","")
+						}
+						for (var i = 0; i < data.length; i++) {
+							addTab(i, "sheet" + (i + 1), "cont");
+							if (data[i].formdata.length > 1) {
+								var sheetData = curtail(data[i].formdata);
+								//if(sheetData!='null'&&sheetData!=null){
+								dataAll(i, data[i].columns, sheetData);
+								//}
+							} else {
+								dataAll(i, data[i].columns, data[i].formdata);
+							}
+						}
+						$('#conNav a:first').tab('show'); //初始化显示哪个tab
+						for (var i = 0; i < data.length; i++) {
+							$("#tab_a_" + i)
+									.click(
+											function(e) {
+												var sheetIndex = e.currentTarget.parentElement.children[1].value;
+												console.log(sheetIndex)
+												if (data[sheetIndex].formdata.length > 1) {
+													var sheetData = curtail(data[sheetIndex].formdata);
+													dataAll(
+															sheetIndex,
+															data[sheetIndex].columns,
+															sheetData);
+												} else {
+													dataAll(
+															sheetIndex,
+															data[sheetIndex].columns,
+															data[sheetIndex].formdata);
+												}
+											});
+						}
+
+					}
+				})
+		$.ajax({
+			type : 'POST',
+			url : "/getUserButton",
+			data : {
+				userId : sessionUser.userId
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				console.log(56)
+				if (data != null) {
+					for (var i = 0; i < data.length; i++) {
+						if (data[i].btnName == '下载') {
+							$("#exportBtn").css("display", "");
+						}
+
+					}
+				}
+			}
+		})
+		//关闭统计框
+		$("#contColse").click(function() {
+			$("#contrast").css("display", "none")
+			$("#tbDiv").css("height", "90%")
+			searchXLS()
+			var box = document.getElementById("pbox");
+			box.innerHTML ="";
+		});
+		//生成图表
+	$("#comparison")
+				.click(
+						function() {
+							var odiv = document.getElementById("pbox");
+							var p = odiv.getElementsByTagName("p");
+							var content = [];
+							var cells = [];
+							for (var i = 0; i < p.length; i++) {
+								content.push({
+									name : p[i].children[0].innerText,
+									type : 'line',
+									data : p[i].innerText.split(",")
+								})
+								cells.push(p[i].children[0].innerText)
+							}
+							//cells.push(p[0].children[0].innerText);
+							//console.log(cells)
+							var contentHead = JSON.stringify(cells);
+							var con = JSON.stringify(content);
+							$
+									.ajax({
+										type : 'POST',
+										url : "/graphing",
+										data : {
+											contentHead : contentHead,
+											content : con
+										},
+										success : function(result) {
+											if (result != null) {
+												//window.location.href="../html/Graphing.html";
+												if (getUrlParam('state') == 0) {
+												window
+														.open(
+																'html/Graphing.html',
+																'target',
+																'height=660, width=1200,left=50, menubar=no, scrollbars=no, resizable=no, location=no, status=no, titlebar=no')
+											}else{
+												
+												window
+												.open(
+														'../html/Graphing.html',
+														'target',
+														'height=660, width=1200,left=50, menubar=no, scrollbars=no, resizable=no, location=no, status=no, titlebar=no')
+											}
+											}
+										}
+									});
+						})
+	})
+	var rows;
+	var cells = [];
+	var returndata = [];
+	var resultdata = [];
+	var hot;
+	var propindex;
+	var searchdata;
+	var csheetname;
+	var titlename;
+	var fdata;
+	var ffileid;
+	var fbegin;
+	var fend;
+	var exportdata;
+	function dataAll(sheetName, row_data, cell_data) {
+		$.ajax({
+			url : '/getXstlcell',
+			data : {
+				'fileid' : getUrlParam('fileId')
+			},
+			type : 'get',
+			async : false,
+			success : function(data) {
+				if (data == "null") {
+					propindex = -1;
+				} else {
+					propindex = parseInt(data);
+				}
+			}
+
+		})
+		console.log(document.body.clientHeight)
+		console.log(document.getElementById('tbDiv').offsetHeight)
+		//var tableHeight = document.body.clientHeight - 180;
+		var tableHeight =document.getElementById('tbDiv').offsetHeight
+		function negativeValueRenderer(instance, td, row, col, prop, value,
+				cellProperties) {
+			Handsontable.renderers.TextRenderer.apply(this, arguments);
+			//	alert(instance+","+ td+","+row+","+ col+","+prop+","+ value+","+ cellProperties)
+			//  alert(prop)
+			if (prop == propindex) {
+				td.innerHTML = "<a href='#' class='relationa' style='color: blue;'>"
+						+ value + "</a>";
+			}
+
+		}
+		Handsontable.renderers.registerRenderer('negativeValueRenderer',
+				negativeValueRenderer);
+		//----handsontable 初始化 开始------
+
+		csheetname = "#hot" + sheetName;
+	//	console.log(cell_data)
+		//console.log(row_data)
+		var tempi=0;
+		for (var i = 0;i<cell_data.length;i++){
+			if(tempi<cell_data[i].length){
+				tempi=cell_data[i].length;
+			}
+		}
+		var temparr=[]
+		for (var i = 0;i<tempi;i++){
+			temparr.push("");
+		}
+		//alert(tempi)
+		//cell_data.unshift(temparr)
+		//alert(tempi);
+		var hotElement = document.querySelector(csheetname); //<====绑定handsontable初始化div 
+		var hotSettings = { //<====handsontable的配置
+			colHeaders :row_data,
+			data : cell_data, //数据源
+			rowHeaders : true,
+			minCols:tempi,
+			//width: 580, //表宽 多余自动显示滚动条
+			height : tableHeight,//表高
+			stretchH : 'all', //自适应
+			colWidths : 110,
+			language : 'zh-CN',
+			readOnly : true,//只读
+			renderAllRows: true,
+			manualColumnResize : true,//当值为true时，允许拖动，当为false时禁止拖动
+			manualRowResize : true,
+			autoWrapRow : true,
+			cells : function(row, col, prop) {
+				var cellProperties = {};
+				cellProperties.renderer = "negativeValueRenderer";
+				return cellProperties;
+			},
+			autoColumnSize : false
+		//当值为true且列宽未设置时，自适应列大小
+		};
+		hot = new Handsontable(hotElement, hotSettings);
+
+		
+		console.log(hot.getData());
+		titlename = row_data;
+		searchdata = hot.getData();
+		setTimeout(function() {
+			hot.render();
+			
+		},100);
+		
+		
+		
+		
+		
+		
+		//获取勾选的数据
+		hot.addHook('afterSelectionEnd', function(r, c, r2, c2) {
+			//rows=[];
+			//cells=[];
+			console.log(r)
+			console.log(c)
+			console.log(r2)
+			console.log(hot.getData(r, c, r2, c2))
+			rows = hot.getData(r, c, r2, c2);
+			//var i=0;i<rows.length;i++
+			for( var i = rows.length-1;i >= 0 ;i--){
+				console.log(rows[i][0])
+				if(rows[i][0]==="…"||rows[i][0]===" "||rows[i][0]===""||!isNumber(rows[i][0])){
+					rows.splice(i,1)
+					console.log(rows)
+				}
+			}
+			for (var j = c; j <= c2; j++) {
+				cells.push(hot.getColHeader(j));
+			}
+			console.log(rows)
+			console.log(cells)
+		})
+	}
+	//判断是否为数字
+	function isNumber(val){
+	    var regPos = /^\d+(\.\d+)?$/; //非负浮点数
+	    var regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/; //负浮点数
+	    if(regPos.test(val) || regNeg.test(val)){
+	        return true;
+	    }else{
+	        return false;
+	    }
+
+	}
+	
+	/**
+	 * 添加选项卡
+	 * @param {Object} tabMainName tab所在容器
+	 * @param {Object} tabName tab名称
+	 * @param {Object} tabTitle tab标题
+	 * @param {Object} tabContentMainName tab内容所在容器
+	 */
+	function addTab(tabName, tabTitle, tabContentMainName) {
+		$("#conNav")
+				.append(
+						'<li id="tab_li_' + tabName + '"><a href="#tab_content_' + tabName + '" data-toggle="tab" id="tab_a_' + tabName + '">'
+								+ tabTitle
+								+ '</a><input type="hidden" value=' + tabName + ' /></li>');
+		var cont = '<div id="tab_content_'
+				+ tabName
+				+ '" role="tabpanel" class="tab-pane" style="height:100%"><div id="hot' + tabName + '"></div></div>';
+		$("#" + tabContentMainName).append(cont);
+	}
+
+	function curtail(arr) {
+		console.log(arr.slice(0))
+		if (arr.slice(0) != '内容为空') {
+			var m = arr.slice(0);
+			//m.shift();
+			return m;
+		}
+		return null;
+	}
+	var pageofficeHeight= window.screen.height
+	var pageofficeWidth= window.screen.width
+	function openFile() {
+		POBrowser.openWindowModeless("/word?type=0&fileId="
+				+ getUrlParam('fileId'), "width="+pageofficeWidth+"px;height="+pageofficeHeight+"px;");
+	}
+	function searchXLS() {
+		
+		var newdata = [];
+		var text = $("#searchtext").val();
+		var b = false;
+		for (var i = 0; i < searchdata.length; i++) {
+			b = false;
+			for (var j = 0; j < searchdata[i].length; j++) {
+				if(searchdata[i][j]!=null){
+					if (searchdata[i][j].indexOf(text) >= 0) {
+						b = true;
+						break;
+					}
+				}
+			}
+
+			if (b) {
+				newdata.push(searchdata[i]);
+			}
+		}
+		console.log(text);
+		//var tableHeight = $(document).height() -120;
+		var tableHeight =document.getElementById('tbDiv').offsetHeight
+		var hotElement = document.querySelector(csheetname); //<====绑定handsontable初始化div 
+		var hotSettings = { //<====handsontable的配置
+			colHeaders : titlename,
+			data : newdata, //数据源
+			rowHeaders : true,
+			//width: 580, //表宽 多余自动显示滚动条
+			height : tableHeight,//表高
+			stretchH : 'all', //自适应
+			colWidths : 110,
+			language : 'zh-CN',
+			readOnly : true,//只读
+			fillHandle : false,//允许拖动单元格右下角，将其值自动填充到选中的单元格
+			manualColumnResize : true,//当值为true时，允许拖动，当为false时禁止拖动
+			manualRowResize : true,
+			autoWrapRow : true,
+			cells : function(row, col, prop) {
+				var cellProperties = {};
+				cellProperties.renderer = "negativeValueRenderer";
+				return cellProperties;
+			},
+			autoColumnSize : false
+		//当值为true且列宽未设置时，自适应列大小
+		};
+		hot = new Handsontable(hotElement, hotSettings);
+		setTimeout(function() {
+			hot.render();
+		//	hot.alter('remove_row',0)
+		});
+		hot.addHook('afterSelectionEnd', function(r, c, r2, c2) {
+			//rows=[];
+			//cells=[];
+			console.log(r)
+			console.log(c)
+			console.log(r2)
+			console.log(hot.getData(r, c, r2, c2))
+			rows = hot.getData(r, c, r2, c2);
+			for( var i = rows.length-1;i >= 0 ;i--){
+				if(rows[i][0]==="…"||rows[i][0]===" "||rows[i][0]===""||!isNumber(rows[i][0])){
+					rows.splice(i,1)
+				}
+			}
+			for (var j = c; j <= c2; j++) {
+				cells.push(hot.getColHeader(j));
+			}
+			console.log(rows)
+			console.log(cells)
+		})
+	}
+
+	var tabsId = getUrlParam('tabsId');
+	console.log(tabsId == null)
+	function closeHtml() {
+		if (getUrlParam('state') == 0) {
+			parent.$(".tab-pane").removeClass('active');
+			parent.$('#all li div').removeClass('xuanzhong');
+			parent.$("#Index").addClass("active");
+			if (lang == "en_US") {
+				parent.$("#text").text('SystemHome')
+			} else {
+				parent.$("#text").text('系统首页')
+			}
+
+		} else if (getUrlParam('state') == 1 && tabsId != null) {
+			window.parent.$("#tab_a_" + tabsId).click();
+		} else {
+			//window.history.go(-1)
+			//window.history.back(-1); 
+			//window.location.href = window.document.referrer;
+			history.back(-1);
+			//document.getElementById('iframe_tab_2').history.back();
+			//window.close();
+		}
+	}
+</script>
+</head>
+
+<body style="margin: 0px;padding: 0px;width:99.9%;height: 100%;">
+	<div id="box" style="background: #fbfbfb;width:99.9%;height: 100%">
+		<div id="toolbar" class="btn-group"
+			style="margin: 10px 0 0 10px;width: 99%;">
+			<button class="btn btn-white btn-default" onclick="closeHtml()">返回</button>
+			<button type="button" class="btn btn-white btn-default"
+				onclick="tongji()">统计</button>
+			<button type="button" class="btn btn-white btn-default"
+				onclick="exportexcle()" id="exprotExcel">关联数据处理</button>
+				<button type="button" class="btn btn-white btn-default"
+				onclick="jiaoyan()" id="exprotExcel">数据校验</button>
+			<button type="button" class="btn btn-white btn-default"
+				onclick="openFile()">本地软件打开</button>
+			<input type="hidden" th:value="${fileUrl}" id="fileUrl" /> <input
+				type="hidden" th:value="${fileId}" id="fileId" /> <input
+				type="text" id="searchtext" style="">
+			<button type="button" onclick="searchXLS()" style="">搜索</button>
+			<div id="fileName"
+				style="display: inherit;text-align: center;padding: 5px;margin-left: 30px; "></div>
+		</div>
+		<div style="width: 99%;height: 90%;margin-bottom:5px;" id="tbDiv">
+			<p id="loadtext" style="">正在读取中...</p>
+			<ul class="nav nav-tabs" id="conNav"
+				style="bottom: 0px;width: 100%;"></ul>
+			<div class="tab-content" id="cont" style="width: 100%;height: 97%;"></div>
+		</div>
+		<!-- 数据对比图表 -->
+		<div id="contrast"
+			style="width: 99%;background-color:#FFF; border: 2px solid #DDDDDD;border-top:0.5px solid #DDDDDD;height:20%; word-break: break-all;word-wrap: break-word;display:none">
+			 <div style="border-bottom: 1px solid #DDDDDD; padding: 4px 0px 0px 10px">
+				<label style="font-size:1em;font-weight: bolder;margin: 0px;">对比</label> <img
+					id="contColse" src="assets/images/exit.png"
+					style="right:0px;cursor: pointer;margin-top: 3px; float:right;margin-right: 5px;" />
+			</div>
+			<div id="pbox"
+				style="padding: 18px 10px;width: 100%;height:53%;display: block;border-bottom:0px;overflow: auto; "></div>
+			<div style="display: block;">
+				<button type="button" class=" btn new-tijiao queding"
+					style="background: #0085ff !important;color:#fff;margin-left: 92%" id="comparison">
+					<i class="icon-bar-chart"></i>生成图表
+				</button>
+			</div> 
+		</div>
+		<!-- 数据对比图表 -->
+	</div>
+
+	<!-- 数据导出begin -->
+	<div class="modal fade" id="importwindow" tabindex="-1" role="dialog"
+		aria-labelledby="addUserLabel" aria-hidden="true"
+		data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog" style="width: 530px !important;">
+			<div class="modal-content" style="width: 530px !important;">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="addUserLabel">数据导出</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div>
+							<form id="addUserForm" style="height:500px;overflow:auto">
+								<table class="table" id="rlisttable">
+									<tr>
+										<td><input type="checkbox"></td>
+										<td>压力</td>
+									<tr>
+								</table>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer" style="padding: 10px">
+					<button type="button" class="btn" onclick="exportmodal()"
+						th:text="#{submit}">保存</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	<!-- 数据导出end -->
+
+
+	<!-- 数据导出222begin -->
+	<div class="modal fade" id="importwindow2" tabindex="-1" role="dialog"
+		aria-labelledby="addUserLabel" aria-hidden="true"
+		data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog" style="width: 1024px !important;">
+			<div class="modal-content" style="width: 1024px !important;">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="addUserLabel">数据导出</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row" id="Exportdiv"></div>
+				</div>
+				<div class="modal-footer" style="padding: 10px">
+					<!-- <button type="button" class="btn" onclick=""
+						title="本条目以下全部与本条目选择相同">与本条目一致</button> -->
+					请输入导出行数: <input id="rowcount1" style="width: 70px" value="0" />- <input
+						id="rowcount2" style="width: 70px" value="50" />
+					<button type="button" class="btn" onclick="exportRelation()">查看结果</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	<!-- 数据导出222end -->
+
+
+	<!-- 数据导出333begin -->
+	<div class="modal fade" id="importwindow3" tabindex="-1" role="dialog"
+		aria-labelledby="addUserLabel" aria-hidden="true"
+		data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog" style="width: 1024px !important;">
+			<div class="modal-content" style="width: 1024px !important;">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="addUserLabel">数据导出</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row" id="Exportdiv2"></div>
+				</div>
+				<div class="modal-footer" style="padding: 10px">
+					<!-- <button type="button" class="btn" onclick=""
+						title="本条目以下全部与本条目选择相同">与本条目一致</button> -->
+
+					<button type="button" class="btn" onclick="exportRelationdata()"
+						id="exportBtn" style="display:none">导出</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	<!-- 数据导出333end -->
+
+	<form id="fform" action="../RelationExportExcle" style="display: none;"
+		method="post">
+		<input id="fdata" name="data"> 
+		<input id="ffileid"  name="fileid"> 
+			<input id="fbegin" name="begin"> <input
+			id="fend" name="end">
+
+	</form>
+
+<form id="vform" action="../verification" style="display: none;"
+		method="post">
+		<input id="vfilename" name="filename"> 
+		
+
+	</form>
+
+	
+
+</body>
+<script type="text/javascript">
+	function chartBtn() {
+		var content = [];
+		for (var i = 0; i < rows.length; i++) {
+			content.push({
+				type : 'line',
+				data : rows[i]
+			})
+		}
+		var contentHead = JSON.stringify(cells);
+		var con = JSON.stringify(content);
+		$.ajax({
+			type : 'POST',
+			url : "/graphing",
+			data : {
+				//contentHead : contentHead,
+				content : con
+			},
+			success : function(result) {
+				if (result != null) {
+					window.parent.parent.parent.$("#contrast").css("display",
+							"none")
+					var box = window.parent.parent.parent.document
+							.getElementById("pbox");
+					var p = document.createElement("p");
+					p.innerHTML = "";
+					console.log(123)
+					//window.location.href="../html/Graphing.html";
+					window.open('../html/Graphing.html', '_blank')
+
+				}
+			}
+		});
+	}
+	function tongji() {
+		$("#tbDiv").css("height", "70%");
+		searchXLS()
+		$("#contrast").css("display", "block");
+		var box = document.getElementById("pbox");
+		var p = document.createElement("p");
+		var img = document.createElement("img");
+		img.src = "../assets/images/exit.png";
+		img.addEventListener('click', function(e) {
+			e = e || window.event;//兼容ie
+			//console.log(img.parentNode)
+			img.parentNode.parentNode.removeChild(img.parentNode);
+		}, false);
+		var label = document.createElement("label");
+		label.innerText = cells;
+		label.style.display = "none"
+		p.innerHTML += rows;
+		p.appendChild(label);
+		p.appendChild(img);
+		box.appendChild(p);
+		rows = [];
+		cells = [];
+	}
+
+	function exportexcle() {
+
+		returndata = [];
+		$
+				.ajax({
+					url : '/getCellByRelation',
+					data : {
+						'fileid' : getUrlParam('fileId')
+					},
+					success : function(data) {
+						console.log("data:" + data)
+						var obj = data + '';
+						if (obj == '') {
+							alert('该文件没有关联信息')
+						} else {
+							var hotdata = hot.getData();
+							var str = "";
+							for (var i = 0; i < hotdata.length; i++) {
+
+								str += "<tr><td  style='width: 10px;'><input class='cklist' type='checkbox' value="+hotdata[i][data]+"></td><td style='width: 40px;text-align:center'>"+(i+1)+"</td><td>"
+										+ hotdata[i][data]
+										+ "</td><tr>";
+							}
+
+							$("#rlisttable").html(str);
+							console.log(getUrlParam('fileId'))
+							//window.parent.parent.parent.callbackbylist();
+							$('#importwindow').modal('show');
+						}
+					}
+
+				})
+
+	}
+
+	var cklist = []
+
+	function exportmodal() {
+		//var  obj = document.get("baseTable");
+		cklist = [];
+		$(".cklist:checked").each(function() {
+			//操作
+			//alert();
+			cklist.push($(this).val())
+		})
+
+		var html = "<iframe id='iframe10' src='html/Export.html' frameborder='no' border='0' width='100%' height='500px' marginwidth='0' marginheight='0' style='margin-top:5px;' scrolling='yes' allowtransparency='yes'> </iframe>"
+		$("#Exportdiv").html(html)
+		$('#importwindow').modal('hide');
+		$('#importwindow2').modal('show');
+
+	}
+
+	function exportRelation() {
+		var value = document.getElementById("rowcount1").value;
+		var value2 = document.getElementById("rowcount2").value;
+		var reg = /^[1-9]\d*$|^0$/; // 注意：故意限制了 0321 这种格式，如不需要，直接reg=/^\d+$/;
+		if (reg.test(value) == true) {
+			//alert("都是数字！通过");
+
+		} else {
+			alert("请输入数字");
+			return false;
+		}
+
+		if (reg.test(value2) == true) {
+			//alert("都是数字！通过");
+
+		} else {
+			alert("请输入数字");
+			return false;
+		}
+
+		fdata = JSON.stringify(returndata);
+		ffileid = getUrlParam('fileId');
+		fbegin = value;
+		fend = value2;
+
+		//location.href="/RelationExportExcle?data="+fdata+"&fileid="+ffileid+"&begin="+fbegin+"&end="+fend;
+
+		$
+				.ajax({
+					url : '/RelationExportExcley',
+					type : 'GET',
+					data : {
+						"data" : JSON.stringify(returndata),
+						"fileid" : getUrlParam('fileId'),
+						"begin" : value,
+						"end" : value2
+					},
+					success : function(data) {
+						console.log(data);
+						resultdata = data;
+						var html = "<iframe id='iframe10' src='html/result.html' frameborder='no' border='0' width='100%' height='500px' marginwidth='0' marginheight='0' style='margin-top:5px;' scrolling='yes' allowtransparency='yes'> </iframe>"
+						$("#Exportdiv2").html(html)
+						$('#importwindow2').modal('hide');
+						$('#importwindow3').modal('show');
+					}
+
+				})
+		//$("#fform").submit()
+		console.log(returndata);
+
+	}
+
+	function exportRelationdata() {
+	//	alert(exportdata)
+		$("#fdata").val(exportdata);
+		$("#ffileid").val(ffileid);
+		$("#fbegin").val(fbegin);
+		$("#fend").val(fend);
+		$("#fform").submit()
+
+	}
+	
+	
+	
+	function jiaoyan(){
+		$.ajax({
+			url : '/getCellByRelation',
+			data : {
+				'fileid' : getUrlParam('fileId')
+			},
+			success : function(data) {
+				console.log("data:" + data)
+				var obj = data + '';
+				if (obj == '') {
+					alert('该文件没有关联信息')
+				} else {
+				//	location.href = "/verification?fileId=" + getUrlParam('fileId');
+					$("#vfilename").val(getUrlParam('fileId'));
+					$("#vform").submit();
+				}
+			}
+
+		})
+		
+	}
+	
+</script>
+
+</html>

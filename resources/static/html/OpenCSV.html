@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html style="background-color: #fbfbfb;width:100%;height:100%">
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+		<link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+  
+    <script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+
+<script type="text/javascript" charset = "UTF-8">
+$(function(){
+	document.oncontextmenu = function () {
+        event.returnValue = false;
+    }
+	document.onselectstart = function(){
+	    event.returnValue = false;
+	}
+	//alert(parseUrl())
+	var isckickout= true;
+	var b=true;
+	var index = 1;
+	var total = 0;
+	var id= parseUrl()[0];
+	var bodyheight = document.documentElement.clientHeight;
+	var tbheight=bodyheight-30;
+	var type =parseUrl()[1];
+	$.ajax({
+		url:'/getcsvfileNameByid',
+		data:{'id':id},
+		success:function(data){
+		$("#filename").html(data);
+		}
+		
+	})
+	
+	
+	$.ajax({
+		url:'/delCSV',
+		type:'post',
+		success:function(){
+			$('#dg').datagrid({    
+				 url:'/openCsv', 
+				 queryParams:{
+					 fileid: ""+id,
+					 page:1,
+					 state:type
+			          },
+			
+		    columns:[[    
+		        {field:'f1',title:'',width:'20%'},    
+		        {field:'f2',title:'',width:'20%'}
+		   			 ]],
+		   	height:tbheight,
+		   	toolbar: '#tb',
+		   	rownumbers:true,
+
+		   	onLoadSuccess:function(){
+		   	 isckickout= true;
+		   if(b){
+		
+		   if(type==1){
+			   $("#total").html(',当前为预览模式')
+				$("#index").html('当前第1页,每页1000条')
+				 total=$('#dg').datagrid('getData').total;
+				b=false;
+		   }else{
+			   total=$('#dg').datagrid('getData').total;
+			   $("#total").html('共'+$('#dg').datagrid('getData').total+'页')
+				$("#index").html('当前第'+index+'页,每页1000条,')
+				$("#requsttd").html("跳转至第<input id='requestinput' style='width: 22px; margin-left: 5px;margin-right: 5px;'>页<a href='#' style='margin-left:5px' id='requstOk'>确认</a>")
+				b=false;  
+		   }
+			
+		   }
+		   }
+
+		});  
+			
+		}
+		
+	})
+	
+	
+	$('#next').click(function(){
+		if(isckickout){
+			
+		
+		//alert($('#dg').datagrid('getData').total)
+		if(index<total){
+		index++;
+		isckickout=false;
+		$('#dg').datagrid('load',{ fileid: ""+id,
+			 page:''+index,
+			 state:1})
+		$("#index").html('当前第'+index+'页,每页1000条,')
+		}
+		}
+	})
+	
+
+	$('#shangyiye').click(function(){
+		if(isckickout){
+		if(index>1){
+			isckickout=false;
+			index--;
+			$('#dg').datagrid('load',{ fileid: ""+id,
+				 page:''+index,
+				 state:1})
+			$("#index").html('当前第'+index+'页,每页1000条,')
+		}
+		}
+	})
+	
+	
+
+	
+	
+	$("body").on("click","#requstOk",function(){
+		if(isckickout){
+		var value = $("#requestinput").val();
+		var reg = /^[1-9]\d*$|^0$/; // 注意：故意限制了 0321 这种格式，如不需要，直接reg=/^\d+$/;
+		if (reg.test(value) == true) {
+			//alert("都是数字！通过");
+
+		} else {
+			alert("请输入数字");
+			return false;
+		}
+		
+		if(value>total){
+			alert("请输入正确的页码");
+			return false;
+		}
+		isckickout=false;
+	
+		$('#dg').datagrid('loading')
+
+				index = value;
+				$("#index").html('当前第' + value + '页每页1000条')
+				$('#dg').datagrid('load', {
+					fileid : "" + id,
+					page : '' + index,
+					state : 1
+				});
+
+			}
+
+			return false;
+		})
+
+	})
+
+	function parseUrl() {
+		var url = location.href;
+		var i = url.indexOf('?');
+		if (i == -1)
+			return;
+		var querystr = url.substr(i + 1);
+		var arr1 = querystr.split('&');
+		var str = new Array();
+		var num = 0;
+		for (i in arr1) {
+			var ta = arr1[i].split('=');
+			str[num] = decodeURI(ta[1]);
+			num++;
+		}
+		return str;
+	}
+</script>
+  </head>
+  
+  <body style="background-color: #fbfbfb;width:100%;height:100%;margin: 0px">
+  <table id="dg" class="easyui-datagrid" 
+   url=""
+   pagePosition="bottom"
+   fitColumns="false"   style="width:100%;height:height:100% ;" >   
+    <thead>   
+        
+           
+         
+    </thead>   
+</table>
+	<div class="datagrid-pager pagination">
+	
+		<table cellspacing="0" cellpadding="0" border="0">
+			<tbody>
+				<tr>
+					
+					<td><div class="pagination-btn-separator"></div></td>
+					
+					<td><a id="shangyiye" href="javascript:;"
+						class="l-btn l-btn-small l-btn-plain "
+						group="" id=""><span class="l-btn-left l-btn-icon-left"><span
+								class="l-btn-text l-btn-empty">&nbsp;</span><span
+								class="l-btn-icon pagination-prev">&nbsp;</span></span></a></td>
+					<td><div class="pagination-btn-separator"></div></td>
+					<td><span style="padding-left:6px;" id="index">加载中</span></td>
+					<td><span style="padding-right:6px;" id='total'>请稍后</span></td>
+					<td><div class="pagination-btn-separator"></div></td>
+					<td><a href="javascript:;"
+						class="l-btn l-btn-small l-btn-plain" group="" id="next"><span
+							class="l-btn-left l-btn-icon-left"><span
+								class="l-btn-text l-btn-empty">&nbsp;</span><span
+								class="l-btn-icon pagination-next">&nbsp;</span></span></a></td>
+					
+					<td><div class="pagination-btn-separator"></div></td>
+					<td style="font-size: 12px;text-indent: 5px;" id="requsttd">
+						
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div id="tb" style="text-align: center;">
+			<span id="filename" style="font-size: 14px;font-weight: bold;"></span>
+		</div>	
+		
+	</div>
+</body>
+</html>

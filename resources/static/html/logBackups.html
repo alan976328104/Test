@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+  <head>
+   <link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+		
+		<title></title>
+		<script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+		
+		<script type="text/javascript">
+		 $.ajaxSetup({cache:false});
+		  $(function(){
+			  var bodyheight = document.documentElement.clientHeight;
+				var tbheight=bodyheight-30;
+			  $.ajax({
+					url:'/getAllbackupstb',
+					//type:'post',
+					success:function(obj){
+						console.log(obj)
+						$('#dg').datagrid({    
+							columns:[[    
+							          {field:'id',title:'序号',width:10},    
+							          {field:'name',title:'备份文件名称',width:50},    
+							          {field:'backupsdate',title:'备份日期',width:100}    
+							      ]], 
+							      
+							data:obj,
+							fitColumns:true,
+							singleSelect:true,
+							height:600,
+							striped:true,
+							toolbar:'#tb'
+							});  
+					}
+					
+				})
+			  
+				$("#add").click(function(){
+					$("#addWindows").window('open');
+					
+				})
+				
+				
+				$("#addbtn").click(function(){
+					if($("#rname").val()==''||$("#rname").val()==null){
+						alert('名称不能为空')
+						return;
+					}
+					var b=false;
+					$.ajax({
+						url:'/backupstbnamecount',
+						data:{'name':$("#rname").val()},
+						async:false, 
+						success:function(data){
+							if(data>0){
+								b =true;
+							}else{
+								b= false;
+							}
+							
+						}
+						
+					})
+					
+					if(b){
+						alert('该文件名称已存在')
+						return;
+					}
+					
+					$("#loadingWindows").window('open');
+					 $.ajax({
+						 url:'/addBackupstb',
+						 data:{'username':'scott','password':'accp','filename':$('#rname').val()},
+						 success:function(data){
+							 if(data>0){
+								 redata()
+								 alert('备份成功')
+								
+							 }else{
+								 redata()
+								 alert('备份失败')
+							 }
+							 
+							 $("#addWindows").window('close');
+							$("#loadingWindows").window('close');
+						 }
+						 
+					 })
+					
+					
+				})
+				
+				
+				
+				$("#del").click(function(){
+					var selectdata = $("#dg").datagrid('getSelected');
+					if(selectdata==null){
+						alert('请选择数据')
+						return ;
+					}
+					//alert(selectdata)
+					$.ajax({
+						url:'/delbackupstb',
+						data:{'id':selectdata.id},
+						success:function(data){
+							if(data>0){
+								alert('删除成功')
+							}else{
+								alert('删除失败')
+							}
+							
+							redata();
+							
+						}
+					})
+					
+				})
+			  
+				
+				$("#recovery").click(function(){
+					var selectdata = $("#dg").datagrid('getSelected');
+					if(selectdata==null){
+						alert('请选择数据')
+						return ;
+					}
+					
+					$("#loadingWindows").window('open');
+					
+					 $.ajax({
+						 url:'/recoveryBackupstb',
+						 data:{'username':'scott','password':'accp','id':selectdata.id},
+						 success:function(data){
+							 if(data>0){
+								 alert('还原成功')
+								
+							 }else{
+								 alert('还原失败')
+							 }
+							$("#loadingWindows").window('close');
+						 }
+						 
+					 })
+					
+				})
+		  })
+		  
+		  
+		  function redata(){
+			  $.ajax({
+					url:'/getAllbackupstb',
+					//type:'post',
+					success:function(obj){
+						console.log(obj)
+						$('#dg').datagrid({    
+							columns:[[    
+							          {field:'id',title:'序号',width:10},    
+							          {field:'name',title:'备份文件名称',width:50},    
+							          {field:'backupsdate',title:'备份日期',width:100}    
+							      ]], 
+							      
+							data:obj,
+							fitColumns:true,
+							singleSelect:true,
+							height:600,
+							striped:true,
+							toolbar:'#tb'
+							});  
+					}
+					
+				})
+			  
+		  }
+		</script>
+  </head>
+  <body>
+		 <table id="dg" style="width: 100%"></table>  
+
+ 		 <div id="tb">
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-tianjia',plain:true" id="add">添加</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-shanchu',plain:true" id="del">删除</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-fanhui',plain:true" id="recovery">还原</a>
+		</div>
+		
+		<div id="addWindows" class="easyui-dialog" title="添加备份" width="300" height="110"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+       	<table  style="margin: 10px;margin-top: 10px">
+       	<tr>
+       	<td>备份名称 : </td>
+       	<td> <input id="rname" style="margin-left: 5px"  class="easyui-textbox" /> </td>
+       	</tr> 
+       	</table>
+       
+        <button id="addbtn" style="position:absolute;bottom:10px;right:10px">确认</button>
+		</div>
+		
+		
+		<div id="loadingWindows" class="easyui-dialog" title="提示" width="300" height="110"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:false">  
+       	正在备份请稍后....
+		</div>
+  </body>  	  
+  </body>
+</html>

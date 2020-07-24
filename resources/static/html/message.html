@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>消息列表</title>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../assets/css/font-awesome.min.css"
+	rel="stylesheet" />
+<!--if IE 7-->
+<link rel="style
+<script type="
+	text/javascript" src="../assets/js/jquery-1.9.1.min.js">
+</script>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="pageoffice.js" id="po_js_main"></script>
+<!--bootstrap-table-->
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrap-table.js"></script>
+<link rel="stylesheet"
+	href="../assets/css/bootstrap/bootstrap-table.css">
+<script src="../assets/js/bootstrap/bootstrap-table-pagejump.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-table-pagejump.css"
+	rel="stylesheet">
+<link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../assets/js/alldata.js"></script>
+<script src="../assets/js/vue/vue.js"></script>
+
+<link rel="stylesheet"
+	href="../assets/css/bootstrap/bootstrap-dialog.css">
+<script type="text/javascript"
+	src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+
+<link rel="stylesheet" href="../assets/css/newstyle.css">
+</head>
+<style>
+tr{
+/* height: 41px;
+line-height: 41px; */
+}
+</style>
+<script>
+//获取登录者信息
+var sessionUser;
+$.ajax({
+	type : "post",
+	url : "/getSessionByIp",
+	async : false,
+	success : function(data) {
+		sessionUser=data
+	}
+})
+	var lang = getUrlParam("lang");
+	var columns;
+	if (lang != "en_US") {
+		columns = [ [ {
+			field : 'files.fileId',
+			title : '#',
+			width : '1%',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		}, {
+			field : 'ck',
+			checkbox : true,
+			width : "0.5%"
+		}, {
+			title : '#',
+			field : '',
+			width : '1%',
+			formatter : function(value, row, index) {
+				return index + 1;
+			}
+		}, {
+			field : 'files.fileName',
+			title : '名称',
+			width : '20%',
+			formatter : forma
+		}, {
+			field : 'messageDate',
+			title : '分享时间',
+			width : '10%'
+		}, {
+			field : 'sharer.username',
+			title : '分享者',
+			width : '10%'
+		}, {
+			field : 'messageId',
+			title : '',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		} ] ]
+		document
+				.write("<script src='../assets/js/bootstrap/bootstrap-table-zh-CN.js' >"
+						+ "<" + "/script>");
+	} else {
+		columns = [ [ {
+			field : 'files.fileId',
+			title : '#',
+			width : '1%',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		}, {
+			field : 'ck',
+			checkbox : true,
+			width : "0.5%"
+		}, {
+			title : '#',
+			field : '',
+			width : '1%',
+			formatter : function(value, row, index) {
+				return index + 1;
+			}
+		}, {
+			field : 'files.fileName',
+			title : 'FileName',
+			width : '20%',
+			formatter : forma
+		}, {
+			field : 'messageDate',
+			title : 'Date',
+			width : '10%'
+		}, {
+			field : 'sharer.username',
+			title : 'Sharer',
+			width : '10%'
+		}, {
+			field : 'messageId',
+			title : '',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		} ] ]
+	}
+	$(function() {
+		dataAll();
+	});
+	function dataAll() {
+		$("#tb_order").bootstrapTable({
+			url : "/pageMessage",
+			method : "post", //请求方式（*）
+			contentType : "application/x-www-form-urlencoded",//post请求的话就加上这个句话
+			toolbar : "#toolbar", //工具按钮用哪个容器
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			paginationShowPageGo : true,
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 15, //每页的记录行数（*）
+			pageList : [ 10, 15, 20, 30, 50 ], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : false, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			sidePagination : "server", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			queryParams : function(params) {//自定义参数，这里的参数是传给后台的，我这是是分页用的
+				return {//这里的params是table提供的
+					username : $("#userName").val(),
+					pageNumber : params.pageNumber,
+					pageSize : params.pageSize
+				};
+			},
+			columns : columns
+		});
+		$('#tb_order').children().children().children('th').eq(0).css(
+				"display", "none");
+		$('#tb_order').children().children().children('th').last().css(
+				"display", "none");
+	}
+	function forma(value, row, index) {
+		console.log(row)
+		if(row.files){
+			if (row.state == 0) {
+				return "<img src='../assets/images/new1.png' /><a style='color: #1963AA;text-decoration: none;' href='javascript:void(0);' onclick='showfile(this)'>"
+						+ row.files.fileName + "</a>";
+			} else {
+				return "<a style='color: #1963AA;text-decoration: none;' href='javascript:void(0);' onclick='showfile(this)'>"
+						+ row.files.fileName + "</a>";
+			}
+		}
+		
+	}
+	function showfile(file) {
+		var fileId = $(file).parent().parent().children('td').eq(0).text();
+		var mId = $(file).parent().parent().children('td').last().text();
+		var secName = $(file).parent().parent().children('td').eq(4).text();
+		var fileName = file.innerText;
+		var filestr = fileName.substr(0, fileName.lastIndexOf(".") + 1);
+		var fileType = fileName.replace(filestr, "");
+		console.log(fileId);
+		console.log(file.previousSibling)
+		//if (sessionUser.security.securityId != 1) {
+		var state = updateState(mId);
+		if (state) {
+			var cont = updateCount(fileId);
+			if (cont) {
+				//$('#tb_order').bootstrapTable('refresh');
+				openFile(fileType, fileId);
+				//window.opener.location.reload();
+			}
+		}
+
+		//} else {
+		//	if (secName == "非密") {
+		//		openFile(fileType, fileId)
+		//	} else {
+		//		$.showErr("您没有此权限");
+		//	}
+		//}
+		$(file).prev().remove()
+		window.opener.messageCount();
+	}
+	var pageofficeHeight= window.screen.height
+	var pageofficeWidth= window.screen.width
+	function openFile(fileType, fileId,fileSize) {
+		
+		if (fileType == "pdf") {
+			POBrowser.openWindowModeless("/pdf?fileId=" + fileId,"width="+pageofficeWidth+"px;height="+pageofficeHeight+"px;");
+		} else if (fileType == "xls" || fileType == "xlsx") {
+			window.open("/office?url=html/list.html&fileId="+fileId,'newwindow', 'height='+(pageofficeHeight-150)+', width='+(pageofficeWidth-150)+', toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		} else if (fileType == "doc" || fileType == "docx" ||fileType == "ppt" || fileType == "pptx") {
+			POBrowser.openWindowModeless("/word?type=0&fileId=" + fileId,
+					"width="+pageofficeWidth+"px;height="+pageofficeHeight+"px;");
+		}else if(fileType == "csv") {
+			window.open('html/OpenCSV.html?fileId=' + fileId+'&type=0','newwindow', 'height=600, width=800,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else if(fileType == "txt"){
+			window.open('Opentxt.html?fileId='+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else if(fileType =="jpg"||fileType =="JPG"||fileType =="PNG"||fileType =="png"){
+			 window.open("/openJpg?fileId="+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else if(fileType =="MP4"||fileType =="mp4"||fileType =="wmv"||fileType =="WMV"){
+			 window.open("OpenVideo.html?fileId="+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else{
+			$("#notOpenModel").modal("show");
+		}
+	}
+	function updateCount(fId) {
+		var isSuccess;
+		$.ajax({
+			type : 'POST',
+			url : "/updateCounts",
+			async : false,
+			data : {
+				userId : sessionUser.userId,
+				fileId : fId
+			},
+			success : function(data) {
+				if (data != null && data > 0) {
+					console.log(data)
+					isSuccess = data;
+				} else {
+					isSuccess = 0;
+				}
+			}
+		});
+		return isSuccess;
+	}
+	function updateState(mId) {
+		var isSuccess;
+		$.ajax({
+			type : 'POST',
+			url : "/updateMessageState",
+			async : false,
+			data : {
+				messageId : mId
+			},
+			success : function(data) {
+				if (data != null) {
+					isSuccess = data;
+				} else {
+					isSuccess = 0;
+				}
+			}
+		});
+		return isSuccess;
+	}
+	function nameSearch() {//根据用户姓名模糊查询
+		$("#tb_order").bootstrapTable('destroy');
+		dataAll();
+	}
+</script>
+<body style="padding: 0px;margin: 0px;">
+	<div id="box">
+		<table id="tb_order">
+
+		</table>
+		<div id="toolbar" class="btn-group" style="margin-top: 3px;">
+			<button id="btn_delete" type="button"
+				class="btn btn-white btn-default btn-round" onclick="delbtn()">
+				<span th:text="#{delete}"></span>
+			</button>
+			<button type="button" class="btn btn-white btn-default"
+				onclick="delAllbtn()">
+				<span th:text="#{remove}"></span>
+			</button>
+			<div class='input-group ' style="padding:0px 2px;">
+				<input type='text' class='form-control' autocomplete='off'
+					th:placeholder='#{searchUser}' id='userName'
+					style="display: inline !important;width:190px;margin-right:5px;height: 34px;">
+				<button class=" btn-white btn-default btn-round"
+					onclick="nameSearch()" type="button"
+					style="height: 34px;font-size: 14px;padding:0px !important;background: #fff !important; 
+    width:40px !important;
+    border-radius: 5px !important;margin-left:5px;">
+					<i class="icon-search"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	$.showConfirm = function(str, funcok, userdel, confirm) {
+		BootstrapDialog.confirm({
+			title : userdel,
+			message : str,
+			type : BootstrapDialog.TYPE_WARNING,
+			closable : true, // 点击对话框以外的页面内容可关闭
+			//draggable : true, // 可拖拽
+			btnOKLabel : confirm,
+			btnOKClass : 'btn-warning',
+			size : BootstrapDialog.SIZE_SMALL,
+			// 对话框关闭的时候执行方法
+			onhide : userdel,
+			callback : function(result) {
+				if (result) {
+					$.post("/deleteMessage", {
+						messageIds : funcok
+					}, function(data) {
+						if (data != null) {
+							deleteSuccess();
+							$('#tb_order').bootstrapTable('refresh');
+						}
+					});
+				}
+			}
+		});
+	};
+	$.showConfirmAll = function(str, userdel, confirm) {
+		BootstrapDialog.confirm({
+			title : userdel,
+			message : str,
+			type : BootstrapDialog.TYPE_WARNING,
+			closable : true, // 点击对话框以外的页面内容可关闭
+			//draggable : true, // 可拖拽
+			btnOKLabel : confirm,
+			btnOKClass : 'btn-warning',
+			size : BootstrapDialog.SIZE_SMALL,
+			// 对话框关闭的时候执行方法
+			onhide : userdel,
+			callback : function(result) {
+				if (result) {
+					$.post("/deleteAllMessage", {}, function(data) {
+						if (data != null) {
+							deleteSuccess();
+							$('#tb_order').bootstrapTable('refresh');
+						}
+					});
+				}
+			}
+		});
+	};
+	var htmlIcon = "<i style='color: red;position: relative;top: 2px;font-size: 27px;left: -6px;' class='icon-remove new-icon'></i>"
+	function delbtn() {
+		var msgIdAll = [];
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if (getSelectRows.length == 0) {
+			nullErr();
+		} else {
+			for (i = 0; i < getSelectRows.length; i++) {
+				msgIdAll.push(getSelectRows[i].messageId)
+			}
+			if (lang != "en_US") {
+				$.showConfirm(htmlIcon + "确认要删除吗？", msgIdAll, "删除消息", "确认");
+			} else {
+				$.showConfirm(htmlIcon + "Are you sure you want to delete it?",
+						msgIdAll, "DeleteMessage", "confirm");
+			}
+		}
+	}
+	function delAllbtn() {
+		if (lang != "en_US") {
+			$.showConfirmAll(htmlIcon + "确认要清空吗？", "删除消息", "确认");
+		} else {
+			$.showConfirmAll(htmlIcon + "Are you sure you want to empty it?",
+					"DeleteMessage", "confirm");
+		}
+	}
+</script>
+</html>

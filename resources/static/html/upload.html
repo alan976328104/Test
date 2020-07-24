@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>文件上传</title>
+<meta charset="utf-8" />
+
+<script type="text/javascript" src="../assets/js/jquery-1.9.1.min.js"></script>
+<link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../assets/js/alldata.js"></script>
+<script src="../assets/js/vue/vue.js"></script>
+
+<link rel="stylesheet" href="../assets/css/bootstrap/bootstrap-dialog.css">
+<script type="text/javascript" src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+
+<!-- 上传文件 -->
+<link rel="stylesheet" href="../assets/css/jquery.plupload.queue.css">
+<script type="text/javascript" src="../assets/js/upload/plupload.full.min.js"></script>
+<script type="text/javascript" src="../assets/js/upload/jquery.plupload.queue.js"></script>
+<script type="text/javascript" src="../assets/js/upload/zh_CN.js"></script>
+<script type="text/javascript" src="../assets/js/upload/moxie.js"></script>
+
+<script type="text/javascript" src="../assets/js/jquery.cookie.js"></script>
+<link rel="stylesheet" href="../assets/css/newstyle.css">
+</head>
+
+<body style="padding: 0px;margin: 0px;">
+
+	<table style="width: 100%;">
+		<tbody>
+			<tr style="display:@(Model.storageID == 0 ? "" : "none")">
+				<td id="pluploader" colspan="3">
+					 <p>你的浏览器不支持 Flash, Silverlight, Gears, BrowserPlus 或者 HTML5</p> 
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<div id="box">
+		<table style="position: absolute;right: 0px;">
+			<tr>
+				<td style="text-align: center;vertical-align: middle;"><span style="color:red;">*</span></td>
+				<td><select class="form-control" id="securityId"
+					v-if="user.security!=null">
+						<option value="0">请选择密级</option>
+						<option v-for="(item,index) in security" :value="item.securityId">{{item.securityName}}</option>
+				</select></td>
+				<td>
+				<button type="button" class="btn new-tijiao queding"  id="saveControl">开始上传</button></td>
+			</tr>
+		</table>
+		<!--文件已存在-->
+		<div class="modal fade" id="exitsFileModel" tabindex="-1" role="dialog" style="height: 550px;">
+			<div class="modal-dialog" style="width: 700px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">上传提示</h4>
+					</div>
+					<div class="modal-body" style="padding: 50px;text-align: center;">
+						<h3 style="margin: 0px auto;">文件已上传</h3>
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn new-tijiao queding" @click="freshBtn()">生成新版本</button>
+						<button type="button" class="btn new-tijiao queding" @click="coverBtn()">覆盖</button>
+						<!-- <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button> -->
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!--文件已存在-->
+	</div>
+</body>
+<script type="text/javascript">
+	$.showConfirm = function(str, funcok, funcclose) {
+		BootstrapDialog.confirm({
+			title : '提示',
+			message : str,
+			type : BootstrapDialog.TYPE_WARNING,
+			closable : true, // 点击对话框以外的页面内容可关闭
+			//draggable : true, // 可拖拽
+			btnCancelLabel : '取消',
+			btnOKLabel : '生成',
+			btnOKClass : 'btn-warning',
+			size : BootstrapDialog.SIZE_SMALL,
+			// 对话框关闭的时候执行方法
+			onhide : funcclose,
+			callback : function(result) {
+				if (result) {
+
+				}
+			}
+		});
+	};
+	var user = JSON.parse($.cookie("user"));
+	var uploader,tabsId;
+	$(function() {
+		$.ajax({
+			type : 'POST',
+			url : "/getFilesByTabsid",
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				tabsId=data.tabsId;
+			}
+		})
+		$.ajax({
+			type : 'POST',
+			url : "/fileVersion",
+			data : {
+				"state" : 2
+			},
+			async : false
+		});
+		uploader = $("#pluploader").pluploadQueue({
+			runtimes : 'html5,flash,silverlight,html4',
+			url : '/pluploadUpload',
+			//multi_selection:false,
+			//分片上传文件时，每个文件大小
+			chunk_size : '100mb',
+			multipart :true ,
+			unique_names : false,
+			multiple_queues : true,
+			//是否支持拖拽上传
+			dragdrop : true,
+			// 对将要上传的图片进行压缩
+			resize : {
+				width : 320,
+				height : 240,
+				quality : 90
+			},
+			rename : false,//点击标题时，是否可以重命名
+			sortable : true,
+			flash_swf_url : '../assets/js/upload/Moxie.swf',
+			silverlight_xap_url : '../assets/js/upload/Moxie.xap',
+			init : {
+				BeforeUpload:function(up, file){
+					uploader.settings.url = "/pluploadUpload?securityId=" + $("#securityId").val();
+					console.log(uploader.settings.url)
+					console.log("上传前的事件")
+				},
+				FileUploaded : function(up, file, info) {
+					//window.opener.location.reload();
+					self.close();
+				},
+				UploadComplete : function( uploader,files ) {
+                    console.log("所有文件上传完毕");
+                },
+				Error : function(up, args) {
+					//发生错误
+					if (args.file) {
+						//alert('[error] File:' + args.file);
+						$.showErr("上传失败");
+					} else {
+						//alert('[error]' + args);
+						$.showErr("上传失败");
+					}
+				}
+			}
+		});
+		//if (user[0].security.securityId != 1) {
+			//隐藏上传按钮
+			$('.plupload_start').attr('style', 'display:none');
+			//$('.plupload_add').attr('style', 'display:none');
+		//}
+		$("#saveControl").on('click', function() {
+			//uploader.start()
+			var isSelect=$("#securityId").val();
+			console.log(isSelect);
+			if(isSelect!=0){
+				if(uploader.files.length==0){
+					$.showErr("未选择文件");
+				}else{
+				var filesName=[];
+				for(var i=0;i<uploader.files.length;i++){
+					filesName.push(uploader.files[i].name)
+				}
+			//	uploader.start();
+				  $.ajax({
+					url : '/existFile', //提交给哪个执行 
+					data : {
+						filesName : filesName,
+						tabsId:tabsId
+					},
+					type : 'POST',
+					success : function(data) {
+						if (data == null || data == "") {
+							uploader.start();
+						} else {
+							console.log(123)
+							$("#exitsFileModel").modal("show");
+						}
+					}
+				});  
+				}
+			}else{
+				$.showErr("未选择密级，请先选择");
+			}
+		
+			//console.log(uploader.files[0].name)
+		});
+	});
+
+	function DataAll() {
+		$.ajax({
+			type : 'POST',
+			url : "/getUserById",
+			data : {
+				userId : user[0].userId
+			},
+			success : function(data) {
+				app.user = data
+			}
+		});
+		$.ajax({
+			type : 'POST',
+			url : "/getSecurityAll",
+			datatype : "json",
+			success : function(data) {
+				app.security = data;
+			}
+		})
+	}
+	var app = new Vue({
+		el : "#box",
+		data : {
+			user : "",
+			security : []
+		},
+		mounted : function() {
+			DataAll();
+		},
+		methods : {
+			coverBtn : function() {
+				$.ajax({
+					type : 'POST',
+					url : "/fileVersion",
+					data : {
+						"state" : 0
+					},
+					async : false
+				});
+				$("#exitsFileModel").modal("hide");
+				uploader.start();
+			},
+			freshBtn:function(){
+				$.ajax({
+					type : 'POST',
+					url : "/fileVersion",
+					data : {
+						"state" : 1
+					},
+					async : false
+				});
+				$("#exitsFileModel").modal("hide");
+				uploader.start();
+			}
+		}
+	})
+</script>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OpenMp4.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    
+      <link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+    <script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+
+<script>
+  $(function(){
+	  document.oncontextmenu = function () {
+          event.returnValue = false;
+      }
+	  document.onselectstart = function(){
+		    event.returnValue = false;
+		}
+	  var id = parseUrl()[0];
+	 // $(".video").attr("src","/openVideo?fileId="+id)
+	   //$(".video1").attr("value","/openVideo?fileId="+id)
+	  
+	
+	   //$(".video1").attr("value","C:\Users\97632\Desktop\演示视频.wmv")
+	    var filename = "";
+	   $.ajax({
+		   url:'../openVideo',
+		   data:{"fileId":id},
+		   type:'get',
+		   async: false,
+		   success:function(data){
+			   filename="../file"+data.substring(8,data.length);
+			//   console.log(data.indexOf("F:\\files"));
+			$("body").html("<video id='video'   src="+filename+" width='400px' height='400px' controls='controls' id='video' preload='auto'></video>")
+			   console.log(filename);
+		   }
+	   })
+	   
+	   
+	  
+	  // $(".video").attr("src",filename);
+	 
+	 
+  })
+  function parseUrl() {
+				var url = location.href;
+				var i = url.indexOf('?');
+				if(i == -1) return;
+				var querystr = url.substr(i + 1);
+				var arr1 = querystr.split('&');
+				var str = new Array();
+				var num = 0;
+				for(i in arr1) {
+					var ta = arr1[i].split('=');
+					str[num] = decodeURI(ta[1]);
+					num++;
+				}
+				return str;
+			}
+  </script>
+  </head>
+  
+  <body>
+  <!--  <video id="video"   src="/openVideo?fileId=297" width="100%" height="100%" controls="controls" id="video" preload="auto"     >
+    
+</video> -->
+  </body>
+</html>

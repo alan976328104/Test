@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"
+	content="ie=edge" />
+<meta charset="UTF-8">
+<title>个人信息</title>
+<link rel="stylesheet" href="../assets/css/bootstrap/bootstrap.min.css" />
+<script src="../assets/js/jquery-1.9.1.min.js"></script>
+<!--bootstrap-table-->
+<script src="../assets/js/bootstrap/bootstrap-table.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-table.css"
+	rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap-table-zh-CN.js"></script>
+<link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-dialog.css"
+	rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+<script src="../assets/js/alldata.js"></script>
+<link rel="stylesheet" href="../assets/css/zTreeStyle.css"
+	type="text/css">
+<script type="text/javascript" src="../assets/js/jquery.ztree.core.js"></script>
+<script type="text/javascript"
+	src="../assets/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.ztree.exedit.js"></script>
+<link rel="stylesheet" href="../assets/css/newstyle.css">
+<!-- 按钮样式 -->
+<link rel="stylesheet"
+	href="../assets/css/awesome-bootstrap-checkbox.css">
+<style>
+i {
+	margin-right: 5px;
+}
+
+.nav-tabs>li>a {
+	padding: 5px 12px;
+}
+
+ul {
+	padding: 0px;
+	margin: 0px;
+}
+
+.nav-tabs>li>a,.nav-tabs>li>a:focus {
+	border-radius: 0 !important;
+	color: #333;
+	margin-right: -1px;
+	line-height: 16px;
+	position: relative;
+	z-index: 11;
+	border-color: #c5d0dc;
+}
+
+.nav-tabs .active a {
+	color: #0085ff !important;
+	font-weight: bold;
+}
+
+label {
+	line-height: 45px;
+	color: #333;
+	margin-right: 10px;
+}
+
+.radio-inline label {
+	line-height: 20px !important;
+}
+
+input {
+	background: none !important;
+	color: rgb(236, 236, 236) !important;
+}
+
+textarea {
+	background: rgba(239, 235, 235, 0.45) !important;
+	color: #333 !important;
+}
+
+.chakan {
+	border-radius: 21px;
+	width: 122px !important;
+	background: #0085ff !important;
+	color: #fff;
+}
+
+.chakan:hover {
+	border-radius: 21px;
+	width: 122px !important;
+	background: #0085ff !important;
+	color: #fff !important;
+}
+
+#myTab li a:hover {
+	background: none !important;
+}
+
+input[type='radio'] {
+	position: relative;
+	top: 15px;
+}
+
+#myTab {
+	border-bottom: none;
+}
+
+#myTab li a {
+	border-bottom: none;
+}
+
+#myTab li {
+	width: 50%;
+	text-align: center;
+}
+
+.active {
+	background: none !important;
+}
+
+#myTab .active {
+	border-bottom: 1px solid #0085ff;
+}
+
+#myTabContent {
+	padding: 0 20px;
+}
+
+input {
+	color: #333 !important;
+}
+
+#roleTable td {
+	border: 1px solid #CCCCCC;
+}
+
+.ztree * {
+	font-size: 18px !important;
+}
+</style>
+<script>
+//获取登录者信息
+var sessionUser;
+$.ajax({
+	type : "post",
+	url : "/getSessionByIp",
+	async : false,
+	success : function(data) {
+		sessionUser=data
+	}
+})
+	var lang = getUrlParam("lang");
+	$(function() {
+		console.log(sessionUser)
+		if(sessionUser.userId==1||sessionUser.userId==2||sessionUser.userId==3||sessionUser.userId==4){
+			$(".isManger").css("display","")
+			$("#sub").css("display","")
+		}else{
+			$(".isManger").css("display","none")
+			$("#sub").css("display","none")
+		}
+		$("#userId").val(sessionUser.userId)
+		$("#username").val(sessionUser.username)
+		$("#pwd").val(sessionUser.pwd)
+		$("input[name=sex][value=" + sessionUser.sex + "]").prop("checked",
+				"true")
+		$("#dept").val(sessionUser.deptname)
+		$("#role").val(sessionUser.role.roleName)
+		if (sessionUser.secretlevel == "A"
+				|| sessionUser.secretlevel == "B") {
+			$("#security").val("重要涉密人员");
+		} else if (sessionUser.secretlevel == "C") {
+			$("#security").val("一般涉密人员");
+		} else if (sessionUser.secretlevel == "D") {
+			$("#security").val("非密");
+		}
+
+		var setting = { //此处根据自己需要进行配置
+			view : {
+				selectedMulti : true, //设置是否能够同时选中多个节点
+				showIcon : false, //设置是否显示节点图标
+				ShowPlusMinus : false,
+				showLine : true, //设置是否显示节点与节点之间的连线
+				showTitle : false, //设置是否显示节点的title提示信息
+			},
+			data : {
+				simpleData : {
+					enable : true
+				},
+				key : {
+					url : "xUrl",
+					icon : "menuIcon"
+				}
+			},
+			check : {
+				enable : true
+			//设置是否显示checkbox复选框
+			},
+			callback : {
+				beforeClick : zTreeBeforeClick
+			}
+		};
+		function zTreeBeforeClick(treeId, treeNode, clickFlag) {
+			return false;
+		}
+		//加载菜单开始
+		$.ajax({
+			type : "post",
+			url : "/getUserMenu",
+			data : {
+				"userId" : sessionUser.userId
+			},
+			dataType : "json",
+			async : false,
+			success : function(data) {
+				$.fn.zTree.init($("#tree"), setting, getNode(data)); //加载菜单数据
+			}
+		});
+		//加载菜单结束
+		//加载按钮开始
+		$.ajax({
+			type : "post",
+			url : "/getUserButton",
+			data : {
+				"userId" : sessionUser.userId
+			},
+			dataType : "json",
+			async : false,
+			success : function(data) {
+				data=unique(data)
+				console.log(data)
+				var btnData = [];
+				for (var i = 0; i < data.length; i++) {
+					btnData.push({
+						btnId : data[i].btnId,
+						name : data[i].btnName
+					})
+				}
+				$.fn.zTree.init($("#btntree"), setting, btnData); //加载按钮数据
+			}
+		});
+		//加载按钮结束
+		roleUser();
+	})
+	//数组去重
+function unique(arr){
+  var hash=[];
+  for (var i = 0; i < arr.length; i++) {
+    for (var j = i+1; j < arr.length; j++) {
+      if(arr[i].btnId===arr[j].btnId){
+        ++i;
+      }
+    }
+      hash.push(arr[i]);
+  }
+  return hash;
+}
+	//获取用户的权限
+	function roleUser() {
+		$.ajax({
+			type : "post",
+			url : "/getRoleMenuById",
+			data : {
+				roleId : sessionUser.role.roleId
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				if (data != null) {
+					var treeObj = $.fn.zTree.getZTreeObj("tree");
+					var node = treeObj.getNodes();
+					var nodes = treeObj.transformToArray(node);
+					treeObj.checkAllNodes(false);
+					for (var i = 0; i < nodes.length; i++) {
+						for (var j = 0; j < data.length; j++) {
+							if (nodes[i].id == data[j].menuId) {
+								var checkNode = treeObj
+										.getNodeByTId(nodes[i].tId);
+								treeObj.checkNode(checkNode, true, false);
+							}
+						}
+						treeObj.setChkDisabled(nodes[i], true);
+					}
+					treeObj.expandAll(true);
+				}
+			}
+		})
+		$.ajax({
+			type : "post",
+			url : "/getRoleButtonById",
+			data : {
+				roleId : sessionUser.role.roleId
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				if (data != null) {
+					var treeBtn = $.fn.zTree.getZTreeObj("btntree");
+				if(treeBtn!=null){
+					var nodebtn = treeBtn.getNodes();
+					var nodebtns = treeBtn.transformToArray(nodebtn);
+					treeBtn.checkAllNodes(false)
+					for (var i = 0; i < nodebtns.length; i++) {
+						for (var j = 0; j < data.length; j++) {
+							if (nodebtns[i].btnId == data[j].btnId) {
+								var checkNode = treeBtn
+										.getNodeByTId(nodebtns[i].tId);
+								treeBtn.checkNode(checkNode, true, true);
+							}
+						}
+						treeBtn.setChkDisabled(nodebtns[i], true);
+					}
+					treeBtn.expandAll(true);
+				}
+				}
+			}
+		})
+
+	}
+	//调整菜单数据
+	function getNode(array) {
+		for (var i = 0; i < array.length; i++) {
+			if (lang == "en_US") {
+				if (array[i].ename != "") {
+					array[i].name = array[i].ename
+				}
+			}
+			if (array[i].children != "undefined"
+					|| array[i].children != undefined) {
+				if (array[i].children != "null" && array[i].children != null
+						&& array[i].children.length != 0) {
+					getNode(array[i].children)
+				} else {
+					delete array[i].children
+				}
+			}
+		}
+		return array;
+	}
+</script>
+</head>
+
+<body style="height:100%">
+	<div id="box" style="height:100%">
+		<div>
+			<table style="float: left;margin: 0px 110px;">
+				<tr>
+					<td><label for="username" th:text="#{name}">姓名:</label><input
+						type="text" name="userId" id="userId" style="display: none" /></td>
+				</tr>
+				<tr>
+					<td><input type="text" name="username" id="username"
+						class="form-control" disabled="disabled" autocomplete="off" /></td>
+				</tr>
+				<!--<tr>
+					<td><label for="sex" th:text="#{sex}">性别:</label></td>
+				</tr>
+				 <tr>
+					<td>
+						<div class="form-group">
+							<div class="radio radio-info radio-inline">
+								<input type="radio" name="sex" id="inlineRadio1"
+									checked="checked" disabled="disabled" value="0" /> <label
+									for="inlineRadio1" th:text="#{man}">男</label>
+							</div>
+							<div class="radio radio-info radio-inline">
+								<input type="radio" name="sex" id="inlineRadio2"
+									disabled="disabled" value="1" /> <label for="inlineRadio2"
+									th:text="#{woman}">女</label>
+							</div>
+						</div>
+					</td>
+				</tr> -->
+				<tr class="isManger">
+					<td><label for="name" th:text="#{password}">密码:</label></td>
+				</tr>
+				<tr class="isManger">
+					<td><input class="form-control" type="password" name="pwd"
+						id="pwd"  /></td>
+				</tr>
+				<tr>
+					<td><label for="name" th:text="#{dept}">部门:</label></td>
+				</tr>
+				<tr>
+					<td><input class="form-control" type="text" name="deptId"
+						id="dept" disabled="disabled" /></td>
+				</tr>
+				<tr>
+					<td><label th:text="#{role}">角色:</label></td>
+				</tr>
+				<tr>
+					<td><input class="form-control" type="text" name="roleId"
+						id="role" disabled="disabled" /></td>
+				</tr>
+				<tr>
+					<td><label th:text="#{security}">密级:</label></td>
+				</tr>
+				<tr>
+					<td><input class="form-control" type="text" name="securityId"
+						id="security" disabled="disabled" /></td>
+				</tr>
+				<!-- <tr>
+					<td align="right"><label for="remark" th:text="#{security}">备注:</label></td>
+					<td><textarea class="form-control" name="remark" id="remark" rows="3" disabled="disabled"
+							v-model="user.remark"></textarea></td>
+				</tr> -->
+			</table>
+			<table id="roleTable" style="margin-left: 100px;width: 50%;">
+				<tr style="font-weight: bolder;text-align: center; ">
+					<td th:text="#{menu}">数据权限</td>
+					<td th:text="#{operation}">操作权限</td>
+				</tr>
+				<tr>
+					<td><div id="menu" style="float: left;">
+							<ul id="tree" class="ztree"></ul>
+						</div></td>
+					<td valign="top">
+						<div id="btn">
+							<ul id="btntree" class="ztree"></ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+			<button type="button" class="btn btn-default"
+				style="background: #0085ff ;color: rgb(255, 255, 255);margin-left:10px;position: absolute;;bottom: 10px;right: 10px;"
+				onclick="updatePwd()" th:text="#{amend}" id="sub"></button>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+//更新用户密码
+	function updatePwd(){
+		$.ajax({
+			type : "post",
+			url : "/updateUserPwd",
+			data : {
+				pwd : $("#pwd").val()
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				if(data!=0){
+					updateSuccess()
+				}else{
+					updateErr()
+				}
+			}})
+	}
+</script>
+
+</html>

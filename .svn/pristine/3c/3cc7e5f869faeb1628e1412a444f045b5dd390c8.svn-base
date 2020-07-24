@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" content="ie=edge" />
+<meta charset="UTF-8">
+<title>例题</title>
+<link href="../assets/css/font-awesome.min.css" rel="stylesheet">
+<!--[if IE 7]>
+    <link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css">
+    <![endif]-->
+<script src="../assets/js/jquery-1.9.1.min.js"></script>
+<!--[bootstrap]-->
+<link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="../assets/js/alldata.js"></script>
+<script type="text/javascript" src="../assets/js/vue/vue.js"></script>
+<link rel="stylesheet" href="../assets/css/bootstrap/bootstrap-dialog.css">
+<script type="text/javascript" src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+<style>
+* {
+	outline: 0;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+.nav-tabs>li>a {
+	padding: 8px 12px;
+}
+
+.nav-tabs>li>a,.nav-tabs>li>a:focus {
+	border-radius: 0 !important;
+	
+	color: #fff;
+	margin-right: -1px;
+	line-height: 16px;
+	position: relative;
+	z-index: 11;
+	border-color: #c5d0dc;
+}
+.nav-tabs{border-bottom :none !important;}
+.nav-tabs .active a {
+color: #fff !important;
+	font-weight: bold;background-color: #0a5c82 !important;
+}
+.nav-tabs>li>a:hover {
+    backgroud:#0085ff !important;
+}
+
+/*main*/
+#list {
+	list-style: none;
+	width: 80px;
+	
+	border: 1px solid #DDDDDD;
+	/* box-shadow: 0px 0px 5px #DDDDDD; */
+	display: none;
+	/*一定要用绝对定位*/
+	position: absolute;
+	z-index: 999;
+	background-color: #FFFFFF
+}
+
+#list li {
+	height: 30px;
+	line-height: 30px;
+	font-size: 14px;
+	text-align: center;
+	cursor: pointer;
+}
+#conNav li{    margin-right: 10px;
+    color: #fff;}
+</style>
+<script>
+//获取登录者信息
+var sessionUser;
+$.ajax({
+	type : "post",
+	url : "/getSessionByIp",
+	async : false,
+	success : function(data) {
+		sessionUser=data
+	}
+})
+var tabs=[];
+var tabUrl=[];
+/*获取iframe的id 也就是menuId*/
+var str=window.frameElement.id;
+var index=str.lastIndexOf("_");
+var menuId=str.substring(index + 1, str.length);
+var tabData;
+	$(function() {
+		tabs.push(menuId)
+		$.ajax({
+			type : 'POST',
+			url : "/getTabsData",
+			data : {
+				id:menuId
+			},
+			async:false,
+			success : function(data) {
+				tabData=data;
+				console.log(data)
+			}
+		})
+		AddTabs("conNav", "tab_info", "基本信息", "cont")
+		 for (var i = 0; i < tabData.length; i++) {
+				if (tabData[i].children=="null"||tabData[i].children==null||tabData[i].children.length == 0) {
+					AddTabs("conNav", tabData[i].id, tabData[i].name, "cont",tabData[i].id)
+					tabUrl.push({"iframeId":"iframe_"+tabData[i].id,"iframeUrl":"../office?url=html/tabs.html"})
+				
+				} else {
+					AddTabs("conNav",tabData[i].id, tabData[i].name, "cont",tabData[i].id) 
+					tabUrl.push({"iframeId":"iframe_"+tabData[i].id,"iframeUrl":"../office?url=html/kongbai.html"})
+				}
+		} 
+		//console.log(tabsAll)
+		$('#conNav a:first').tab('show'); //初始化显示哪个tab
+		
+		$('#conNav a').click(function(e) {
+			//console.log(e.target.id)
+			e.preventDefault(); //阻止a链接的跳转行为
+			$(this).tab('show'); //显示当前选中的链接及关联的content
+			getTabData(tabData,tabUrl)
+		});
+		
+		var listBox = document.getElementById('list');//获取自定义右键菜单
+		//阻止浏览器默认右键点击事件
+		document.oncontextmenu = function() {
+			return false;
+		}
+		//某元素组织点击事件
+		 $("#alias").click(function() {
+			 aliasByUser();
+			$("#aliasModel").modal("show");
+		}) 
+		//添加选项卡
+		 $("#plusTabs").click(function() {
+			$("#plusTabsModel").modal("show");
+		}) 
+			//某元素组织右键点击事件
+		$("#conNav li").bind("contextmenu", function() {
+			return false;
+		}) 
+	var lithis = '';
+		$("div").on('mousedown','#conNav li',function(e){
+			lithis = $(this);
+			//右键为3
+			if (3 == e.which) {
+				console.log(e.currentTarget.children[1].value);
+				//console.log(.children[0])
+				$("#tabsId").val(e.currentTarget.children[1].value);
+				 //记录当前的坐标(x轴和y轴)
+	            var x = e.clientX;
+	            var y = e.clientY;
+
+	            listBox.style.display = 'block';//右键点击时显示菜单框
+	            listBox.style.left = x + 'px';
+	          　		listBox.style.top = y + 'px';
+	          　		//关闭右键
+	            document.onclick = function(){
+	                 listBox.style.display = 'none';//再次点击时隐藏菜单框
+	            }
+			}
+	})
+		$("#zhiding").click(function(){
+			var html = $(lithis).prop("outerHTML");
+			$(lithis).remove();
+			$("#conNav").prepend(html);
+		})
+		getTabData(tabData,tabUrl)
+		$("#iframe_tab_info").attr('src',"../html/info.html");
+	})
+	function getTabData(tabData,tabUrl) {
+		var tabId;
+		var ul=$("#conNav").children('li');
+		var input=$("#conNav").children('li').children('input');
+		//var ul = document.getElementById("conNav").getElementsByTagName("li");
+		var content = document.getElementById("cont").getElementsByTagName("div");
+		for (var i = 0; i < tabData.length; i++) {
+			 if(ul[i+1]!=undefined){
+				if (ul[i+1].className == "active") {
+					tabId=input[i+1].value;
+	        	}
+			}
+			 
+			 if(content[i+1]!=undefined){
+				 if (content[i+1].className.search("active") != -1) {
+					 	for(j=0;j<tabUrl.length;j++){
+					 		 if(tabUrl[j].iframeId==content[i+1].children[0].id){
+					 			$(content[i+1].children[0]).attr('src',tabUrl[j].iframeUrl);
+					 		} 
+					 	}
+		        	}
+			 }
+    	}
+		if(tabId!="undefined"||tabId!=undefined){
+			 $.ajax({
+					type : 'POST',
+					url : "/getDataBySession",
+					async:false,
+					data : {
+						"menuId":menuId,
+						"tabsId":tabId
+					}
+			})
+		}
+	}
+	function tabContId(tabUrl,iframeId) {
+		for (k = 0; k < tabUrl.length; k++) {
+			if (tabUrl[k].iframeId == iframeId) {
+				//console.log(tab2content[j].children)
+				$("#"+iframeId).attr('src', tabUrl[k].iframeUrl);
+			}
+		}
+	}
+	function AddTabs(tabMainName, tabName, tabTitle,tabContentMainName,tabId) {
+		//tabMainName:tab标签页所在的容器
+		//tabName:当前tab的名称
+		//tabTitle:当前tab的标题
+		//tabUrl:当前tab所指向的URL地址
+		//tabContentMainName:内容所在容器
+		var exists = checkTabIsExists(tabMainName, tabName);
+		if (exists) {
+			$("#tab_a_" + tabName).click();
+		} else {
+			$("#" + tabMainName)
+					.append(
+							'<li id="tab_li_' + tabName + '"><a href="#tab_content_' + tabName + '" data-toggle="tab" id="tab_a_' + tabName + '">'
+									+ tabTitle + '</a><input type="hidden" value='+tabId+' /></li>');
+
+			//固定TAB中IFRAME高度
+			var header = parent.document.getElementById('headheight');
+			var ul = parent.document.getElementById('ulheight');
+			var breadcrumbs = parent.document.getElementById('breadcrumbs');
+			//            console.log(parent.document.getElementById('headheight'))
+			//var contHeight = header.offsetHeight + ul.offsetHeight
+					+ breadcrumbs.offsetHeight + 165;
+					var hri = $(window.parent).height();
+					mainHeight = parseInt(hri) - 300+'px';
+			 var content = '';
+			if (content) {
+				content = option.content;
+			} else {
+				content = '<iframe id="iframe_' + tabName + '" width="100%" height="'
+						+ mainHeight
+						+ 'px" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="yes" allowtransparency="yes"></iframe>';
+			}
+			$("#" + tabContentMainName)
+					.append(
+							'<div id="tab_content_' + tabName + '" role="tabpanel" class="tab-pane" id="' + tabName + '">'
+									+ content + '</div>'); 
+			$("#tab_a_" + tabName).click();
+		}
+	}
+
+	function checkTabIsExists(tabMainName, tabName) {
+		var tab = $("#" + tabMainName + " > #tab_li_" + tabName);
+		//console.log(tab.length)
+		return tab.length > 0;
+	}
+	function aliasByUser() {
+		$
+				.ajax({
+					type : 'POST',
+					url : "/aliasByUser",
+					data : {
+
+					},
+					success : function(data) {
+						if(data!=null){
+							var aliasIds=[];
+							for (var i = 0; i < data.length; i++) {
+								aliasIds.push(data[i].aliasId);
+								if(i==10){
+									break;
+								}
+							}
+							console.log(aliasIds)
+							if(aliasIds.length!=0){
+								getByAliasById(aliasIds);
+							}else{
+								document.getElementById('aliasUser').style.display = "none"
+							}
+						}
+					}
+				})
+	}
+	function getByAliasById(aliasIds) {
+		$.ajax({
+			type : 'POST',
+			url : "/getByAliasById",
+			data : {
+				aliasIds:aliasIds
+			},
+			success : function(data) {
+				console.log(data)
+				if (data.length != 0) {
+					document.getElementById('myalias').innerHTML = ""
+					for (var i = 0; i < data.length; i++) {
+						if(data[i].aliasType!=0){
+							document.getElementById('myalias').innerHTML += '<span onclick="attention(this)" title="系统标签" style="border-radius: 5px;padding:3px;margin-right:5px;background-color:#C2E1EF;cursor:pointer">'
+								+ data[i].aliasName + '</span>';
+						}else{
+							document.getElementById('myalias').innerHTML += '<span onclick="attention(this)" title="个人标签" style="background-color:#EFEDC2;border-radius: 5px;padding:3px;margin-right:5px;cursor:pointer">'
+								+ data[i].aliasName + '</span>';
+						}
+					}
+				} else {
+					document.getElementById('aliasUser').style.display = "none"
+				}
+			}
+		})
+	}
+	function attention(info){
+		$("#labelVal").val(info.innerText)
+	}
+</script>
+</head>
+
+<body style="height: 100%;width: 100%;margin: 0px;padding: 0px;">
+	<div id="box">
+		<ul class="nav nav-tabs" id="conNav" style="margin-top: 2px;display: inline-block; margin: 0 0px;
+    margin-bottom: 30px;">
+		
+		<button class="btn btn-default" type="button" id="plusTabs"
+			style="float: right;margin: 0px; padding: 5px 10px; color: #333;width: 38px !important;    background: rgb(255, 255, 255) !important;">
+			<i class="icon-plus"></i>
+		</button>
+</ul>
+		<div class="tab-content" style="overflow: auto;margin-top: -5px;" id="cont"></div>
+		<!--添加标签开始-->
+		<ul id="list" style="display: none">
+			<li id="alias">添加标签</li>
+<li id="zhiding">置前</li>
+		</ul>
+		<div class="modal fade" id="aliasModel" tabindex="-1" role="dialog">
+			<div class="modal-dialog" style="    width: 435px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">系统提示</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px;margin:20px 0px;">
+						<div class="row">
+							<div class="col-md-8" style="    width: 100%;">
+								<table>
+									<tr>
+										<td><label>标签名称:</label></td>
+										<td><input class="form-control" type="text" id="labelVal" autocomplete="off"
+											style="display: inline; width: 180px;" /> <select class="form-control"
+											v-for="(item,index) in rolebtn" v-if="item.btnId==6" id="state"
+											style="display: inline;width: 110px;"><option value="0">个人标签</option>
+												<option value="1">全局标签</option>
+										</select></td>
+									</tr>
+								<input type="text" id="tabsId" style="display: none" />
+									<tr id="aliasUser">
+										<td><label style="margin-top: 30px;">我的标签:</label></td>
+										<td><label id="myalias" style="margin-top: 30px;"></label></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+						<button type="button" class="btn btn-default"  style="background: #0085ff !important;color: #fff;" @click="saveAlias()" th:text="#{submit}">保存</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!--添加标签结束-->
+		<!--添加选项卡开始-->
+		<div class="modal fade" id="plusTabsModel" tabindex="-1" role="dialog">
+			<div class="modal-dialog"  style="    width: 320px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">系统提示</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px;">
+						<div class="row">
+							<div class="col-md-12" style="margin: 20px 0;">
+								<table>
+									<tr>
+										<td>名称：</td>
+										<td><input class="form-control" type="text" id="tabsText" autocomplete="off"
+											style=" width: 180px;" /></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+						<button type="button" class="btn btn-default" @click="saveTabs()" style="background: #0085ff !important;color: #fff;" th:text="#{submit}">保存</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!--添加选项卡结束-->
+	</div>
+</body>
+<script type="text/javascript">	
+
+function DataAll() {
+	$.ajax({
+		type : 'POST',
+		url : "/getUserById",
+		data : {
+			userId : sessionUser.userId
+		},
+		datatype : "json",
+		success : function(data) {
+			app.user = data;
+			$.ajax({
+				type : 'POST',
+				url : "/getRoleButtonById",
+				data : {
+					roleId : data.role.roleId
+				},
+				success : function(result) {
+					if (result != null) {
+						app.rolebtn = JSON.parse(result);
+					}
+				}
+			})
+		}
+	})
+}
+var app = new Vue({
+	el : "#box",
+	data : {
+		rolebtn : []
+	},
+	mounted : function() {
+		DataAll();
+	},
+	methods : {
+		saveAlias : function() {
+			$.ajax({
+				type : 'POST',
+				url : "/insertTabAlias",
+				data : {
+					aliasName : $("#labelVal").val(),
+					tabsId : $("#tabsId").val(),
+					aliasType : $("#state").val()
+				},
+				success : function(data) {
+					if (data != null && data != "null"&& data != "") {
+						$("#aliasModel").modal("hide");
+						$.showSuccessTimeout("添加标签成功");
+					}else{
+						//$("#aliasModel").modal("hide");
+						$.showErr("不存在数据");
+					}
+				}
+			})
+		},
+		saveTabs:function(){
+			 $.ajax({
+				type : 'POST',
+				url : "/insertTabs",
+				data : {
+					name: $("#tabsText").val(),
+					parentId:0,
+					lv:1,
+					menuId : menuId
+				},
+				success : function(data) {
+					if(data=="ok"){
+						$("#plusTabsModel").modal("hide");
+						self.location.reload();
+						$.showSuccessTimeout("添加成功");
+					}
+				}
+			}) 
+		}
+	}
+})
+</script>
+</html>

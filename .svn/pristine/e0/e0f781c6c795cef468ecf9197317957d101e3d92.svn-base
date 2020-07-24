@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html style="width:100%;height:100%;">
+	<head>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+		
+		<title></title>
+		<script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+		<style type="text/css">
+		.td-select{background:#FBEC88}/*td高亮样式*/
+		</style>
+		<script>
+		var isP=1;
+		
+		   $.ajaxSetup({cache:false});
+		$(function(){
+			var xianxiangstr=[];
+			var xiangmustr =[];
+			var isxy=0;
+		var menuid = parseUrl();
+			//数据表格标头初始化
+			var titledata = [];
+			for(var i=0;i<26;i++)
+			{
+				titledata.push({field:String.fromCharCode((65+i)),title:String.fromCharCode((65+i)),width:100,align:'center'});
+			//alert();
+			}
+
+			//数据表格内容初始化
+			var contentdata=[];
+			var rowdata={};
+		for (var j=0;j<50;j++){	
+			for(var i=0;i<26;i++){
+				rowdata[String.fromCharCode((65+i))]=''
+			}
+			contentdata.push(rowdata);
+			rowdata={};
+		}
+		
+		$("#exportP").click(function(){
+		//	alert();
+			var data=$('#dg').datagrid("getData").rows;
+			var returndata =[[]];
+			returndata[0].push("");
+			for (var i = 0; i<data.length;i++){
+				if(i>0){
+					if(data[i]["A"]!=""){
+						returndata.push([]);
+					}
+					
+				}
+			var j=0;
+			for(var key in data[i]){
+				
+				if(data[i][key]==""){
+					
+				}else{
+					if(i>0){
+						if(j==0){
+							
+							var jtemp = data[i][key];
+							returndata[i].push( jtemp.slice(0,jtemp.indexOf("<")));
+						}else{
+							var jtemp = data[i][key];
+							if(jtemp.indexOf("○")>0){
+								returndata[i].push("○")
+							}else{
+								returndata[i].push("×")
+							}
+							
+						}
+						
+						
+					}else{
+						returndata[i].push( data[i][key]);
+					}
+					
+				}
+				j++;
+			}
+			}
+			var strreturndata = JSON.stringify(returndata);
+		//	console.log(returndata);
+		$("#fdata").val(strreturndata);
+		$("#fform").submit();
+			
+			//location.href="../ExprotPhenomenonController?data="+strreturndata
+		})
+		
+		
+			$('#dg').datagrid({    
+			    columns:[titledata],
+			    data:contentdata,
+			    onClickCell:function(index, field, value ){
+			  	  // 	 var me = this;
+	         	 // setTimeout(function () { $(me).datagrid('unselectRow', index) }, 1); //取消easyui的默认行选择样式，注意要延时执行，要不无法取消默认样式	
+			 
+	         	 
+	         	 if(value.indexOf('span')>0){
+	         		 var phid = menuid;
+		    			// alert(456)
+		    			// alert(123)
+		    			  window.frameElement.id=value.substring(value.indexOf('display')+16,value.length-7);
+		    			 $.ajax({
+		    				 url:'../inssessionPhenomenonmenuid',
+		    				 data:jQuery.param({"menuid":phid},true),
+		    				 async: false,
+		    				 success:function(data){
+		    					 //alert(123)
+		    					location.href='../office?url=html/tab3.html'
+		    				 }
+		    				 
+		    			 })
+	        
+	 			//	location.href='../office?url=html/tab3.html'
+	         		
+	         	 }
+			   
+	         	 
+			  		},
+			   		toolbar: '#tb',
+			    	singleSelect:true
+		            });
+			
+			
+			
+			
+			
+			
+			
+			//alert(menuid);
+			
+			
+			$.ajax({
+				url:'../getPhvalue',
+				 type:"POST",
+				 traditional:true,
+				data:{'menuid':menuid},
+				success:function(obj){
+					if(obj==""){
+						return;
+					}
+					console.log(obj)
+					$('#dg').datagrid({    
+					    columns:[titledata],
+					    data:JSON.parse(obj),
+					    onClickCell:function(index, field, value ){
+					    	//alert("----")
+					    	 if(value.indexOf('span')>0){
+					    		// alert(789)
+					    		 window.frameElement.id=value.substring(value.indexOf('display')+16,value.length-7);
+					    			 console.log(window.frameElement.id);
+					    			 var phid = menuid;
+					    			// alert(456)
+					    			 //alert(phid)
+					    			 $.ajax({
+					    				 url:'../inssessionPhenomenonmenuid',
+					    				 data:jQuery.param({"menuid":phid},true),
+					    				 async: false,
+					    				 success:function(data){
+					    					 //alert(123)
+					    					location.href='../office?url=html/tab3.html'
+					    				 }
+					    				 
+					    			 })
+					 			
+					         	 }
+					   //window.frameElement.id=32;
+						//location.href='../office?url=html/test.html'
+			         	 
+					  		},
+					   		toolbar: '#tb',
+					    	singleSelect:true
+				            });
+					$('#dd').window('close');
+				}
+				
+			})
+			
+			
+			
+			
+			
+			
+			
+			
+			//点击选择配置单元格按钮
+			$("#setrow").click(function(){
+				
+				//if($('#dg').datagrid('getSelected')!=null){
+						
+					$('#dd').window('open');
+				//}else{
+					//alert('请选择起始X轴坐标');
+					//return ;
+				//}
+			})
+			
+			
+			//Y轴坐标改变事件
+			$("#yy").combobox({
+				
+				onChange:function(newValue, oldValue){
+					
+					if(newValue=='xiangmu'){
+						$('#xx').combobox('setValue', 'xianxiang');
+						isxy=0;
+					}else{
+						$('#xx').combobox('setValue', 'xiangmu');
+						isxy=1;
+						
+					}
+					
+				}
+			})
+			//X轴坐标改变事件
+			$("#xx").combobox({
+				
+				onChange:function(newValue, oldValue){
+					
+					if(newValue=='xiangmu'){
+						$('#yy').combobox('setValue', 'xianxiang');
+						isxy=1;
+					}else{
+						$('#yy').combobox('setValue', 'xiangmu');
+						isxy=0;	
+					}
+					
+				}
+			})
+			
+			
+			//X轴按钮点击事件
+			$("#xbtn").click(function(){
+				if($('#xx').combobox('getValue')=='xianxiang'){
+					var obj = [
+							      {id:1,
+							    	"text":"全部选择",    
+									 "iconCls":"icon-blank",
+							    	children:[]
+							      }
+							      ];
+					
+					$.ajax({
+						url:'../findAllPhenomenon',
+						success:function(data){
+							obj[0].children = data;
+							$('#xianxiangtt').tree({
+								data:obj  ,
+								checkbox:true
+							})
+							//$('#dd').window('close');
+							$('#xianxiangwindow').window('open');
+						}
+						
+					})
+				}else{
+					var obj = [
+							      {id:1,
+							    	"text":"全部选择",    
+									 "iconCls":"icon-blank",
+							    	children:[]
+							      }
+							      ];
+					
+					$.ajax({
+						url:'../findAllPhenomenonmenu',
+						success:function(data){
+							obj[0].children = data;
+							$('#xiangmutt').tree({
+								data:obj  ,
+								checkbox:true
+							})
+							//$('#dd').window('close');
+							$('#xiangmuwindow').window('open');
+						}
+						
+					})
+					
+				}
+			})
+			
+			//Y轴按钮点击事件
+			$("#ybtn").click(function(){
+				if($('#yy').combobox('getValue')=='xianxiang'){
+					var obj = [
+							      {id:1,
+							    	"text":"全部选择",    
+									 "iconCls":"icon-blank",
+							    	children:[]
+							      }
+							      ];
+					
+					$.ajax({
+						url:'../findAllPhenomenon',
+						success:function(data){
+							obj[0].children = data;
+							$('#xianxiangtt').tree({
+								data:obj  ,
+								checkbox:true
+							})
+							//$('#dd').window('close');
+							$('#xianxiangwindow').window('open');
+						}
+						
+					})
+				}else{
+					var obj = [
+							      {id:1,
+							    	"text":"全部选择",    
+									 "iconCls":"icon-blank",
+							    	children:[]
+							      }
+							      ];
+					
+					$.ajax({
+						url:'../findAllPhenomenonmenu',
+						success:function(data){
+							//alert(data);
+							obj[0].children = data;
+							$('#xiangmutt').tree({
+								data:obj  ,
+								checkbox:true
+							})
+							//$('#dd').window('close');
+							$('#xiangmuwindow').window('open');
+						}
+						
+					})
+				}
+			})
+			
+			$("#xiangmubtn").click(function(){
+				 xiangmustr =[];
+				var nodes = $('#xiangmutt').tree('getChecked');
+				if(nodes[0].text=='全部选择'){
+					for(var i=0;i<nodes[0].children.length;i++){
+						xiangmustr.push(nodes[0].children[i].text)
+					}
+				}else{
+					for(var i=0;i<nodes.length;i++){
+						xiangmustr.push(nodes[i].text)
+					}
+				}
+				console.log(xiangmustr);
+				$('#xiangmuwindow').window('close');
+				
+				
+			})
+			
+			$("#xianxiangbtn").click(function(){
+				xianxiangstr=[];
+				var nodes = $('#xianxiangtt').tree('getChecked');
+				if(nodes[0].text=='全部选择'){
+					for(var i=0;i<nodes[0].children.length;i++){
+						xianxiangstr.push(nodes[0].children[i].text)
+					}
+				}else{
+					for(var i=0;i<nodes.length;i++){
+						xianxiangstr.push(nodes[i].text)
+					}
+				}
+				console.log(xianxiangstr);
+				$('#xianxiangwindow').window('close');
+				
+				
+			})
+			
+			
+			$("#save").click(function(){
+				
+				
+				$.ajax({
+					url:'../saveph',
+					traditional:true,
+					 type:"POST",
+					data:{'menuid':menuid,'value':JSON.stringify($('#dg').datagrid('getData'))},
+					success:function(data){
+						if(data>0){
+							alert("保存成功")
+							
+						}else{
+							
+							alert('保存失败')
+						}
+					}
+					
+				})
+				
+			})
+			
+			//点击提交按钮
+			$("#commit").click(function(){
+					console.log(xiangmustr);
+					console.log(xianxiangstr);
+				$.ajax({
+					url:'../Phenomenon',
+					traditional:true,
+					 type:"POST",
+					data:{'xiangmu':xiangmustr,'xianxiang':xianxiangstr,'isxy':isxy},
+					success:function(data){
+						console.log(data);
+						
+						for(var i = 0;i<data.length;i++){
+							
+							for(var j=0;j<data[i].length;j++){
+								contentdata[i][String.fromCharCode((65+j))]=data[i][j];
+								//alert(JSON.stringify(contentdata[i]));
+							}
+						}
+						
+						$('#dg').datagrid({    
+						    columns:[titledata],
+						    data:contentdata,
+						    onClickCell:function(index, field, value ){
+						    	 if(value.indexOf('span')>0){
+						    		 //window.frameElement.id=value.substring(value.indexOf('display')+16,value.length-7);
+						    		// alert(123)
+						    	//	alert(menuid)
+						    		 var phid = menuid;
+						    			// alert(456)
+						    			// alert(123)
+						    			  window.frameElement.id=value.substring(value.indexOf('display')+16,value.length-7);
+						    			 $.ajax({
+						    				 url:'../inssessionPhenomenonmenuid',
+						    				 data:jQuery.param({"menuid":phid},true),
+						    				 async: false,
+						    				 success:function(data){
+						    					 //alert(123)
+						    					location.href='../office?url=html/tab3.html'
+						    				 }
+						    				 
+						    			 })
+						         	 }
+						   	//window.frameElement.id=32;
+							//location.href='../office?url=html/test.html'
+				         	 
+						  		},
+						   		toolbar: '#tb',
+						    	singleSelect:true
+					            });
+						$('#dd').window('close');
+					}
+					
+				})
+				
+			})
+			
+			
+			
+			
+		});
+		
+		function parseUrl() {
+			var url = location.href;
+			var i = url.indexOf('?');
+			if(i == -1) return;
+			var querystr = url.substr(i + 1);
+			var arr1 = querystr.split('&');
+			var str = new Array();
+			var num = 0;
+			for(i in arr1) {
+				var ta = arr1[i].split('=');
+				str[num] = decodeURI(ta[1]);
+				num++;
+			}
+			return str;
+		}
+		
+		
+		
+		</script>
+	</head>
+	<body style="width:100%;height:100%;">
+	<div>
+	
+		<table id="dg" style="width:100%;height:768px;"   
+        data-options="fitColumns:false">
+        
+        
+        </table>
+    
+        
+        <!-- 设定坐标begin -->
+<div id="dd" class="easyui-dialog" title="设置单元格" width="440" height="145"  style="top: 100px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">   
+   <table style="margin: 0px auto">
+<tr>
+<td>设置首行标题(横坐标)</td>
+<td>
+ <select id="xx" class="easyui-combobox" style="width:180px;">   
+  <option value="xianxiang">试验现象</option>   
+    <option value="xiangmu">试验项目</option>   
+      
+</select>  
+</td>
+<td><button id="xbtn">选择</button>
+</td>
+</tr>
+<tr>
+<td>设置首列标题(纵坐标)</td>
+<td>
+ <select id="yy" class="easyui-combobox" style="width:180px;">   
+  <option value="xiangmu">试验项目</option>    
+     <option value="xianxiang">试验现象</option>  
+    
+</select>  
+</td>
+<td><button id="ybtn">选择</button>
+</td>
+</tr>
+</table>  
+<div style="text-align: right; margin-top: 20px" >
+<button id=commit style="margin-right: 10px" th:text="#{submit}">确定</button> 
+</div>  
+</div>   
+ </div> 
+	<!-- 设定坐标end -->
+	
+		<!-- 选择项目begin -->
+		<div id="xiangmuwindow" class="easyui-dialog" title="设置单元格" width="500" height="500"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+        <ul id="xiangmutt"></ul> 
+        <button id="xiangmubtn" style="position:absolute;bottom:10px;right:10px">确认</button>
+		</div>
+		<!-- 选择项目end -->
+		
+		<!-- 选择现象begin -->
+		<div id="xianxiangwindow" class="easyui-dialog" title="设置单元格" width="500" height="500"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+        <ul id="xianxiangtt"></ul> 
+        <button id="xianxiangbtn" style="position:absolute;bottom:10px;right:10px">确认</button>
+		</div>
+		<!-- 选择现象end -->
+		
+<div id="tb">
+<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-xiugai',plain:true" id="setrow"  >设置单元格</a>   
+<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-baocun',plain:true" id="save"  th:text="#{submit}">保存</a>      
+<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-daochu',plain:true" id="exportP"  >导出</a>   
+</div>
+
+<form id="fform" action="../ExprotPhenomenonController" style="display: none;" method="post">
+	<input id="fdata" name="data">
+	
+</form>
+	</body>
+</html>

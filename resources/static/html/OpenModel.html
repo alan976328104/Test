@@ -1,0 +1,62 @@
+<HTML>
+<link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+    <script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+<script>
+$(function(){
+	document.oncontextmenu = function () {
+        event.returnValue = false;
+    }
+	document.onselectstart = function(){
+	    event.returnValue = false;
+	}
+	 var id = parseUrl()[0];
+	 var filename = "";
+	  $.ajax({
+		   url:'../openVideo',
+		   data:{"fileId":id},
+		   type:'get',
+		   async: false,
+		   success:function(data){
+			   filename="../file"+data.substring(8,data.length);
+				document.Intevueactivexctrl1.TIM_File_OpenFile(filename,'');
+			//   console.log(data.indexOf("F:\\files"));
+			   console.log(filename);
+		   }
+	   })
+	 
+	
+	
+
+	
+})
+ function parseUrl() {
+				var url = location.href;
+				var i = url.indexOf('?');
+				if(i == -1) return;
+				var querystr = url.substr(i + 1);
+				var arr1 = querystr.split('&');
+				var str = new Array();
+				var num = 0;
+				for(i in arr1) {
+					var ta = arr1[i].split('=');
+					str[num] = decodeURI(ta[1]);
+					num++;
+				}
+				return str;
+			}
+</script>
+
+<BODY BGCOLOR="#ffffff" onload = "javascript: document.Intevueactivexctrl1.TIM_File_OpenFile('ftp://0912:zheng_19841011@135.5.9.120:21/hello/test.iva',''); ">
+<FONT face="Arial, Helvetica, sans-serif" color="#336699">
+<CENTER>
+<H1></H1>
+<OBJECT id="Intevueactivexctrl1" height=550 width=800 classid="clsid:D7F8624B-5614-4C94-AC18-0322E83D5268" VIEWASTEXT>
+</OBJECT>
+<br>
+<br>
+</CENTER>
+</FONT>
+</BODY>
+</HTML>

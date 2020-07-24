@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" content="ie=edge"/>
+    <meta charset="UTF-8">
+    <title>模板管理</title>
+
+    <link href="../assets/css/font-awesome.min.css" rel="stylesheet">
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css">
+    <![endif]-->
+    <script src="../assets/js/jquery-1.9.1.min.js"></script>
+
+    <script src="../assets/js/alldata.js"></script>
+    <!--bootstrap-table-->
+    <script src="../assets/js/bootstrap/bootstrap-table.js"></script>
+    <link href="../assets/css/bootstrap/bootstrap-table.css" rel="stylesheet">
+    <script src="../assets/js/bootstrap/bootstrap-table-zh-CN.js"></script>
+
+    <link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+    <script src="../assets/js/vue/vue.js"></script>
+    <link href="../assets/css/bootstrap/bootstrap-dialog.css" rel="stylesheet">
+    <script src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+    
+    <style>
+        i {
+            padding-right: 5px;
+        }
+
+        li {
+            list-style: none;
+            cursor: pointer;
+            padding-left: 30px;
+        }
+    </style>
+    <script>
+        $(function () {
+            $("#ulTree li").click(function () {
+                var item = $(this).index();  //获取索引下标 也从0开始
+                $(this).siblings('li').removeClass('selected');
+                $(this).addClass('selected');
+                $("#rightCont").css("display","")
+                $("#tb_order").bootstrapTable('load', MyTemplatetreedata[item].mydata);
+            });
+            $('#tb_order').bootstrapTable({
+//                data: personalData,         //请求后台的URL（*）
+                method: 'get',                      //请求方式（*）
+                toolbar: '#toolbar',                //工具按钮用哪个容器
+                pagination: true,                   //是否显示分页（*）
+                pageNumber: 1,                       //初始化加载第一页，默认第一页
+                pageSize : 15, //每页的记录行数（*）
+        		pageList : [ 10, 15, 20 ,30,50], //可供选择的每页的行数（*）
+                clickToSelect: true,                //是否启用点击选中行
+                columns: [
+                    [{
+                        field: 'ck',
+                        checkbox: true,
+                        width: "0.5%"
+                    }, {
+                        field: 'name',
+                        title: '字段名称',
+                        width: "2%"
+                    }, {
+                        field: 'ename',
+                        title: '英文名称',
+                        width: "50%"
+                    }, {
+                        field: 'type',
+                        title: '字段类型',
+                        width: "5%"
+                    }, {
+                        field: 'isnull',
+                        title: '是否允许为空',
+                        width: "5%"
+                    }]
+                ]
+            });
+        })
+
+    </script>
+</head>
+
+<body style="height: 100%;">
+<div id="box">
+    <div class="row" style="width:100%;">
+        <div class="col-md-2" id="leftHeight">
+            <div id="tobar" style="padding:5px 0px;">
+                <button type="button" class="btn btn-default btn-sm"><i class="icon-plus"></i>新建模板
+                </button>
+                <button type="button" class="btn btn-default btn-sm">
+                    <i class="icon-trash"></i>删除
+                </button>
+            </div>
+            <ul id="ulTree" style="margin: 0px;padding: 0px;width: 80%">
+                <li v-for="(site,index) in sites">
+                    {{site.text}}
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-10" id="rightCont" style="display: none">
+            <div id="toolbar">
+                <button type="button" class="btn btn-white btn-default" @click="downloadbtn()">
+                    <i class="icon-plus"></i>添加
+                </button>
+                <button type="button" class="btn btn-white btn-default" @click="uploadbtn()">
+                    <i class="icon-trash" aria-hidden="true"></i>删除
+                </button>
+            </div>
+            <table id="tb_order" style="width:100%;height:100% ;">
+            </table>
+        </div>
+    </div>   
+</div>
+</body>
+<script>
+    new Vue({
+        el: "#box",
+        data: {
+            sites: MyTemplatetreedata
+        },
+        methods: {}
+    })
+</script>
+</html>

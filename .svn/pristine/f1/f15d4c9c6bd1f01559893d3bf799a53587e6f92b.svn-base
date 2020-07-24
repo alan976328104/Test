@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link href="assets/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+<script type="text/javascript" src="assets/js/jquery-1.9.1.min.js"></script>
+<style type="text/css">
+.pagetabs {
+	height: 41px !important;
+}
+
+.nav-tabs>li {
+	padding: 0 1px !important;
+	width:30px !important;
+	float: left;
+}
+
+.nav-tabs>li>a {
+	color: #555 !important;
+	padding: 8px 25px 8px 15px !important;
+	border-top: 4px solid transparent !important;
+	background-color: #eee !important;
+	border: 1px solid #ddd !important;
+	border-bottom-color: transparent !important;
+}
+
+.nav-tabs>li>a>.close {
+	display: inline-block !important;
+	float: inherit !important;
+	position: absolute !important;
+	top: 1px !important;
+	font-size: 18px !important;
+	font-weight: inherit !important;
+	right: 5px !important;
+}
+
+.nav-tabs>li.active>a,.nav-tabs>li.active>a:hover,.nav-tabs>li.active>a:focus
+	{
+	border-top: 4px solid #ffa405 !important;
+}
+
+.nav-tabs>li>a:hover {
+	background-color: #e3e3e3 !important;
+	border: 1px solid #ddd !important;
+	border-bottom-color: transparent !important;
+}
+
+.pagetabs .dropdown-toggle,.pagetabs .dropdown-toggle:hover {
+	border: none !important;
+	background-color: transparent !important;
+	padding: 8px !important;
+}
+
+.pagetabs .open>.dropdown-toggle,.pagetabs .open>.dropdown-toggle:hover,.pagetabs .open>.dropdown-toggle:focus
+	{
+	background-color: transparent !important;
+}
+</style>
+</head>
+<body>
+	<div id="tabtest" style="width:600px;"></div>
+
+</body>
+</html>
+<script>
+	$(function() {
+		var toolbar = $('<div class="btn-group"></div>');
+		$("#tabtest").before(toolbar);
+		Tabs.init({
+			selector : $("#tabtest"),
+			close : true
+		});
+		for (var i = 1; i <= 40; i++) {
+			(function(i) {
+				toolbar.append($(
+						'<button type="button" class="btn btn-default">' + i
+								+ '</button>').click(function() {
+					Tabs.addtab({
+						title : "测试" + i,
+						bindcode : i,
+						content : i + "456456"
+					});
+					//Tabs.addtab({ title: "测试" + i, bindcode: i, url: "http://www.baidu.com" });
+				}));
+			})(i);
+		}
+		;
+	});
+
+	//选项卡
+	var Tabs = (function($) {
+		var options = {
+			selector : undefined,//
+			close : false,//是否可以关闭标签
+			//contextmenu: false,//右键菜单
+			closeCallback : function() {
+			}
+		};
+		var _newtab;
+		var _tabcontent;
+		var _drop;
+
+		var tab = function() {
+			this.options = {
+				title : "",
+				bindcode : undefined,
+				url : undefined,
+				close : false
+			};
+			var isfull = false;
+			this.init = function(setting) {
+				$.extend(this.options, setting);
+			};
+			this.addtab = function(setting) {
+				$.extend(this.options, setting);
+				var li, litop, hasdata;
+				 if (!_drop) {
+					_drop = new droplist();
+				} 
+				hasdata = ishas(this.options);
+				if (!hasdata.has) {
+					li = $('<li><a href="#page' + this.options.bindcode + '" data-toggle="tab">'
+							+ this.options.title
+							+ '<span class="close">×</span></a></li>');
+					li.data("data", $.extend(true, {}, this.options));
+				} else {
+					li = hasdata.selector.off("click");
+				}
+				console.log(options.selector)
+				li.prependTo(options.selector);
+				//li.append(options.selector)
+				li.find("span.close").show().on("click", function() {
+					closetab(this);
+				});
+				options.selector.children("li").not(li).removeClass("active");
+				li.addClass("active");
+				 litop = _drop.options.selector.position().top,
+						paneltop = options.selector.position().top;
+				if (litop > paneltop) { //超出检测
+					_drop.addDropItem();
+				} 
+			};
+
+			function closetab(target) {
+				var pager = $(target).parent().attr("href");
+				$(target).closest("li").remove();
+				options.selector.next().find(pager).remove();
+				if (options.selector.find("li.active").length <= 0) {
+					options.selector.find("li>a:first").tab("show");
+				}
+				;
+
+				var li = _drop.options.ulpanel.children("li:first");
+				if (li.length <= 0)
+					return;
+				li.find("span.close").show();
+				_drop.options.selector.before(li);
+				if (_drop.options.selector.position().top > options.selector
+						.position().top) {
+					li.find("span.close").hide();
+					_drop.options.ulpanel.append(li);
+					return;
+				}
+				;
+				li.off("click");
+				if (_drop.options.ulpanel.children("li").length <= 0) {
+					_drop.options.selector.css({
+						"visibility" : "hidden"
+					});
+				}
+				;
+			}
+			;
+
+			function ishas(setting) {//检测选项卡是否存在
+				var lis = options.selector.find("li"), lidata, hasdata;
+				hasdata = {
+					selector : undefined,
+					has : false
+				};
+				$.each(lis, function() {
+					lidata = $(this).data("data");
+					if (!lidata)
+						return true;
+					if (lidata.title === setting.title
+							&& lidata.bindcode === setting.bindcode
+							&& lidata.url === setting.url) {
+						hasdata = {
+							selector : $(this),
+							has : true
+						};
+						return false;
+					}
+					;
+				});
+				return hasdata;
+			}
+			;
+		};
+
+		var tabcontent = function() {
+			this.options = {
+				selector : undefined
+			};
+			var option = {
+				bindcode : undefined,
+				url : undefined,
+				content : undefined
+			};
+
+			this.init = function() {
+				var content = $('<div class="tab-content"></div>');
+				this.options.selector = content;
+				options.selector.after(this.options.selector);
+			};
+			this.addContent = function(setting) {
+				var page, iframe;
+				$.extend(option, setting);
+				hasdata = ishas(option);
+				if (!hasdata.has) {
+					page = $(
+							'<div id="page' + option.bindcode + '" class="tab-pane"></div>')
+							.data("data", $.extend(true, {}, option));
+					if (!option.url) {
+						page.html(option.content);
+					} else {
+						iframe = $('<iframe src="' + option.url + '"  scrolling="no"></iframe>');
+						page.append(iframe);
+					}
+					;
+					page.appendTo(this.options.selector);
+				} else {
+					page = hasdata.selector;
+				}
+				;
+				this.options.selector.children("div").not(page).removeClass(
+						"active");
+				page.addClass("active");
+			};
+
+			function ishas(setting) {//检测选项卡是否存在
+				var divs = _tabcontent.options.selector.children("div"), divdata, hasdata;
+				hasdata = {
+					selector : undefined,
+					has : false
+				};
+				$.each(divs, function() {
+					divdata = $(this).data("data");
+					if (!divdata)
+						return true;
+					if (divdata.bindcode === setting.bindcode) {
+						hasdata = {
+							selector : $(this),
+							has : true
+						};
+						return false;
+					}
+					;
+				});
+				return hasdata;
+			}
+			;
+		};
+
+		var droplist = function() {
+			this.options = {
+				selector : undefined,
+				ulpanel : undefined
+			};
+
+			this.init = function(panel) {
+				var li = $('<li class="dropdown pull-right"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><b class="caret"></b></a><ul class="dropdown-menu"></ul></li>');
+				this.options.selector = li.css({
+					"visibility" : "hidden"
+				});
+				this.options.ulpanel = li.children("ul");
+				this.options.selector.appendTo(panel);
+			};
+
+			this.addDropItem = function() {
+				additem(this.options.selector, this.options.ulpanel);
+			};
+
+			function additem(li, ul) {
+				var item = options.selector.children("li").not(li).last();
+				li.css({
+					"visibility" : "visible"
+				});
+				if (item.length <= 0)
+					return;
+				item.find("span.close").hide();
+				ul.append(item);
+				item.one("click", function() {
+					itemtarget(this, li, ul);
+				});
+			}
+			;
+
+			function itemtarget(target, selector, ulpanel) {
+				var item = options.selector.children("li").not(selector).last();
+				$(target).find("span.close").show();
+				$(target).prependTo(options.selector);
+				if (item.length <= 0)
+					return;
+				if (selector.position().top > options.selector.position().top) {
+					item.find("span.close").hide();
+					ulpanel.append(item);
+				}
+				;
+				item.one("click", function() {
+					itemtarget(this, selector, ulpanel);
+				});
+			}
+			;
+		};
+
+		function init(setting) {
+			$.extend(options, setting);
+			if (!options.selector) {
+				return;
+			}
+			;
+			if (options.selector[0].tagName.toLowerCase() != "ul") {
+				var selector = $('<ul class="nav nav-tabs pagetabs"></ul>')
+						.appendTo(options.selector);
+				options.selector = selector;
+			}
+			if (!_drop) {
+				_drop = new droplist();
+			}
+			_drop.init(options.selector);
+			if (!_tabcontent) {
+				_tabcontent = new tabcontent();
+			}
+			_tabcontent.init();
+			if (!_newtab) {
+				_newtab = new tab();
+			}
+		}
+
+		function addtab(setting) {
+			if (!_newtab) {
+				_newtab = new tab();
+			}
+			_newtab.addtab(setting);
+			if (!_tabcontent) {
+				_tabcontent = new tabcontent();
+			}
+			_tabcontent.addContent(setting);
+			 options.selector.find('li>a').filter(
+					'[href=#page' + setting.bindcode + ']').tab("show"); 
+		}
+
+		return {
+			init : function(setting) {
+				init(setting);
+			},
+			addtab : function(setting) {
+				addtab(setting);
+			}
+		};
+	})(jQuery);
+</script>

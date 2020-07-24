@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8">
+    <title>Export.html</title>
+	
+  		 <link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+		
+		<title></title>
+		<script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+
+  </head>
+  
+  <body class="easyui-layout">   
+     
+    <div data-options="region:'west',split:true" style="width:150px;">
+    <ul id="tt"></ul>  
+    </div>   
+    <div data-options="region:'center'" style="width:150px;">
+ <ul id="tt2"></ul>
+    </div>   
+    
+       <div data-options="region:'east',split:true"  style="width:400px;">
+        <div id="checkparent">
+     	<div style="display: inline-block;margin-left:70px;"><input type='checkbox' style='' name='ck' value="1"></div>
+     	<div style="display: inline-block;margin-left:130px;"><input type='checkbox' style='' name='ck' value="2"></div>
+     	</div>
+    <table id="dg" style="width:100%;height:300px;"   
+        data-options="fitColumns:true">
+        
+        
+        </table>
+       
+       <div style="margin-top: 10px">
+       <button onclick="agreement()"  style="float: right;margin-right: 5px;    display: inline-block;
+    padding: 5px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.428571429;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    ">与本条目一致</button>
+       </div>
+       
+       </div>
+</body>  
+<script>
+var clickindex =0;
+var clickindex1 = 0;
+var fileid=window.parent.getUrlParam('fileId');
+$(function(){
+	
+	var parentdata =window.parent.cklist;
+	var tdata = [];
+	
+	//var returndata =[] ;
+	for(var i = 0;i<parentdata.length ;i++){
+		tdata.push({"id":i,"text":parentdata[i],"iconCls":"icon-blank"});
+		
+	}
+	
+	$("body").on("change", "input[name='ck']", function() {
+		if($(this).val()=='1'){	
+			
+			if($(this).prop("checked")==true){
+				window.parent.returndata[clickindex].f1=1;
+			}else{
+				window.parent.returndata[clickindex].f1=0;
+			}
+			}else{
+				if($(this).prop("checked")==true){
+					window.parent.returndata[clickindex].f2=1;
+				}else{
+					window.parent.returndata[clickindex].f2=0;
+				}
+			}
+		
+	})
+	
+	
+	//console.log(tdata);
+	$('#tt').tree({    
+	   data:tdata,
+	   onLoadSuccess:function(node,data){  
+		   $("#tt li:eq(0)").find("div").addClass("tree-node-selected");   //设置第一个节点高亮  
+           var n = $("#unitlist").tree("getSelected");  
+           if(n!=null){  
+                $("#unitlist").tree("select",n.target);    //相当于默认点击了一下第一个节点，执行onSelect方法  
+           }  
+		  $.ajax({
+				  url:'/getRelationSearch',
+				  data:{"name":$('#tt').tree('getRoot').text,"fileid":fileid},
+				  success:function(data){
+					 // console.log(data);
+						loadfile(data);					  
+					  
+					 // setdata(data[0].fileId)
+				  }
+			  }) 
+        },
+	   onClick:function(node){
+		  
+		   
+		
+		  $.ajax({
+			  url:'/getRelationSearch',
+			  data:{"name":node.text,"fileid":fileid},
+			  success:function(data){
+				  //console.log(data);
+				  loadfile(data);	
+			  }
+			  
+		  })
+	   }
+	});  
+	
+	
+	
+
+  
+	
+})
+	
+function loadfile(obj){
+		for(var i = 0;i<obj.length;i++){
+				obj[i].text=obj[i].fileName;
+				obj[i].iconCls="icon-blank";
+		}
+	$("#tt2").tree({
+		 data:obj,
+		   onLoadSuccess:function(node,data){ 
+			   var boo = true;
+			   for(var i=0;i<window.parent.returndata.length;i++){
+				   if(obj[0].fileName==window.parent.returndata[i].name){
+					   boo=false;
+				   }
+				   
+			   }
+			   if(boo){
+				   window.parent.returndata.push({"fileId":obj[0].fileId,"name":obj[0].fileName,"f1":0,"f2":0});
+			   }
+			   
+			 
+			   $("#tt2 li:eq(0)").find("div").addClass("tree-node-selected");   //设置第一个节点高亮  
+	           var n = $("#unitlist").tree("getSelected");  
+	           if(n!=null){  
+	                $("#unitlist").tree("select",n.target);    //相当于默认点击了一下第一个节点，执行onSelect方法  
+	           }  
+	           
+	           for(var i=0;i<window.parent.returndata.length;i++){
+				   if(window.parent.returndata[i].name==obj[0].fileName){
+					   geti(obj[0].fileName);
+					   if(window.parent.returndata[i].f1==0){
+						   $('input[name="ck"]').eq(0).prop("checked",false);
+					   }else{
+						   $('input[name="ck"]').eq(0).prop("checked",true);
+					   }
+					   if(window.parent.returndata[i].f2==0){
+						   $('input[name="ck"]').eq(1).prop("checked",false);
+					   }else{
+						   $('input[name="ck"]').eq(1).prop("checked",true);
+					   }
+				   }
+			   }
+				setdata(obj[0].fileId,obj[0].fileName)
+	        },
+		   onClick:function(node){
+			   var boo = true;
+			   console.log(window.parent.returndata)
+			   for(var i=0;i<window.parent.returndata.length;i++){
+				   if(node.text==window.parent.returndata[i].name){
+					   boo=false;
+				   }
+				   
+			   }
+			   if(boo){
+				   window.parent.returndata.push({"fileId":node.fileId,"name":node.fileName,"f1":0,"f2":0}); 
+			   }
+			   for(var i=0;i<window.parent.returndata.length;i++){
+				   if(window.parent.returndata[i].name==node.text){
+					   geti(node.text);
+					   if(window.parent.returndata[i].f1==0){
+						   $('input[name="ck"]').eq(0).prop("checked",false);
+					   }else{
+						   $('input[name="ck"]').eq(0).prop("checked",true);
+					   }
+					   if(window.parent.returndata[i].f2==0){
+						   $('input[name="ck"]').eq(1).prop("checked",false);
+					   }else{
+						   $('input[name="ck"]').eq(1).prop("checked",true);
+					   }
+				   }
+			   }
+			setdata(node.fileId,node.text)
+		   }
+		});  
+}	
+
+
+function agreement(){
+	 if(confirm("确认其余数据是否与本条目一致")){
+			var parentdata =window.parent.cklist;
+			console.log(parentdata)
+			var thisindex=clickindex;
+		 var ck123 = clickindex;
+		
+		 for(var i = clickindex;i<parentdata.length;i++){
+			 $("#tt li").find("div").removeClass("tree-node-selected");
+			 $("#tt li:eq("+i+")").find("div").addClass("tree-node-selected");   //设置第一个节点高亮  
+	           var n = $("#unitlist").tree("getSelected");  
+	           if(n!=null){  
+	                $("#unitlist").tree("select",n.target);    //相当于默认点击了一下第一个节点，执行onSelect方法  
+	           }  
+			  $.ajax({
+					  url:'/getRelationSearch',
+					  data:{"name":parentdata[i],"fileid":fileid},
+					   async: false,
+					  success:function(data){
+						  console.log(data);
+							loadfile(data);					  
+							
+						 // setdata(data[0].fileId)
+					  }
+				  }) 
+				window.parent.returndata[i].f1=window.parent.returndata[ck123].f1;
+			  window.parent.returndata[i].f2=window.parent.returndata[ck123].f2;
+		 }
+		 
+		 if(window.parent.returndata[thisindex].f1==0){
+			   $('input[name="ck"]').eq(0).prop("checked",false);
+		   }else{
+			   $('input[name="ck"]').eq(0).prop("checked",true);
+		   }
+		   if(window.parent.returndata[thisindex].f2==0){
+			   $('input[name="ck"]').eq(1).prop("checked",false);
+		   }else{
+			   $('input[name="ck"]').eq(1).prop("checked",true);
+		   }
+		 
+		 
+		 console.log("returndata");
+		 console.log( window.parent.returndata);
+		 
+     }else {
+        
+     }
+	
+}
+	
+	function geti(name){
+		for(var i=0;i<window.parent.returndata.length;i++){
+			   if(name==window.parent.returndata[i].name){
+				 
+				   clickindex = i;
+				 
+				  return i;
+			   }
+			   
+		   }
+	}
+function setdata(url,name){
+	name = name+"";
+	if(name.substring(name.lastIndexOf("."))==".xlsx111"
+			||name.substring(name.lastIndexOf("."))==".xls11"){
+		$.ajax({
+			url:'/getRelationExportcsv',
+			type:'post',
+			data:{"fileid":url},
+			success:function(data){
+				//console.log(getcolumns(data))
+				var cdata=getcolumns(data)
+				$("#checkparent").empty();
+				for(var i=0;i<cdata[0].length;i++){
+					if(i==0){
+						$("#checkparent").append("<div style='display: inline-block;margin-left:"+((391- 20 *cdata[0].length)/cdata[0].length )/2+"px'><input type='checkbox' style='' name='ck' value="+i+"></div>");	
+					}else{
+						$("#checkparent").append("<div style='display: inline-block;margin-left:"+((391- 23 *cdata[0].length)/cdata[0].length )+"px'><input type='checkbox' style='' name='ck' value="+i+"></div>");
+					}
+					
+				}
+				$('#dg').datagrid({    
+				    columns: getcolumns(data),
+				    data:getddata(data),
+				    toolbar: '#checkparent'
+				});
+				
+			}
+			
+		})
+	
+		
+	}else{
+		$.ajax({
+			url:'/getRelationExportcsv',
+			type:'post',
+			data:{"fileid":url},
+			success:function(data){
+				
+				var dcolumns=[];
+				var ddata = data.rows;
+				$('#dg').datagrid({    
+					 
+				    columns:[[    
+				        {field:'f1',title:'列1',width:50},    
+				        {field:'f2',title:'列2',width:50}    
+				         
+				    ]],
+				    data:ddata,
+				    toolbar: '#checkparent'
+				});
+				
+			}
+			
+		})
+	}
+	
+
+	
+}
+
+
+
+function getcolumns(data){
+	
+	var temp = data.rows[0];
+	
+	var colum = [[]];
+	for(var i = 0 ;i<temp[0].length;i++){
+		colum[0].push({field:'f'+(i+1),title:'列'+(i+1),width:50});
+		
+	}
+	return colum;
+	
+}
+
+
+function getddata(data){
+	var ddata=[];
+	var temp = data.rows[0];
+	//console.log(data);
+	for(var i = 0 ;i<temp.length;i++){
+		var tempdata = {};
+		
+		for(var j= 0; j <temp[i].length;j++){
+			//console.log(j);
+			tempdata["f"+(j+1)]= temp[i][j];
+		}
+		ddata.push(tempdata);
+	}
+	
+	return ddata;
+}
+
+</script>
+
+</html>

@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html style="height: 100%;" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"
+	content="ie=edge" />
+<meta charset="UTF-8">
+<title>个人收藏</title>
+<link href="../assets/css/font-awesome.min.css" rel="stylesheet">
+<!--[if IE 7]>
+    <link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css">
+<![endif]-->
+<script src="../assets/js/jquery-1.9.1.min.js"></script>
+
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="pageoffice.js" id="po_js_main"></script>
+
+<!--bootstrap-table-->
+<script src="../assets/js/bootstrap/bootstrap-table.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-table.css"
+	rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap-table-pagejump.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-table-pagejump.css"
+	rel="stylesheet">
+<link href="../assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+
+<script src="../assets/js/vue/vue.js"></script>
+
+<link rel="stylesheet" href="../assets/css/zTreeStyle.css"
+	type="text/css">
+<script type="text/javascript" src="../assets/js/jquery.ztree.core.js"></script>
+<script type="text/javascript"
+	src="../assets/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.ztree.exedit.js"></script>
+
+<link href="../assets/css/bootstrap/bootstrap-dialog.css"
+	rel="stylesheet">
+<script src="../assets/js/bootstrap/bootstrap-dialog.js"></script>
+
+<script src="../assets/js/alldata.js"></script>
+<link rel="stylesheet" href="../assets/css/newstyle.css">
+<script src="../assets/js/laydate/laydate.js"></script>
+<style>
+i {
+	padding-right: 5px;
+}
+
+ul,li {
+	margin: 0px;
+	padding: :0px;
+}
+
+.selected {
+	color: #3498db
+}
+
+#box {
+	
+}
+
+#tb_order th {
+	color: #333;
+}
+
+#tb_order td {
+	color: #333;
+}
+
+.pull-left {
+	width: 100%;
+}
+
+#leftHeight button {
+	float: left;
+	margin-right: 5px;
+	color: #fff;
+	margin-bottom: 15px;
+}
+
+#leftHeight button:hover {
+	color: #fff !important;
+	background: #0085ff !important;
+}
+
+#rightCont button {
+	color: #fff;
+	margin-right: 20px;
+}
+
+#treeview {
+	/* float: left; 
+	margin-right: 20px;*/
+	padding: 0px;
+	display:block;
+	margin: 0px;
+}
+
+#treeview>ul>li {
+	
+}
+
+#tobar .btn-sm {
+	background: #0085ff !important;
+	color: #fff;
+}
+
+#toolbar .btn:hover {
+	color: #333 !important;
+}
+
+.dropdown-menu>li>a:hover,.dropdown-menu>li>a:focus {
+	background: rgb(0, 133, 255);
+	color: #333
+}
+
+.ztree li .curSelectedNode span:last-child {
+	background-color: #4fc1e9;
+	color: #fff;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #B6BCC9;
+  font-family: 'Muli';
+}
+* {
+  outline: none;
+}
+
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-left>.page-list{
+display: none !important;
+}
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination-jump{
+display: none !important;
+}
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-item{
+display: none !important;
+}
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-pre,.page-next{
+display: inline !important;
+}
+#div_deptUser>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-next{
+display: inline !important;
+}
+
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-left>.page-list{
+display: none !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination-jump{
+display: none !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-item{
+display: none !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-pre,.page-next{
+display: inline !important;
+}
+#div_user>.bootstrap-table>.fixed-table-pagination>.pull-right>.pagination>.page-next{
+display: inline !important;
+}
+</style>
+<script>
+//获取登录者信息
+var sessionUser;
+$.ajax({
+	type : "post",
+	url : "/getSessionByIp",
+	async : false,
+	success : function(data) {
+		sessionUser=data
+	}
+})
+	var lang = getUrlParam("lang");
+	var columns, usercolumns;
+	var tabledata = [];
+	var deptdata;
+	if (lang != "en_US") {
+		usercolumns = [ [ {
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		}, {
+			field : 'username',
+			title : '姓名',
+			width : '20%'
+		} ,{
+			field : 'deptname',
+			title : '部门',
+			width : '20%'
+		} ] ]
+		columns = [ [ {
+			field : 'files.fileId',
+			title : '#',
+			width : '0.5%',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		}, {
+			field : 'check',
+			checkbox : true,
+			width : '0.5%',
+			formatter : function(value, row, index) {
+				if (row.check == true) {
+					// console.log(row.serverName);
+					//设置选中
+					return {
+						checked : true
+					};
+				}
+			}
+
+		}, {
+			field : 'files.fileName',
+			title : '名称',
+			width : "30%",
+			formatter : forma
+		}, {
+			field : 'files.security.securityName',
+			title : '密级',
+			width : "5%"
+		}, {
+			field : 'files.fileVersion',
+			title : '版本',
+			width : "5%"
+		}, {
+			field : 'colDate',
+			title : '收藏日期',
+			sortable : true,
+			width : "15%"
+		}, {
+			field : 'files.user.username',
+			title : '发布人',
+			width : "8%"
+		},  {
+			field : 'files.location',
+			title : '路径',
+			formatter:formatUrl
+		} ] ]
+		document
+				.write("<script src='../assets/js/bootstrap-table-zh-CN.js' >"
+						+ "<" + "/script>");
+	} else {
+		usercolumns = [ [ {
+			field : 'ck',
+			checkbox : true,
+			width : '1%'
+		}, {
+			field : 'username',
+			title : 'UserName',
+			width : '20%'
+		},{
+			field : 'deptname',
+			title : 'DeptName',
+			width : '20%'
+		}  ] ]
+		columns = [ [ {
+			field : 'fileId',
+			title : '#',
+			width : '0.5%',
+			cellStyle : function(row, index) {
+				var style = {};
+				style = {
+					css : {
+						'display' : 'none'
+					}
+				};
+				return style;
+			}
+		}, {
+			field : 'check',
+			checkbox : true,
+			width : '0.5%',
+			formatter : function(value, row, index) {
+				if (row.check == true) {
+					// console.log(row.serverName);
+					//设置选中
+					return {
+						checked : true
+					};
+				}
+			}
+
+		}, {
+			field : 'fileName',
+			title : 'FileName',
+			width : "30%",
+			formatter : forma
+		}, {
+			field : 'security.securityName',
+			title : 'Security',
+			width : "5%"
+		}, {
+			field : 'fileVersion',
+			title : 'Version',
+			width : "5%"
+		}, {
+			field : 'colDate',
+			title : 'Date',
+			sortable : true,
+			width : "15%"
+		}, {
+			field : 'user.username',
+			title : 'UserName',
+			width : "8%"
+		}, {
+			field : 'location',
+			title : 'Location',
+			formatter:formatUrl
+		} ] ]
+	}
+	var categories = document.getElementsByName("categories");
+	var dataAlias;
+
+	$(function() {
+		getFolder();
+		dataAlias = aliasByUser();
+		$("#tb_user").bootstrapTable({
+			data : tabledata,
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			paginationShowPageGo : true,
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 10, //每页的记录行数（*）
+			pageList : [ 10, 15, 20, 30, 50 ], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : false, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			sidePagination : "client", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			queryParams : function(params) {//自定义参数，这里的参数是传给后台的，我这是是分页用的
+				return {//这里的params是table提供的
+					username : $("#nameInput").val(),
+					pageNumber : params.pageNumber,
+					pageSize : params.pageSize
+				};
+			},
+			columns : usercolumns
+		})
+			$("#tb_deptUser").bootstrapTable({
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			paginationShowPageGo : true,
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 10, //每页的记录行数（*）
+			pageList : [ 10, 15, 20, 30, 50 ], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : false, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			sidePagination : "client", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			search : true,
+			columns : usercolumns
+			//onDblClickRow: function (row) {
+		    //    $('#tb_user').bootstrapTable('append', row);
+			//}
+		})
+		console.log($("#folderId").val())
+		dataAll('/folderById');
+		/* $.ajax({
+			type : 'POST',
+			url : "/getUserButton",
+			data : {
+				userId : sessionUser.userId
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				if (data != null) {
+					for (var i = 0; i < data.length; i++) {
+						if (data[i].btnName == '移动') {
+							$("#btn_move").css("display", "");
+						}
+						if (data[i].btnName == '删除') {
+							$("#btn_delete").css("display", "");
+						}
+						if (data[i].btnName == '下载') {
+							$("#btn_down").css("display", "");
+						}
+					}
+				}
+			}
+		}) */
+		deptData()
+	})
+	var setting = { //此处根据自己需要进行配置
+		view : {
+			selectedMulti : false, //设置是否能够同时选中多个节点
+			showIcon : false, //设置是否显示节点图标
+			showLine : true, //设置是否显示节点与节点之间的连线
+			showTitle : false, //设置是否显示节点的title提示信息
+		},
+		data : {
+			simpleData : {
+				enable : true
+			},
+			key : {
+				url : "xUrl",
+				icon : "menuIcon"
+			}
+		},
+		check : {
+			enable : true,
+			//设置是否显示checkbox复选框
+			chkStyle : "radio", //单选框
+			radioType : "all" //对所有节点设置单选
+		},
+		callback : {
+			beforeClick : zTreeBeforeClick
+		}
+	};
+	var setting2 = { //此处根据自己需要进行配置
+		view : {
+			enable : true,
+			showLine : true,
+			showIcon : true, //设置是否显示节点图标
+		},
+		data : {
+			simpleData : {
+				enable : true
+
+			}
+		},
+		edit: {
+			enable: true,
+			showRemoveBtn: false,
+			showRenameBtn: false
+		},
+		callback : {
+			 beforeDrag:beforeDrag,
+			 beforeDrop:beforeDrop,
+			onClick : zTreeOnClickRight,
+			onMouseUp : treeUp
+		}
+	};
+	var settingUser = { //此处根据自己需要进行配置
+		view : {
+			selectedMulti : false, //设置是否能够同时选中多个节点
+			showIcon : true, //设置是否显示节点图标
+			ShowPlusMinus : false,
+			showLine : false, //设置是否显示节点与节点之间的连线
+			showTitle : false, //设置是否显示节点的title提示信息
+		},
+		data : {
+			simpleData : {
+				enable : true
+			},
+			key : {
+				url : "xUrl",
+				icon : "menuIcon"
+			}
+		},
+		callback : {
+			onClick : zTreeOnClickRightUser,
+			beforeClick : zTreeBeforeClick
+		}
+	};
+	function zTreeBeforeClick(treeId, treeNode, clickFlag) {
+		var str = treeNode.tId
+		var treeName = str.substring(0, str.indexOf("_"))
+		if (treeName == "deptTree") {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	function treeUp(action, objId, data) {
+		var treeobj = $.fn.zTree.getZTreeObj("treeview");
+		treeobj.cancelSelectedNode();
+	}
+	// 树的单击事件
+	function zTreeOnClickRight(event, treeId, treeNode) {
+		if(treeNode.children!=undefined){
+			return 
+		}
+		var zTreeObj = $.fn.zTree.getZTreeObj("treeview");
+		$("#folderId").val(zTreeObj.getSelectedNodes()[0].folderId);
+		$("#rightCont").css("display", "");
+		$("#hint").css("display", "none");
+		dataAll('/folderById');
+	}
+	function zTreeOnClickRightUser(event, treeId, treeNode) {
+		if(treeNode.children!=undefined){
+			return 
+		}
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		var ids = [];
+		var menuIds = [];
+		for (var i = 0; i < getSelectRows.length; i++) {
+			ids.push(getSelectRows[i].files.security.securityId)
+			menuIds.push(getSelectRows[i].files.menu.id)
+		}
+		console.log(ids)
+		var max = ids[0];
+		var len = ids.length; 
+		for (var i = 1; i < len; i++){ 
+		if (ids[i] > max) { 
+		max = ids[i]; 
+		} 
+		} console.log(max)
+		console.log(menuIds)
+		if(treeId=="deptTree"){
+		if(max!=undefined&&menuIds.length>0){
+			getUserData(treeNode.name,max,unique(menuIds));
+		}
+	  }
+	}
+	//拖拽之前调用的函数
+	function beforeDrag(treeId,treeNode){
+	 //console.log(treeNode)
+	}
+	 
+	//拖拽操作结束之前调用的函数
+	function beforeDrop(treeId, treeNode, targetNode, moveType){
+		console.log(treeNode)
+		console.log(targetNode)
+ 		var result=false;
+		if(moveType == 'inner'){
+			var cont=dataByFolderId(targetNode.folderId).length
+			if(cont>0){
+				moverChildrenErr()
+				return false;
+			}else{
+			    result=forderByParentId(treeNode[0].folderId,targetNode.folderId);
+			    getFolder();
+				return result;
+			}
+		}else{
+			result=forderByParentId(treeNode[0].folderId,targetNode.parentId);
+			getFolder();
+			return result
+		}
+		return result;
+	}
+	//根据ID修改收藏夹的父id
+	function forderByParentId(fId,parentId){
+		console.log(fId)
+		console.log(parentId)
+		var result;
+		$.ajax({
+			type : 'POST',
+			url : "/updateFolderByParent",
+			data : {
+				forderId : fId,
+				parentId:parentId
+			},
+			async:false,
+			success : function(data) {
+				if(data!=null){
+					result=true
+				}else{
+					result=false
+				}
+			}
+		})
+		console.log(result)
+		return result;
+	}
+	//根据密级查找用户
+	function getUserData(deptname,id,menuIds){
+		$.ajax({
+			type : "post",
+			url : "/listUserBySecretlevel",
+			data : {
+				deptname : deptname,
+				id : id,
+				menuIds:menuIds
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				if(data!=null){
+					//$("#userNull").css("display","none")
+					//data = JSON.parse(JSON.stringify(data).replace(/username/g,"name"));
+					//$.fn.zTree.init($("#userTree"), settingUser, data);
+					console.log(data)
+					$('#tb_deptUser').bootstrapTable('load', data);
+				}else{
+					$('#tb_deptUser').bootstrapTable('load', "");
+				}
+			}
+		})
+	}
+	//去重
+	function unique(arr){
+		var hash=[];
+		  for (var i = 0; i < arr.length; i++) {
+		    for (var j = i+1; j < arr.length; j++) {
+		      if(arr[i].id ==arr[j].id){
+		        ++i;
+		      }
+		    }
+		      hash.push(arr[i]);
+		  }
+		  return hash;
+	}
+	//获取用户的收藏夹
+	function getFolder() {
+		$.ajax({
+			type : 'POST',
+			url : "/folderByUser",
+			data : {
+				userId : sessionUser.userId
+			},
+			async : false,
+			success : function(data) {
+				//app.sites = data;
+				data = JSON.parse(JSON.stringify(data).replace(/folderName/g,
+						"text"));
+				console.log(data);
+				var folderData = JSON.parse(JSON.stringify(data).replace(
+						/text/g, "name"));
+				//console.log(getChildren(folderData)[0])
+				$("#folderId").val(getFirstNode(getChildren(folderData)[0]))
+				console.log(getFirstNode(getChildren(folderData)[0]))
+				console.log($("#folderId").val())
+				$.fn.zTree.init($("#tree"), setting, getChildren(folderData)); //加载收藏夹数据
+				$.fn.zTree.init($("#treeview"), setting2,
+						getChildren(folderData)); //加载收藏夹数据
+			}
+		})
+	}
+	//查询无子级的id
+function getFirstNode(data){
+	if(data!=undefined){
+		if(data.children!=null){
+			return getFirstNode(data.children[0])
+		}else{
+			return data.folderId
+		}
+	}
+}
+	function getNode(array) {
+		for (var i = 0; i < array.length; i++) {
+			if (array[i].nodes != "undefined" || array[i].nodes != undefined) {
+				if (array[i].nodes != "null" && array[i].nodes != null
+						&& array[i].nodes.length != 0) {
+					//array[i]['nodes'] = array[i].children;
+					getNode(array[i].nodes)
+				} else {
+					delete array[i].nodes
+				}
+			}
+		}
+		return array;
+	}
+	function getChildren(array) {
+		for (var i = 0; i < array.length; i++) {
+			if (array[i].children != "undefined"
+					|| array[i].children != undefined) {
+				if (array[i].children != "null" && array[i].children != null
+						&& array[i].children.length != 0) {
+					getChildren(array[i].children)
+				} else {
+					delete array[i].children
+				}
+			}
+		}
+		return array;
+	}
+//根据收藏夹id查询
+	function tableData() {
+		var tableData;
+		$.ajax({
+			type : 'POST',
+			url : "/folderById",
+			data : {
+				folderId : $("#folderId").val()
+			},
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				console.log(data)
+				tableData = data;
+			}
+		})
+		return tableData;
+	}
+
+	//初始化表格
+	function dataAll(tableUrl) {
+		$("#tb_order").bootstrapTable('refresh');
+		$("#tb_order").bootstrapTable({
+			url : tableUrl, //请求后台的URL（*）
+			method : "post", //请求方式（*）
+			contentType : "application/x-www-form-urlencoded",//post请求的话就加上这个句话
+			toolbar : "#toolbar", //工具按钮用哪个容器
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 15, //每页的记录行数（*）
+			pageList : [ 10, 15, 20, 30, 50 ], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : true, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			sidePagination : "server", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			queryParams : function(params) {//自定义参数，这里的参数是传给后台的，我这是是分页用的
+				return {//这里的params是table提供的
+					folderId : $("#folderId").val(),
+					selectName : $("#searchSelect").val(),
+					selectVal : $("#val").val(),
+				    sortOrder:this.sortOrder,
+					pageNumber : params.pageNumber,
+					pageSize : params.pageSize
+					
+				};
+			},
+			columns : columns
+		});
+		$('#tb_order').children().children().children('th').eq(0).css(
+				"display", "none")
+	}
+	//搜索字体变红色
+	function forma(value, row, index) {
+		if (row.files.fileName) {
+			var namestr=row.files.fileName;
+				if($("#searchInput").val()!=""){
+					var array = namestr.split($("#searchInput").val());
+					namestr="";
+					for(var j = 0;j<array.length;j++){
+						if(j==array.length-1){
+							namestr+=array[j]
+						}else{
+							namestr+=array[j]+"<span style='color:red;'>"+$("#searchInput").val()+"</span>"
+						}
+					}
+				}
+			return "<a style='color: #1963AA;text-decoration: none;' href='javascript:void(0)' target='_blank' onclick='showfile(this)'>"
+					+ namestr+ "<a/>";
+		}
+	}
+	//美化文件路径
+	function formatUrl(value, row, index){
+		if(row.files.location){
+			var str=row.files.location.replace(/>/g,"<span style='color:blue'>➜</span>");
+			//console.log(str)
+			str=str.replace(/→/g,"<span style='color:blue'>➜</span>")
+			return str;
+		}
+	}
+	//点击名称查看文件
+	function showfile(file) {
+		var fileId = $(file).parent().parent().children('td').eq(0).text();
+		var secName = $(file).parent().parent().children('td').eq(4).text();
+		var fileName = file.innerText;
+		var filestr = fileName.substr(0, fileName.lastIndexOf(".") + 1);
+		var fileType = fileName.replace(filestr, "");
+		var cont = updateCount(fileId);
+		if (cont) {
+			openFile(fileType, fileId);
+		}
+	}
+	//点击文件后更新文件点击次数
+	function updateCount(fId) {
+		var isSuccess;
+		$.ajax({
+			type : 'POST',
+			url : "/updateCounts",
+			async : false,
+			data : {
+				userId : sessionUser.userId,
+				fileId : fId
+			},
+			success : function(data) {
+				if (data != null && data > 0) {
+					isSuccess = data;
+				} else {
+					isSuccess = 0;
+				}
+			}
+		})
+		return isSuccess;
+	}
+	var pageofficeHeight= window.screen.height
+	var pageofficeWidth= window.screen.width
+	//根据文件类型判断打开文件方式
+	function openFile(fileType, fileId,fileSize) {
+		
+		
+		if (fileType == "pdf") {
+			POBrowser.openWindowModeless("/pdf?fileId=" + fileId,"width="+pageofficeWidth+"px;height="+pageofficeHeight+"px;");
+		} else if (fileType == "xls" || fileType == "xlsx") {
+			window.open("/office?url=html/list.html&fileId="+fileId,'newwindow', 'height='+(pageofficeHeight-150)+', width='+(pageofficeWidth-150)+', toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		} else if (fileType == "doc" || fileType == "docx" ||fileType == "ppt" || fileType == "pptx") {
+			POBrowser.openWindowModeless("/word?type=0&fileId=" + fileId,
+					"width="+pageofficeWidth+"px;height="+pageofficeHeight+"px;");
+		} else if(fileType == "csv") {
+			window.open('html/OpenCSV.html?fileId=' + fileId+'&type=0','newwindow', 'height=600, width=800,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else if(fileType == "txt"){
+			window.open('html/Opentxt.html?fileId='+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else if(fileType =="jpg"||fileType =="JPG"||fileType =="PNG"||fileType =="png"){
+			 window.open("/openJpg?fileId="+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else if(fileType =="MP4"||fileType =="mp4"||fileType =="wmv"||fileType =="WMV"){
+			 window.open("html/OpenVideo.html?fileId="+fileId,'newwindow', 'height=500, width=500,top=100, left=300, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=n o, status=no');
+		}else{
+			$("#notOpenModel").modal("show");
+		}
+	}
+
+	function firstSel(province) {
+		var inputNode = document.getElementById("searchInput");
+		var disNode = document.getElementById("children");
+		var date = document.getElementById("qBeginTime");
+		var aliasNode = document.getElementById("menu");
+		if (province.value == "securityId") {//选择文档密级
+			console.log('文档密级')
+			inputNode.style.display = "none";
+			disNode.style.display = "";
+			date.style.display = "none";
+			aliasNode.style.display = "none";
+			date.value=''
+			inputNode.value=''
+			$("#alias2Id").val('')
+			selData("/getSecurityAll", disNode, 0);
+// 		} else if (province.value == "format") {//文档格式
+// 			console.log('文档格式')
+// 			inputNode.style.display = "none";
+// 			date.style.display = "none";
+// 			disNode.style.display = "";
+// 			aliasNode.style.display = "none";
+// 			date.value=''
+// 			inputNode.value=''
+// 			$("#alias2Id").val('')
+// 			selData("/listFormatAll", disNode, 1);
+		} else if (province.value == "fileDate") {//日期
+			console.log('日期')
+			date.style.display = "";
+			inputNode.style.display = "none";
+			disNode.style.display = "none";
+			aliasNode.style.display = "none";
+			disNode.value=''
+			inputNode.value=''
+			$("#alias2Id").val('')
+		} /* else if (province.value == "alias") {//标签
+			console.log('标签')
+			disNode.style.display = "none";
+			date.style.display = "none";
+			inputNode.style.display = "none";
+			aliasNode.style.display = "inline";
+			disNode.value=''
+			inputNode.value=''
+			date.value=''
+		} */ else {//文本框
+			console.log('文本框')
+			disNode.style.display = "none";
+			date.style.display = "none";
+			inputNode.style.display = "";
+			aliasNode.style.display = "none";
+			disNode.value=''
+			date.value=''
+			$("#alias2Id").val('')
+			console.log(disNode.value)
+		}
+	}
+	function searchData() {
+		var tableData;
+		var val;
+		var inputVal = document.getElementById("searchInput");
+		var disVal = document.getElementById("children");
+		var dateVal = document.getElementById("qBeginTime");
+		var aliasNode = document.getElementById("menu");
+		if (inputVal.value != "") {
+			console.log("文本框")
+			val = inputVal.value;
+		} else if (disVal.value != "") {
+			console.log("二级")
+			val = disVal.value;
+		} else if (dateVal.value != "") {
+			console.log("日期")
+			val = dateVal.value;
+		} /* else if (	$("#alias2Id").val()!= "") {
+			console.log("标签")
+			val = $("#alias2Id").val();
+		} */
+		if (val != ""  && val != undefined) {
+			$("#val").val(val);
+		}else{
+			$("#val").val('');
+		}
+	}
+	function selData(url, node, index) {
+		$.ajax({
+			type : 'POST',
+			url : url,
+			async : true,
+			success : function(data) {
+				var option;
+				if (index == 0) {
+					option += "<option value='0'>请选择</option>";
+					$.each(data, function(i, n) {//循环，i为下标从0开始，n为集合中对应的第i个对象
+						option += "<option value='"+n.securityId+"'>"
+								+ n.securityName + "</option>"
+					});
+				} else {
+					if (data != null) {
+						option += "<option value='0'>请选择</option>";
+						$.each(data, function(i, n) {//循环，i为下标从0开始，n为集合中对应的第i个对象
+							option += "<option value='"+n+"'>" + n
+									+ "</option>"
+						});
+					}
+				}
+				node.innerHTML = option;//将循环拼接的字符串插入第二个下拉列表
+			}
+		});
+	}
+	function aliasByUser() {
+		var aliasData;
+		$.ajax({
+			type : 'POST',
+			url : "/aliasByUser",
+			data : {
+				userId : sessionUser.userId
+			},
+			async : false,
+			success : function(data) {
+				var result = createCategoryTree(data);
+				aliasData = result;
+				$("#categories").append(result);
+				/*for(var i=0;i<categories.length;i++){
+				$(categories[i]).append(result);
+				}  */
+			}
+		})
+		return aliasData;
+	}
+	var glb_str = "";
+	function createCategoryTree(data) {
+		var flag;
+		for (var i = 0; i < data.length; i++) {
+			var nodeText = data[i]['aliasName'];
+			var nodeId = data[i]['aliasId'];
+			var children = data[i]['children'];
+			//若有子分类，则遍历子分类
+			if (children.length > 0) {
+				flag = true;
+				glb_str += "<li class='offset-right dropdown-submenu'><a class='category' " + "id=" + nodeId + " href='#'>"
+						+ nodeText + "</a><ul class='dropdown-menu'>"
+				createCategoryTree(children);
+			} else {
+				//若没有子分类
+				flag = false;
+				glb_str += "<li><a class='category' " + "id=" + nodeId
+						+ " href='#' onclick='shows($(this),$(this).text(),"
+						+ nodeId + ")'>" + nodeText + "</a>";
+			}
+			if (flag) {
+				glb_str += "</ul></li>"
+			} else {
+				glb_str += "</li>";
+			}
+		}
+		return glb_str;
+	}
+	function shows(node, text, id) {
+		console.log(node);
+		console.log(text);
+		console.log(id);
+		getPartent(node, text, id);
+		//$("#alias2Id").val(text);
+		$("#alias2Id").val(id);
+		//a+='<span class="caret" style="margin-left: 5px;color:#000"></span>';
+		//document.getElementById("alias2Text").innerHTML=a; 
+		//document.getElementById("aliasText").innerHTML=a; 
+	}
+	function getPartent(node, text, id) {
+		if (node[0].tagName != "DIV") {
+			getPartent($(node).parent(), text, id);
+		} else {
+			node.children().eq(0).val(text);
+			text += '<span class="caret" style="margin-left: 5px;color:#000"></span>';
+			node.children().eq(1).html(text);
+		}
+	}
+	function deptData() {
+		$.ajax({
+			type : 'POST',
+			url : "/getDeptAll",
+			datatype : "json",
+			success : function(data) {
+				console.log(data)
+				$.fn.zTree.init($("#deptTree"), settingUser, getDeptData(data));
+			}
+		})
+	}
+	function getDeptData(array) {
+		for (var i = 0; i < array.length; i++) {
+			array[i].name = array[i].deptName
+			if (array[i].children != undefined && array[i].children.length > 0) {
+				getDeptData(array[i].children)
+			} else {
+				delete array[i].children
+			}
+		}
+		return array;
+	}
+	function allleft(){
+		var getSelectRows = $("#tb_user").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		var rows = $('#tb_user').bootstrapTable('getData');
+		for (var i = 0; i < rows.length; i++) {
+			for (j = 0; j < getSelectRows.length; j++) {
+				if (rows[i].id == getSelectRows[j].id) {
+					rows.splice(i, 1);
+				}
+			}
+		}
+		$("#tb_user").bootstrapTable('load', rows);
+	}
+	function allright(){
+		var getSelectRows = $("#tb_deptUser").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if(getSelectRows.length>0){
+			for (var i = 0; i < getSelectRows.length; i++) {
+				delete getSelectRows[i].ck
+				tabledata.push(getSelectRows[i])
+			}
+		//	distinct(tabledata)
+			$("#tb_user").bootstrapTable('load', unique(tabledata));
+		}else{
+			console.log('请选择')
+		}
+	}
+</script>
+</head>
+
+<body style="height:100%">
+	<div id="box" style="height:100%">
+		<div class="row" style="width:99%;height:100%">
+			<div  id="leftHeight"
+				style="float:left;width: 20%;border-right: 1px solid #ccc;height:100%;">
+
+				<div id="tobar" style="height:35px;">
+					<button type="button" class="btn btn-default btn-sm"
+						onclick="addFolder()" style="width: 50px !important;">
+						<span th:text="#{add}"></span>
+					</button>
+
+					<button type="button" class="btn btn-default btn-sm"
+						style="width: 50px !important;" onclick="editFolder()">
+						<span th:text="#{modification}"></span>
+					</button>
+					<button type="button" class="btn btn-default btn-sm"
+						style="width: 50px !important;" onclick="deleteFolder()">
+						<span th:text="#{delete}"></span>
+					</button>
+					<!-- <div id="treeview" class=""></div> -->
+				</div>
+				<ul id="treeview" class="ztree" style="margin-top: 10px;"></ul>
+				<!-- <ul id="ulTree" style="margin: 0px;padding: 0px;width: 80%;">
+					<li v-for="site in sites"  v-if="site.children.length!=0">
+						<i class="icon-heart"></i>{{site.folderName}}
+						<ul style="padding:0px;font-size: 12px;"><li v-for="item in site.children"  onclick="itemClick(site)">{{item.folderName}}</li></ul>
+					</li>
+					<li  onclick="itemClick(site)" v-else>
+						<i class="icon-heart"></i>{{site.folderName}}
+					</li>
+				</ul> -->
+
+				<input id="folderId" style="display: none;" value="0" />
+			</div>
+
+			<div  id="rightCont"
+				style="float:left;width: 80%;height:100%;padding-left: 10px;">
+
+				<table id="tb_order" style="width:100%;height:100%;">
+				</table>
+
+				<div id="toolbar" class="btn-group"
+					style="margin-top: 3px;width: 100%;">
+					<input type="text" id="val" style="display:none" />
+					<button id="btn_delete" type="button" 
+						class="btn btn-white btn-default" onclick="delbtn()">
+						<span th:text="#{delete}"></span>
+					</button>
+					<button id="btn_down" type="button" 
+						class="btn btn-white btn-default" onclick="dowbtn()">
+						<span th:text="#{download}"></span>
+					</button>
+					<button id="btn_move" type="button" 
+						class="btn btn-white btn-default" onclick="moveBtn()">
+						<span th:text="#{move}"></span>
+					</button>
+					<button type="button" class="btn btn-white btn-default"
+						onclick="sharebtn()">
+						<span th:text="#{share}"></span>
+					</button>
+					<select id='searchSelect' class='form-control'
+						onchange="firstSel(this)"
+						style='width:auto;float:left;    margin-right: 10px;'><option
+							value='fileName' th:text="#{fileName}">文件名称</option>
+						<option value='securityId' th:text="#{filesec}">文档密级</option>
+						<!-- <option value='format' th:text="#{format}">格式</option> -->
+						<option value='fileDate' th:text="#{date}">日期</option>
+						<!-- <option value='alias' th:text="#{alias}">标签</option> -->
+					</select> <select id='children' class='form-control'
+						style='width:auto;float:left;display:none'></select>
+					<div id="menu" class="dropdown"
+						style="float:left;display:none;height:34px !important;">
+						<input type="text" id="alias2Id" style="display:none" /> <a
+							id="alias2Text" data-toggle="dropdown" class="btn"
+							data-target="#"
+							style="width:109px !important;height:34px !important;color:#333 !important;font-weight: normal !important;margin: 0px !important;font-size: 14px !important;border: 1px solid #ccc;background: none !important;">请选择标签<span
+							class="caret" style="margin-left: 5px;color:#000"></span>
+						</a>
+						<ul id="categories" class="dropdown-menu"></ul>
+					</div>
+					<div class="input-group" style="margin-left:5px;">
+						<input type='text' class='form-control' autocomplete="off"
+							placeholder="请选择日期" style="background: none;width: 217px;"
+							style="display:none;" id='qBeginTime' /> <input type="text"
+							class="form-control" autocomplete="off"
+							th:placeholder='#{searchText}'
+							style="background: none;width: 217px;color:#333 !important;"
+							id="searchInput"> <span class="input-group-btn">
+							<button class=" btn-default"
+								style="position: absolute;padding: 4px 8px;
+		top: 0px;
+        left: 7px;
+    border: none !important; 
+    background: none !important;
+    color: #333;border: 1px solid #ccc !important;
+    border-radius: 5px !important;"
+								type="button" onclick="searchFolder()">
+								<i class="icon-search"></i>
+							</button>
+						</span>
+					</div>
+					<!-- /input-group -->
+				</div>
+				<span style="font-size: 16px;position: absolute;bottom: 10px;right:20px;" id="hint"><span style="color:red">*</span>请点击左侧收藏夹查看数据</span>
+			</div>
+			
+		</div>
+		<!--文件移动-->
+		<div class="modal fade" id="moveFileModel" tabindex="-1" role="dialog"
+			style="height: 550px;">
+			<div class="modal-dialog modal-sm" style="width: 700px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title">文件移动</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px;">
+						<ul id="tree" class="ztree"></ul>
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn new-tijiao queding"
+							onclick="moveSave()">移动</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!--文件移动-->
+		<!-- 分享弹出窗口begin -->
+		<div class="modal fade" id="shareModal" tabindex="-1" role="dialog"
+			aria-labelledby="addRoleLabel" aria-hidden="true">
+			<div class="modal-dialog" style="width: 800px;">
+				<div class="modal-content">
+					<div class="modal-header" style="padding:8px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="addRoleLabel">选择用户</h4>
+					</div>
+					<div class="modal-body" style="height:500px;">
+						<div style="width:100%;height:100%;">
+							<input type="text" id="roleUser" style="display:none" />
+							<div
+								style="width:20%;height:100%;float: left;border-right: 1px solid rgb(204, 204, 204);overflow: auto;">
+								<ul class="ztree" id="deptTree"></ul>
+							</div>
+							<div
+								style="width:35%;height:100%;float: left;border-right: 1px solid rgb(204, 204, 204);overflow: auto;" id="div_deptUser">
+								<table id="tb_deptUser" style="height:100%;width:100%"></table>
+							</div>
+							<div
+								style="float: left;width:5%;height:100%;float: left;border-right: 1px solid rgb(204, 204, 204);overflow: auto; ">
+								<div style="position: relative;top:30%">
+									<img onclick="allleft()" src="../assets/images/allleft.png" />
+									<!-- <img onclick="" src="../assets/images/left.png"/>
+								<img onclick="" src="../assets/images/right.png"/> -->
+									<img onclick="allright()" src="../assets/images/allright.png" />
+								</div>
+							</div>
+							<div style="float: left;height:100%;width:35%;overflow: auto;" id="div_user">
+								<table id="tb_user" style="height:100%;width:100%"></table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="padding:5px;">
+						<button type="button" class="btn new-tijiao queding"
+							onclick="shareMessage()">分享</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!-- 分享弹出窗口end -->
+		<!-- 新建分类 -->
+		<div class="modal fade" id="addFolder" tabindex="-1" role="dialog"
+			style="height: 550px;">
+			<div class="modal-dialog" style="width: 600px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title">新增收藏夹</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px;">
+						<div class="row">
+							<div class="col-md-8  col-md-offset-2">
+								<table>
+									<tr>
+										<td>收藏夹名称:</td>
+										<td><input class="form-control" type="text"
+											id="folderName" placeholder="请输入名称" autocomplete="off" /></td>
+										<td><select class="form-control" id="lv"><option
+													value="0">同级</option>
+												<option value="1">子级</option></select></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn new-tijiao queding"
+							onclick="saveFolder()" th:text="#{submit}">保存</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!-- 新建分类 -->
+		<!-- 修改分类 -->
+		<div class="modal fade" id="editFolder" tabindex="-1" role="dialog"
+			style="height: 550px;">
+			<div class="modal-dialog" style="width: 600px;">
+				<div class="modal-content">
+					<div class="modal-header" style="height: 50px;">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title">修改收藏夹</h4>
+					</div>
+					<div class="modal-body" style="padding: 0px 10px;">
+						<div class="row">
+							<div class="col-md-8  col-md-offset-2">
+								<table>
+									<tr>
+										<td>收藏夹名称:</td>
+										<td><input class="form-control" type="text"
+											id="updateName" placeholder="请输入名称" autocomplete="off" /></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer" style="height: 70px;">
+						<button type="button" class="btn new-tijiao queding"
+							onclick="updateFolder()" th:text="#{submit}">保存</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<!-- 修改分类 -->
+	</div>
+</body>
+<script>
+	$.showConfirm = function(str, funcok, funcclose, confirm) {
+		BootstrapDialog.confirm({
+			title : funcclose,
+			message : str,
+			type : BootstrapDialog.TYPE_WARNING,
+			closable : true, // 点击对话框以外的页面内容可关闭
+			//draggable : true, // 可拖拽
+			btnOKLabel : confirm,
+			btnOKClass : 'btn-warning',
+			size : BootstrapDialog.SIZE_SMALL,
+			// 对话框关闭的时候执行方法
+			onhide : funcclose,
+			callback : function(result) {
+				if (result) {
+					$.post("/deleteFolder", {
+						folderIds : funcok
+					}, function(data) {
+						if (data != null) {
+							$("#folderId").val(0);
+							dataAll('/folderById');
+							deleteSuccess()
+							getFolder();
+						}
+					});
+				}
+			}
+		});
+	};
+	$.showConfirmTable = function(str, funcok, funcclose, confirm) {
+		BootstrapDialog.confirm({
+			title : funcclose,
+			message : str,
+			type : BootstrapDialog.TYPE_WARNING,
+			closable : true, // 点击对话框以外的页面内容可关闭
+			//draggable : true, // 可拖拽
+			btnOKLabel : confirm,
+			btnOKClass : 'btn-warning',
+			size : BootstrapDialog.SIZE_SMALL,
+			// 对话框关闭的时候执行方法
+			onhide : funcclose,
+			callback : function(result) {
+				if (result) {
+					$.post("/deleteCollectFile", {
+						fileIds : funcok,
+						folderId : $("#folderId").val()
+					}, function(data) {
+						if (data != null) {
+							deleteSuccess()
+							$('#tb_order').bootstrapTable('refresh');
+						}
+					});
+				}
+			}
+		});
+	};
+	var htmlIcon = "<i style='color: red;position: relative;top: 2px;font-size: 27px;left: -6px;' class='icon-remove new-icon'></i>"
+	function dowbtn() {
+		var fileIdAll = [];
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if (getSelectRows.length == 0) {
+			nullErr();
+		} else {
+			for (i = 0; i < getSelectRows.length; i++) {
+				fileIdAll.push(getSelectRows[i].files.fileId)
+			}
+			$.ajax({
+				type : 'POST',
+				url : "/isFileRole",
+				data : {
+					fileIds : fileIdAll
+				},
+				async : false,
+				success : function(data) {
+					console.log(data)
+					if(data=="ok"){
+						 if (getSelectRows.length == 1) {
+						window.location.href = "/download?fileId="
+								+ getSelectRows[0].files.fileId;
+					} else {
+						window.location.href = "/downloadFiles?fileIds="+fileIdAll;
+					}  
+					}else if(data=="no"){
+						dowErr()
+					}
+				}
+			})
+		}
+	}
+	function delbtn(index) {
+		var fileIdAll = [];
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if (getSelectRows.length == 0) {
+			nullErr();
+		} else {
+			for (i = 0; i < getSelectRows.length; i++) {
+				fileIdAll.push(getSelectRows[i].files.fileId)
+			}
+			console.log(fileIdAll)
+			if (lang != "en_US") {
+				$.showConfirmTable(htmlIcon + "确认要删除吗？", fileIdAll, "删除文件",
+						"确认");
+			} else {
+				$.showConfirmTable(htmlIcon
+						+ "Are you sure you want to delete it?", fileIdAll,
+						"DeleteFile", "confirm");
+			}
+		}
+	}
+	function moveBtn() {
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if (getSelectRows.length == 0) {
+			nullErr();
+			//$("#moveFileModel").modal("show");
+		} else {
+			$("#moveFileModel").modal("show");
+		}
+	}
+	function sharebtn() {
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		if (getSelectRows.length == 0) {
+			nullErr();
+		} else {
+			//console.log($("#shareModal .no-records-found"))
+			$("#shareModal .no-records-found")[0].innerHTML='<td colspan="3">暂无用户数据</td>'
+			$("#shareModal .no-records-found")[1].innerHTML='<td colspan="3">暂无用户数据</td>'
+			$('#shareModal').modal('show');
+		}
+	}
+	function shareMessage() {
+		var userRows = $('#tb_user').bootstrapTable('getData');
+		var dataRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		var dataAll = [];
+		for (i = 0; i < userRows.length; i++) {
+			var fileIdAll = [];
+			for (j = 0; j < dataRows.length; j++) {
+				fileIdAll.push(dataRows[j].files.fileId)
+			}
+			dataAll.push({
+				"userId" : userRows[i].userId,
+				"dataFile" : fileIdAll
+			})
+
+		}
+		$.ajax({
+			type : 'POST',
+			url : "/insertMessage",
+			data : {
+				dataAll : JSON.stringify(dataAll)
+			},
+			success : function(data) {
+				console.log(data)
+				if (data == "ok") {
+					$('#shareModal').modal('hide');
+					shareSuccess()
+					$("#tb_order").bootstrapTable('refresh');
+				} else {
+					shareErr()
+				}
+			}
+		})
+	}
+	
+	function itemClick(info) {
+		console.log(13)
+		$('#ulTree li').removeClass('selected');
+		$(info).addClass('selected');
+		$("#folderId").val(info.folderId);
+		$("#rightCont").css("display", "");
+		$('#tb_order').bootstrapTable('load', tableData());
+	}
+	function addFolder() {
+		var treeObj = $.fn.zTree.getZTreeObj("treeview");
+		if(treeObj!=null&&treeObj.getNodes().length>0){
+			var nodes = treeObj.getSelectedNodes();
+			if (nodes.length != 0) {
+				$("#addFolder").modal('show');
+			} else {
+				selectErr()
+			}
+		}else {
+			$("#addFolder").modal('show');
+		}
+	}
+	function saveFolder() {
+		var parentId = 0;
+		var treeObj = $.fn.zTree.getZTreeObj("treeview");
+		if(treeObj!=null&&treeObj.getNodes().length>0){
+		var nodes = treeObj.getSelectedNodes();
+		if ($("#lv").val() == 0) {
+			if (nodes[0].parentId != undefined) {
+				parentId = nodes[0].parentId;
+			}
+		} else {
+			parentId = nodes[0].folderId;
+		}
+		}else{
+			parentId = 0;
+		}
+		if($("#lv").val()>0&&dataByFolderId($("#folderId").val()).length>0){
+			aliasChildrenErr()
+		}else{
+		$.ajax({
+			type : 'POST',
+			url : "/insertFolder",
+			data : {
+				folderName : $("#folderName").val(),
+				parentId : parentId,
+				userId : sessionUser.userId
+			},
+			success : function(data) {
+				if(data==0){
+					existErr();
+				}else if (data != null || data != "") {
+					$("#addFolder").modal('hide');
+					getFolder();
+				}else{
+					addErr();
+				}
+			}
+		})
+		}
+	}
+	function dataByFolderId(folderId){
+		var dataFolder;
+		$.ajax({
+			type : 'POST',
+			url : '/listByFolderId',
+			data : {
+				folderId : folderId
+			},
+			async : false,
+			success : function(data) {
+				if(data!=null){
+					dataFolder=data
+				}
+			}
+		})
+		return dataFolder
+	}
+	function editFolder() {
+		var treeObj = $.fn.zTree.getZTreeObj("treeview");
+		var nodes = treeObj.getSelectedNodes();
+		console.log(nodes[0])
+		if (nodes.length != 0) {
+			$("#updateName").val(nodes[0].name);
+			$("#editFolder").modal('show');
+		} else {
+			selectErr()
+		}
+	}
+	function updateFolder() {
+		$.ajax({
+			type : 'POST',
+			url : "/updateFolder",
+			data : {
+				folderName : $("#updateName").val(),
+				folderId : $("#folderId").val()
+			},
+			success : function(data) {
+				if (data != null || data != "") {
+					$("#editFolder").modal('hide');
+					getFolder();
+				}
+			}
+		})
+	}
+	function getChildNodes(treeObj,treeNode) { 
+        var childNodes = treeObj.transformToArray(treeNode); 
+        var nodes =[]; 
+        for(i = 0; i < childNodes.length; i++) { 
+             nodes.push(childNodes[i].folderId); 
+        } 
+        return nodes; 
+	} 
+	function deleteFolder() {
+		console.log(123)
+		var treeObj = $.fn.zTree.getZTreeObj("treeview");
+		var nodes = treeObj.getSelectedNodes();
+		var folderIds = getChildNodes(treeObj,nodes);
+		console.log(treeObj)
+		console.log(getChildNodes(treeObj,nodes))
+		if (nodes.length != 0) {
+			 if (lang != "en_US") {
+				$.showConfirm(htmlIcon + "确认要删除吗？", folderIds, "删除收藏夹", "确认");
+			} else {
+				$.showConfirm(htmlIcon + "Are you sure you want to delete it?",
+						folderIds, "DeleteFile", "confirm");
+			}  
+		} else {
+			selectErr()
+		} 
+	}
+	
+	function getFolderIds(folder,folderIds){
+		console.log(folderIds)
+		if(folder.children!=null&&folder.children.length>0){
+			folderIds.push(folder.folderId)
+			for(var i=0;i<folder.children.length;i++){
+				getFolderIds(folder.children[i],folderIds)
+			}
+		}
+	}
+	function searchFolder() {
+		searchData();
+		$('#tb_order').bootstrapTable('refresh', {
+			url : '/pageCollection'
+		});
+		//$("#tb_order").bootstrapTable('load', searchData());
+	}
+	function moveSave() {
+		var fileIdAll=[];
+		var treeObj = $.fn.zTree.getZTreeObj("tree");
+		var trees = treeObj.getCheckedNodes(true)
+		var getSelectRows = $("#tb_order").bootstrapTable('getSelections',
+				function(row) {
+					return row;
+				});
+		//console.log(getSelectRows[0])
+		var folderId = trees[0].folderId;
+		var colIds = [];
+		for (j = 0; j < getSelectRows.length; j++) {
+			fileIdAll.push(getSelectRows[j].files.fileId)
+			colIds.push(getSelectRows[j].colId)
+		}
+		console.log(colIds)
+		$.ajax({
+			type : 'POST',
+			url : "/moveFile",
+			data : {
+				folderId : folderId,
+				colIds : colIds,
+				fileIds : fileIdAll
+			},
+			success : function(data) {
+				if (data != 0 || data != " ") {
+					dataAll('/folderById');
+					$("#moveFileModel").modal("hide");
+					fileMoveSuccess()
+				} else {
+					fileMoveErr()
+				}
+			}
+		})
+	}
+</script>
+<script>
+	laydate.skin('molv');
+	laydate({
+		elem : "#qBeginTime",
+		format : 'YYYY-MM-DD',
+		min : "1420-2-10", //设定最小日期为当前日期
+		max : laydate.now()
+	//最大日期
+	});
+</script>
+</html>

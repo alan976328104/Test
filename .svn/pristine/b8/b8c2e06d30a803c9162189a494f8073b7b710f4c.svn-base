@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+ <link rel="stylesheet" href="../assets/themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../assets/css/icon.css" />
+		
+		<title></title>
+		<script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.easyui.min.js"></script>
+</head>
+<script>
+		
+var data;
+var fileid;
+var begin;
+var end;
+		$(function(){
+			$.ajaxSetup({cache:false});
+			
+			//获取登录者信息
+			var sessionUser;
+			$.ajax({
+				type : "post",
+				url : "../getSessionByIp",
+				async : false,
+				success : function(data) {
+					sessionUser = data
+					console.log(sessionUser)
+				}
+			})
+			
+			$.ajax({
+				type : 'POST',
+				url : "../getUserButton",
+				data : {
+					userId : sessionUser.userId
+				},
+				async : false,
+				dataType : "json",
+				success : function(data) {
+					//console.log(data)
+					if (data != null) {
+						for (var i = 0; i < data.length; i++) {
+
+							if (data[i].btnName == '下载') {
+								//$("#save").css("display", "");
+								//alert(1);
+								$('#save').linkbutton('enable');
+							}
+
+						}
+					}
+				}
+			})
+			var index=1;
+			var columnsdata=[]
+			
+			//"data":obj.data,"fileid": obj.fileid,"begin":obj.begin,"end":obj.end
+		
+			$("#save").click(function(){
+				if($('#save').linkbutton('options').disabled==true){
+					return;
+				}
+				exportRelationdata();
+			})
+			$("#choose").click(function(){
+				$.ajax({
+					type:'get',
+					url:'/findRelationtemp',
+					success:function(obj){
+						$('#choosett').tree({
+							data:obj  
+						})	
+						
+						
+					$("#choosewindow").window('open')	
+					}
+					
+				})
+				
+			})
+			
+			
+			$("body").on("change","input[name='ck']",function(){
+		var temp =[]
+		var fi=0;
+		$("input[name='ck']:checkbox:checked").each(function(){ 
+			var sss=$('#dg').datagrid('options').data;
+			var indexck=$(this).val();
+		//	alert(indexck)
+			//var json={};
+			for(var i=0;i<sss.length;i++){
+				//alert(temp.length)
+				if(temp.length<sss.length){
+					//alert(1)
+					var t = "f"+fi;
+					var t1 = sss[i]["f"+indexck];
+					var json={}
+					json[t]=t1;
+					temp.push(json);
+				}else{
+					//alert(2)
+					temp[i]["f"+fi]=sss[i]["f"+indexck];
+				}
+				
+			}
+			
+			fi++;
+		}) 
+		//alert(JSON.stringify(temp))
+		data=JSON.stringify(temp)
+	})
+			
+			
+			$("#delbtn").click(function(){
+				var node=$('#choosett').tree('getSelected')
+				if(node==null){
+					alert('请选择')
+					return false;
+				}
+				
+				$.ajax({
+					url:"/delRelationtempbyid",
+					data:{"id":node.id},
+					success:function(obj){
+						if(obj>0){
+							alert("删除成功")
+						}else{
+							alert("删除失败")
+						}
+						
+						$.ajax({
+							type:'get',
+							url:'/findRelationtemp',
+							success:function(obj){
+								$('#choosett').tree({
+									data:obj  
+								})	
+							}
+						})
+					}
+					});
+			})
+			
+			//delRelationtempbyid
+			$("#choosebtn").click(function(){
+				var node=$('#choosett').tree('getSelected')
+				if(node==null){
+					alert('请选择')
+					return false;
+				}
+				
+				$.ajax({
+					url:"/findRelationTempbyid",
+					data:{"id":node.id},
+					success:function(obj){
+						
+						var colume=eval('(' + obj.columndata + ')');
+						
+						$('#dg').datagrid({
+							columns:colume,
+						    data:eval('(' + obj.data + ')'),
+						    rownumbers:true
+						});
+						data=JSON.stringify(eval('(' + obj.data + ')'))
+						
+						
+						
+						$("#choosewindow").window("close")
+						
+					}
+				})
+				
+			})
+			
+			
+			
+				$("#mathbtn").click(function(){
+				var value=$("#mathvalue").val();
+				//f0+f1
+				//alert(value)
+				if(value.indexOf("+")>0){
+					var sss=$('#dg').datagrid('options').columns;
+					var x={}
+					x.field="f"+sss[0].length;
+					x.title="f"+sss[0].length+"("+value+")"+"<input type='checkbox' name='ck' checked='checked' value="+sss[0].length+" />";
+					x.width=200;
+					sss[0].push(x);
+					var odata = $('#dg').datagrid('options').data;
+					var val=value.split("+")
+					
+					if(catStr(value)==1){
+						//alert(1);
+						if(val[0].indexOf("f")>=0){
+							for(var i=0;i<odata.length;i++){
+								odata[i]["f"+(sss[0].length-1)]=(odata[i][val[0]]*1)+(val[1]*1)
+							}
+						}else{
+							for(var i=0;i<odata.length;i++){
+								odata[i]["f"+(sss[0].length-1)]=(val[0]*1)+(odata[i][val[1]]*1)
+							}
+						}
+						
+					}else{
+						for(var i=0;i<odata.length;i++){
+							odata[i]["f"+(sss[0].length-1)]=(odata[i][val[0]]*1)+(odata[i][val[1]]*1)
+						}
+					}
+					console.log(odata)
+					
+					$('#dg').datagrid({
+						columns:sss,
+					    data:odata,
+					    rownumbers:true
+					});
+					data=JSON.stringify(odata)
+					$(".datagrid-body").css("overflow-x","scroll");
+				}else if(value.indexOf("-")>0){
+					var sss=$('#dg').datagrid('options').columns;
+					var x={}
+					x.field="f"+sss[0].length;
+					x.title="f"+sss[0].length+"("+value+")"+"<input type='checkbox' name='ck' checked='checked' value="+sss[0].length+" />";
+					x.width=200;
+					sss[0].push(x);
+					var odata = $('#dg').datagrid('options').data;
+					var val=value.split("-")
+					if(catStr(value)==1){
+						if(val[0].indexOf("f")>=0){
+							for(var i=0;i<odata.length;i++){
+								odata[i]["f"+(sss[0].length-1)]=(odata[i][val[0]]*1)-(val[1]*1)
+								
+							}
+						}else{
+							for(var i=0;i<odata.length;i++){
+								odata[i]["f"+(sss[0].length-1)]=(val[0]*1)-(odata[i][val[1]]*1)
+							}
+						}
+						
+					}else{
+					for(var i=0;i<odata.length;i++){
+						odata[i]["f"+(sss[0].length-1)]=(odata[i][val[0]]*1)-(odata[i][val[1]]*1)
+					}
+					}
+					$('#dg').datagrid({
+						columns:sss,
+					    data:odata,
+					    rownumbers:true
+					});
+					data=JSON.stringify(odata)
+				}else if(value.indexOf("*")>0){
+					var sss=$('#dg').datagrid('options').columns;
+					var x={}
+					x.field="f"+sss[0].length;
+					x.title="f"+sss[0].length+"("+value+")"+"<input type='checkbox' name='ck' checked='checked' value="+sss[0].length+" />";
+					x.width=200;
+					sss[0].push(x);
+					var odata = $('#dg').datagrid('options').data;
+					var val=value.split("*")
+					if(catStr(value)==1){
+						if(val[0].indexOf("f")>=0){
+							for(var i=0;i<odata.length;i++){
+								odata[i]["f"+(sss[0].length-1)]=(odata[i][val[0]]*1)*(val[1]*1)
+							}
+						}else{
+							for(var i=0;i<odata.length;i++){
+								odata[i]["f"+(sss[0].length-1)]=(val[0]*1)*(odata[i][val[1]]*1)
+							}
+						}
+						
+					}else{
+					for(var i=0;i<odata.length;i++){
+						odata[i]["f"+(sss[0].length-1)]=(odata[i][val[0]]*1)*(odata[i][val[1]]*1)
+					}
+					}
+					$('#dg').datagrid({
+						columns:sss,
+					    data:odata,
+					    rownumbers:true
+					});
+					data=JSON.stringify(odata)
+				}else if(value.indexOf("/")>0){
+					var sss=$('#dg').datagrid('options').columns;
+					var x={}
+					x.field="f"+sss[0].length;
+					x.title="f"+sss[0].length+"("+value+")"+"<input type='checkbox' name='ck' checked='checked' value="+sss[0].length+" />";
+					x.width=200;
+					sss[0].push(x);
+					var odata = $('#dg').datagrid('options').data;
+					var val=value.split("/")
+					if(catStr(value)==1){
+						if(val[0].indexOf("f")>=0){
+							for(var i=0;i<odata.length;i++){
+								odata[i]["f"+(sss[0].length-1)]=(odata[i][val[0]]*1)/(val[1]*1)
+							}
+						}else{
+							for(var i=0;i<odata.length;i++){
+								odata[i]["f"+(sss[0].length-1)]=(val[0]*1)/(odata[i][val[1]]*1)
+							}
+						}
+						
+					}else{
+					for(var i=0;i<odata.length;i++){
+						odata[i]["f"+(sss[0].length-1)]=(odata[i][val[0]]*1)/(odata[i][val[1]]*1)
+					}
+					}
+					$('#dg').datagrid({
+						columns:sss,
+					    data:odata,
+					    rownumbers:true
+					});
+					data=JSON.stringify(odata)
+				}else{
+					alert('请输入正确的公式')
+				}
+				
+				
+				
+			})
+			
+		})
+		
+		
+		
+		
+function exportRelationdata(){
+			
+		if(data==undefined){
+			alert('请选择模板')
+			return;	
+		}
+		$("#fdata").val(data);
+		$("#ffileid").val(fileid);
+		$("#fbegin").val(begin);
+		$("#fend").val(end);
+		$("#fform").submit()
+		
+	}
+		
+		
+		
+		function zhuanhuan(data){
+			var zdata=[];
+			for(var i=0;i<data.length;i++){
+					var zobj = {};
+				for(var j=0;j<data[i].length;j++){
+					zobj["f"+j]=data[i][j];
+				}
+				zdata.push(zobj);
+			}
+			return zdata;
+		}
+		
+		
+		function aaaaa(data){
+			var columnsdata=[]
+			for(var i=0;i<data[0].length;i++){
+				var x={}
+				x.field="f"+i;
+				x.title="f"+i;
+				x.width=200;
+				columnsdata.push(x);
+			}
+			
+			var ccdata=[[]];
+			ccdata[0]=columnsdata;
+			return ccdata;
+		}
+		
+		function catStr(str){
+
+		    var num=0;
+
+		    for(var i=0,len=str.length;i<len;i++){
+
+		        if(str[i]=='f'){
+
+		            num++
+
+		        }
+
+		    }
+
+		return num
+
+		}
+		</script>
+		
+		
+  </head>
+  
+ <body style="background-color: #fbfbfb;width:100%;height:100%;margin: 0px">
+  <table id="dg" class="easyui-datagrid" 
+    toolbar="#tb" selectOnCheck="false" style="width:100%;height:650px ;" >   
+    <thead>   
+         
+    </thead>   
+</table>
+<div id="tb">
+<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-xiugai',plain:true" id="choose"  >选择模板</a>   
+<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-baocun',plain:true,disabled:true" id="save">导出</a>  
+<input id="mathvalue" style="width: 110px" />
+ <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-sousuo',plain:true" id="mathbtn">执行</a>     
+ 
+
+</div>
+    
+	
+
+
+		<div id="choosewindow" class="easyui-dialog" title="选择模板" width="500" height="300"  style="top: 50px"   
+        data-options="resizable:true,modal:true,closed:true,closable:true">  
+        <ul id="choosett"></ul> 
+        <button id="delbtn" style="position:absolute;bottom:10px;right:58px">删除</button>
+        <button id="choosebtn" style="position:absolute;bottom:10px;right:10px">确认</button>
+		</div>
+
+
+
+<form id="fform" action="../RelationExportExcle" style="display: none;" method="post">
+	<input id="fdata" name="data">
+	<input id="ffileid" name="fileid">
+	<input id="fbegin" name="begin">
+	<input id="fend" name="end">
+	
+</form>
+
+</body>
+</html>

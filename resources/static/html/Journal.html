@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" content="ie=edge" />
+<meta charset="UTF-8">
+<title>日志管理</title>
+<link rel="stylesheet" href="../assets/css/font-awesome.min.css" rel="stylesheet" />
+<!--if IE 7-->
+<link rel="stylesheet" href="../assets/css/font-awesome-ie7.min.css" />
+<!--endif-->
+<link rel="stylesheet" href="../assets/css/bootstrap/bootstrap.min.css" />
+<script src="../assets/js/jquery-1.9.1.min.js"></script>
+<script src="../assets/js/jquery.min.js"></script>
+<!--bootstrap-table-->
+ <script src="../assets/js/bootstrap/bootstrap-table.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-table.css" rel="stylesheet">
+
+<script src="../assets/js/bootstrap/bootstrap-table-pagejump.js"></script>
+<link href="../assets/css/bootstrap/bootstrap-table-pagejump.css" rel="stylesheet">
+
+
+<script src="../assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="../assets/js/vue/vue.js"></script>
+<link rel="stylesheet" href="../assets/css/newstyle.css"> 
+<script src="../assets/js/laydate/laydate.js"></script>
+<script type="text/javascript" src="../assets/js/alldata.js"></script>
+<!-- bootstrap-table-export数据导出---后面两个是Excel2007所需要的js -->
+<script src="../assets/js/jquery.base64.js"></script>
+ <script src="../assets/js/bootstrap/bootstrap-table-export2.js"></script> 
+<script src="../assets/js/bootstrap/tableExport.js"></script>
+<script src="../assets/js/bootstrap/xlsx.core.min.js"></script>
+<script src="../assets/js/bootstrap/FileSaver.min.js"></script>
+<style>
+a:hover{
+cursor: default;
+color:#333;
+}
+</style>
+<script>
+//获取登录者信息
+var sessionUser;
+$.ajax({
+	type : "post",
+	url : "/getSessionByIp",
+	async : false,
+	success : function(data) {
+		sessionUser=data
+	}
+})
+var lang = getUrlParam("lang");
+var columns;
+if (lang != "en_US") {
+	columns = [ [ {
+		field : 'ck',
+		checkbox : true,
+		width : "0.5%"
+	}, {
+		field : 'user.username',
+		title : '用户名称',
+		width : "2%"
+	}, {
+		field : 'logDate',
+		title : '执行时间',
+		width : "7%"
+	}, {
+		field : 'operation',
+		title : '执行操作',
+		width : "6%"
+	}, {
+		field : 'file.fileName',
+		title : '操作文件',
+		width : "14%",
+		formatter : forma
+	} ,{
+		field : 'file.location',
+		title : '文件来源',
+		width : "15%",
+		formatter:formatUrl
+	},{
+		field : 'ipData',
+		title : 'IP地址',
+		width : "5%"
+	},{
+		field : 'result',
+		title : '执行结果',
+		width : "5%"
+	}] ]
+	document.write("<script src='../assets/js/bootstrap/bootstrap-table-zh-CN.js' >"
+			+ "<" + "/script>");
+}else{
+	columns =[ [ {
+		field : 'ck',
+		checkbox : true,
+		width : "0.5%"
+	}, {
+		field : 'user.username',
+		title : 'UserName',
+		width : "2%"
+	}, {
+		field : 'logDate',
+		title : 'ExecDate',
+		width : "7%"
+	}, {
+		field : 'operation',
+		title : 'OperationExecutive',
+		width : "6%"
+	}, {
+		field : 'file.fileName',
+		title : 'OperationDocument',
+		width : "14%",
+		formatter : forma
+	} ,{
+		field : 'file.location',
+		title : 'SourceFile',
+		width : "15%",
+		formatter:formatUrl
+	},{
+		field : 'ipData',
+		title : 'IPAddress',
+		width : "5%"
+	},{
+		field : 'result',
+		title : 'Result',
+		width : "5%"
+	}] ]
+}
+	$(function() {
+		$.ajax({
+			type : 'POST',
+			url : "/getMenuAll",
+			async : false,
+			dataType : "json",
+			success : function(data) {
+				var menu=data[0].children
+				$("#menuId").append("<option value='0'>专业选择</option>");
+				for (var i = 0; i < menu.length; i++) {
+					$("#menuId").append(
+							"<option value='"+menu[i].id+"'>"
+									+menu[i].name + "</option>");
+				}
+			}
+		})
+		if(sessionUser.userId==4){//安全管理员
+			dataAll('/getLogBySafe');
+		}else if(sessionUser.userId==1){
+			dataAll('/pageLog');
+		}else if(sessionUser.userId==3){//安全审计员
+			dataAll('/getLogByUserId');
+		}else{
+			dataAll('/getLogByGen');
+		}
+		//导出
+		 $("#btn_export").click(function(){
+			 // 获取实例配置
+			/*  
+	        var table = $('#logTable').bootstrapTable('getOptions');//选择器根据实际修改
+	       
+	        table.pagination=false;
+	        //导出判断(导出时分页参数 pagination 是false) 导出就查询所有数据
+	        console.log(table.pagination)
+	        if (table.pagination === false) {
+	        	console.log(table.pagination)
+	        	//获取每一页的行数
+	        	$('#logTable').bootstrapTable('getOptions').pagesize=$('#logTable').bootstrapTable('getOptions').totalRows;
+	        	//导出
+	 	        $('#logTable').tableExport({
+	 	        	//type: 'excel',//导出excel
+	 	            formats: ["xlsx"],  
+	 	            fileName: '日志导出', 
+	 	            // bootstrap: false,
+	 	            escape: 'false' ,
+	                 ignoreColumn: [0],  //忽略某一列的索引
+	 	            exportDataType:'all',
+	 	            onMsoNumberFormat: doOnMsoNumberFormat,//大概是处理数字的方法
+	 	            excelstyles: ['background-color', 'color', 'font-size', 'font-weight']
+	 	        }); 
+	        }  */
+	        window.location.href = "/exportLog"
+	    });
+	})
+	function dataAll(url) {
+		$('#logTable').bootstrapTable({
+			url : url,
+			method : "post", //请求方式（*）
+			contentType : "application/x-www-form-urlencoded",//post请求的话就加上这个句话
+			toolbar : "#toolbar", //工具按钮用哪个容器
+			cache : false, // 是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			paginationShowPageGo: true,
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 15, //每页的记录行数（*）
+			pageList : [ 10, 15, 20 ,30,50], //可供选择的每页的行数（*）
+			clickToSelect : true, //是否启用点击选中行
+			sortable : false, //是否启用排序
+			//sortOrder : "asc", //排序方式
+			ginationLoop: false, //当前页是边界时是否可以继续按
+			sidePagination : "server", //分页方式：client客户端分页，server服务端分页（*）
+			queryParamsType : '',
+			queryParams : function(params) {//自定义参数，这里的参数是传给后台的，我这是是分页用的
+
+				return {//这里的params是table提供的
+					menuId : $('#menuId').val(),
+					operation : $('#operation').val(),
+					userName : $('#userName').val(),
+					fileName: $('#fileName').val(),
+					startDate : $('#qBeginTime').val(),
+					endDate : $('#qEndTime').val(),
+					pageNumber : params.pageNumber,
+					pageSize : params.pageSize
+				};
+			},
+			columns : columns
+		});
+	}
+	 //数字
+    function doOnMsoNumberFormat(cell, row, col){
+        var result = "";  
+        if (row > 0 && col == 0){
+            result = "\\@";  
+        }
+        return result;  
+    }
+	function formatUrl(value, row, index){
+		if(row.file!=null&&row.file!=""){
+			var str=row.file.location.replace(/>/g,"<span style='color:blue'>➜</span>");
+			//console.log(str)
+			str=str.replace(/→/g,"<span style='color:blue'>➜</span>")
+			return str;
+		}
+	}
+	function forma(value, row, index) {
+		if (row.file) {
+			var namestr=row.file.fileName;
+				if($("#fileName").val()!=""){
+					var array = namestr.split($("#fileName").val());
+					namestr="";
+					for(var j = 0;j<array.length;j++){
+						if(j==array.length-1){
+							namestr+=array[j]
+						}else{
+							namestr+=array[j]+"<span style='color:red;'>"+$("#fileName").val()+"</span>"
+						}
+					}
+				}
+			return "<a style='text-decoration: none;' href='javascript:void(0)' target='_blank' >"
+					+ namestr+ "<a/>";
+		}
+	}
+</script>
+</head>
+
+<body style="width: 100%;">
+	<div id="box">
+		<!-- 表格begin -->
+		<table id="logTable">
+
+		</table>
+		<!-- 表格end -->
+		<!-- 表格上的菜单begin -->
+		<div id="toolbar" style="position: relative;">
+			<div class='input-group col-md-1' style="padding-right:0px;">
+				<div class='input-group-btn' style="width: 23px;">
+					<select id='menuId' class='form-control' style='width:auto;width: 105px;border-radius: 5px !important;margin-right: 10px;background: none  !important;'>
+						
+					</select>
+				</div>
+			</div>
+			<div class='input-group col-md-1' style="padding:0px 2px;">
+				<div class='input-group-btn'>
+					<select id='operation' class='form-control' style='width:auto;width: 120px;border-radius: 5px !important;margin-right: 10px;background: none  !important;'>
+						<option value=''>操作请选择</option>
+						<option value='上传'>上传</option>
+						<option value='下载'>下载</option>
+						<option value='添加'>添加</option>
+						<option value='修改'>修改</option>
+						<option value='删除'>删除</option>
+						<option value='登录'>登录</option>
+						<option value='打开文件'>打开文件</option>
+					</select>
+				</div>
+			</div>
+			
+			<div class="input-group col-md-3" style="padding:0px 2px;">
+				<input type="text" class="form-control" autocomplete='off' name="start" id="qBeginTime" style="border-radius: 5px !important;" th:placeholder="#{start}"/> <span
+					class="input-group-addon" style="background: rgba(255, 255, 255, 0);color: #333;border: none;" th:text="#{to}">至</span> <input autocomplete='off' th:placeholder="#{end}" style="border-radius: 5px !important;" type="text" class="form-control" name="end"
+					id="qEndTime" /> <span class="input-group-btn"> </span>
+			</div>
+			<div class='input-group col-md-4' style="padding:0px 2px;">
+				<input type='text' class='form-control' autocomplete='off' th:placeholder='#{searchUser}' id='userName' style="display: inline !important;width:100px;margin-right:5px;">
+				<input type='text' class='form-control' autocomplete='off' th:placeholder='#{searchFile}' id='fileName' style="display: inline !important;width:200px">
+				<button class="btn btn-white btn-default btn-round" id="searchLog" type="button"style="color: rgb(255, 255, 255);
+    height: 32px;font-size: 14px;padding:0px !important;
+    width:40px !important;
+    border-radius: 5px !important;margin-left:5px;">
+					<i class="icon-search"></i>
+			</button>
+			</div>
+			<button class="btn btn-white btn-default btn-round" id="btn_export" type="button" style="color: rgb(255, 255, 255);height: 32px;line-height: 15px;">
+				<span>导出</span>
+			</button>
+		</div>
+		<!-- 表格上的菜单end -->
+	</div>
+</body>
+<script>
+	$(function() {
+		$("#searchLog").click(function() {
+			$("#logTable").bootstrapTable('destroy');
+			if(sessionUser.userId==4){//安全管理员
+				dataAll('/getLogBySafe');
+			}else if(sessionUser.userId==1){
+				dataAll('/pageLog');
+			}else if(sessionUser.userId==3){//安全审计员
+				dataAll('/getLogByUserId');
+			}else{
+				dataAll('/getLogByGen');
+			}
+			console.log($('#searchInput').val());
+			console.log($('#searchSelect').val());
+		});
+	})
+	/* var app = new Vue({
+		el : "#box",
+		data : {
+			major : []
+		},
+		mounted : function() {
+			$.ajax({
+				type : 'POST',
+				url : "/getMajorAll",
+				success : function(data) {
+					app.major = data;
+				}
+			});
+		},
+		methods : {}
+	}) */
+	laydate.skin('molv');
+	var start = {
+	    elem: '#qBeginTime',
+	    format: 'YYYY-MM-DD',
+	    min: "1420-2-10", //设定最小日期为当前日期
+	    max: laydate.now(), //最大日期
+	   // festival: true, //显示节日
+	    choose: function(datas){
+	         end.min = datas; //开始日选好后，重置结束日的最小日期
+	        // end.start = datas //将结束日的初始值设定为开始日
+	    }
+	};
+	var end = {
+	    elem: '#qEndTime',
+	    format: 'YYYY-MM-DD',
+	   	min: "1420-2-10",
+	    max: laydate.now(),
+	    //festival: true, //显示节日
+	    choose: function(datas){
+	        start.max = datas; //结束日选好后，充值开始日的最大日期
+	    }
+	};
+	laydate(start);
+	laydate(end);
+	 $("#toolbar").find('button').bind('click',function () {
+			$(this).css("background","#cc7003");
+	});
+	 $('.modal').on('hide.bs.modal', function () {
+		 $(".btn").css("background","#0085ff")
+	});
+</script>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" content="ie=edge" />
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="../themes/bootstrap/easyui.css" />
+		<link rel="stylesheet" href="../themes/icon.css" />
+		<title></title>
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script src="../js/jquery.easyui.min.js"></script>
+		<script src="../js/alldata.js"></script>
+		<script type="text/javascript" src="../js/index.js"></script>
+		<script>
+			$(function() {
+				$("#bigdg").datagrid({
+					toolbar: '#tb',
+					data: dataRule,
+					singleSelect: true
+				});
+				$("#editPro").click(function(){
+					location.href = 'process.html'
+				})
+				$("#btnS").click(function() {
+					var str = $("input[type=checkbox]:checked");
+					if(str.length == 1) {
+						if(str[0].value == 0) {
+							$("#dg").datagrid("loadData", {
+								total: 0,
+								rows: []
+							});
+							$("#dg").datagrid({
+								method: 'get',
+								data: data1,
+								columns: colDatas
+							});
+						} else {
+							$("#dg").datagrid("loadData", {
+								total: 0,
+								rows: []
+							});
+							$("#dg").datagrid({
+								method: 'get',
+								data: data2,
+								columns: colDatas
+							});
+						}
+					} else {
+						$("#dg").datagrid("loadData", {
+							total: 0,
+							rows: []
+						});
+						var data3 = data1.concat(data2);
+						$("#dg").datagrid({
+							method: 'get',
+							data: data3,
+							columns: colDatas
+						});
+					}
+				})
+				$("#addRet").click(function() {
+					console.log(123)
+					$('#dd').dialog('open');
+				});
+				$("#search").click(function() {
+					
+					var selectLength=$("#bigdg").datagrid('getSelected');
+					console.log(selectLength)
+					if(selectLength==null){
+						$.messager.alert("警告","请选择一条搜索规则")
+					}
+				});
+			});
+			var datafield = [{
+				"name": "字段1"
+			}, {
+				"name": "字段2"
+			}, {
+				"name": "字段3"
+			}, {
+				"name": "字段4"
+			}, {
+				"name": "字段5"
+			}]
+
+			function showfile(file) {
+				var fileName = file.innerText
+				var fileType = fileName.split(".")[1];
+				if(fileType == "pdf") {
+					showPdf(true);
+				} else if(fileType == "doc" || fileType == "docx") {
+					console.log("doc文档");
+				} else if(fileType == "xlsx" || fileType == "xls") {
+					console.log("execl文档")
+					$("#dg").datagrid({
+						method: 'get',
+						data: datafield,
+						columns: [
+							[{
+								field: 'ck',
+								checkbox: true
+							}, {
+								field: 'name',
+								title: '字段名称',
+								width: "30%"
+							}]
+						]
+					});
+				} else {
+					console.log("文档不支持打开")
+				}
+			}
+		</script>
+	</head>
+
+	<body>
+		<div class="easyui-layout" data-options="fit:true">
+			<div id="tb">
+				<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-fanhui',plain:true" onclick="javascript:history.back(-1);">返回到上一页</a>
+				<input class="easyui-textbox" style="width:137px" id="condition" />
+				<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-sousuo',plain:true" id="search">搜索</a>
+			</div>
+			<table class="easyui-datagrid" id="bigdg" style="width: 88%;height: 100%;" fitColumns='true' pagination='true' checkOnSelect='false' selectOnCheck='true'>
+				<thead>
+					<tr>
+						<th data-options="field:'ck',checkbox:true"></th>
+						<th data-options="field:'id'">id</th>
+						<th data-options="field:'ruleName'" width="100">名称</th>
+						<th data-options="field:'ruleDate'" width="100">日期</th>
+					</tr>
+				</thead>
+			</table>
+			<div id="dd" class="easyui-dialog" title="详情" style="padding: 5px 0px 0px 5px;">
+				<div class="easyui-layout" style="width: 99%;height: 100%;">
+					<div style="height: 20px; margin-bottom: 5px;">
+						规则名称<input type="text" id="proName" />
+					</div>
+					<div style="height: 20px; margin-bottom: 5px;">
+						检索范围
+						<input type="checkbox" checked="checked" value="0" />文档<input type="checkbox" value="1" />表格
+						<select id="cc" class="easyui-combotree" style="width:200px;"></select>
+						<button id="btnS">搜索</button>
+					</div>
+					<table id="dg" class="easyui-datagrid" style="width: 99%; height: 80%;">
+
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		$(function() {
+			var dataobj = [];
+			dataobj.push(obj[0])
+			$('#cc').combotree({
+				data: dataobj,
+				required: true
+			});
+			$('#dd').dialog({
+				width: 700,
+				height: 350,
+				title: '详情',
+				modal: true,
+				//是否创建就打开对话框，也就是是否页面一打开就显示对话框
+				autoOpen: false,
+				// 是否显示可折叠按钮
+				collapsible: false,
+				// 是否显示最小化按钮
+				minimizable: false,
+				// 是否显示最大化按钮
+				maximizable: false,
+				// 是否可以改变对话框窗口大小
+				resizable: false,
+				// 设置对话框窗口顶部工具栏
+				//buttons : '#tt',
+				//toolbar: [{ 
+				//	text: '编辑',
+				//	iconCls: 'icon-edit',
+				//	handler: function() { 
+				//		alert('edit'); 
+				//	},
+				//}, {}],
+				// 对话框窗口底部按钮
+				buttons: [{
+					text: '取消',
+					 handler: function() { 
+						$("#dd").dialog("close");
+					}
+				}, { 
+					text: '确定保存',
+					 handler: function() { 
+						var inputText = $("#proName").val();
+						$("input[name=btn_" + nameIndex + "]").val(inputText);
+						$("#dd").dialog("close");
+					}
+				}] 
+			});
+			$('#dd').dialog('close');
+		})
+	</script>
+
+</html>

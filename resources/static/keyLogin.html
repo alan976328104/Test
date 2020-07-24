@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<!-- 解决部分兼容性问题，如果安装了GCF，则使用GCF来渲染页面，如果未安装GCF，则使用最高版本的IE内核进行渲染。 -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=9" />
+<title></title>
+<script type="text/javascript" src="assets/js/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+
+
+
+
+$(function(){
+	var url = location.href;
+	var i = url.indexOf('?');
+	if(i == -1) return;
+	var querystr = url.substr(i + 1);
+	var arr1 = querystr.split('&');
+	var str = new Array();
+	var num = 0;
+	for(i in arr1) {
+		var ta = arr1[i].split('=');
+		str[num] = decodeURI(ta[1]);
+		num++;
+	}
+//	var card= parseUrl();
+	//alert(parseUrl())
+	$.ajax({
+		url:"/templogin",
+		data:{"card":""+str},
+		async: false,
+		success:function(data){
+		//	alert(data)
+			 location.href = "../office?url=index.html&lang=zh_CN";
+		}
+		
+	})
+	
+})
+</script>
+</head>
+<body>
+
+</body>
+</html>
