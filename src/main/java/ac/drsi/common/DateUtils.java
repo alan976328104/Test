@@ -22,6 +22,8 @@ public class DateUtils {
 	 * 转换成时间类型
 	 * @param datestr 时间字符
 	 * @return
+	 * 
+	 * 
 	 */
 	public static Date stringByDate(String datestr){
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");// 设置日期格式
