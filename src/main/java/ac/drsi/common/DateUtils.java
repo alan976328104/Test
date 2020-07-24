@@ -11,6 +11,7 @@ public class DateUtils {
 	 * @return
 	 * 
 	 * 
+	 * 
 	 */
 	public static String getDate(){
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// 设置日期格式
